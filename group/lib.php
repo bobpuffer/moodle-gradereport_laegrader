@@ -134,6 +134,18 @@ function groups_create_group($data, $editform = false, $editoroptions = false) {
 
     $data->id = $DB->insert_record('groups', $data);
 
+    // CLAMP-333 auto-create groupings from groups
+    if ($CFG->enablegroupmembersonly) {
+        $autodata = new stdClass();
+        $autodata->courseid = $course->id;
+        $autodata->name = $data->name;
+        $autodata->timecreated = time();
+        $autodata->descriptionformat = $data->descriptionformat;
+        $groupingid = groups_create_grouping($autodata);
+        $groupid = $data->id;
+        groups_assign_grouping($groupingid, $groupid);
+    }
+
     if ($editform and $editoroptions) {
         // Update description from editor with fixed files
         $data = file_postupdate_standard_editor($data, 'description', $editoroptions, $context, 'group', 'description', $data->id);
