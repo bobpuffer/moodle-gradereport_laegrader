@@ -2816,6 +2816,13 @@ function forum_print_post($post, $discussion, $forum, &$cm, $course, $ownpost=fa
     static $strpruneheading, $displaymode;
     static $strmarkread, $strmarkunread;
 
+    /// CLAMP #175 2010-06-22 cfulton
+    /// If anonymous is the poster check who the actual owner is
+    if(isset($post->hiddenuserid) && !empty($USER)) {
+        $ownpost = ($USER->id == $post->hiddenuserid);
+    }
+    /// end added by cfulton
+
     $post->course = $course->id;
     $post->forum  = $forum->id;
 
@@ -3927,10 +3934,14 @@ function forum_add_new_post($post,&$message) {
 
     $post->created    = $post->modified = time();
     $post->mailed     = "0";
-    $post->userid     = $USER->id;
     $post->attachment = "";
     $post->forum      = $forum->id;     // speedup
     $post->course     = $forum->course; // speedup
+    
+    /// CLAMP #175 2010-06-22 cfulton
+    /// Anonymize posting if necessary
+    $post = forum_scrub_userid($forum, $post);
+    /// end added by cfulton
 
     if (! $post->id = insert_record("forum_posts", $post)) {
         return false;
@@ -4008,7 +4019,6 @@ function forum_add_discussion($discussion,&$message) {
     $post = new object();
     $post->discussion  = 0;
     $post->parent      = 0;
-    $post->userid      = $USER->id;
     $post->created     = $timenow;
     $post->modified    = $timenow;
     $post->mailed      = 0;
@@ -4019,6 +4029,16 @@ function forum_add_discussion($discussion,&$message) {
     $post->course      = $forum->course; // speedup
     $post->format      = $discussion->format;
     $post->mailnow     = $discussion->mailnow;
+
+    /// CLAMP #175 2010-06-22 cfulton
+    /// Anonymize user if necessary.
+    if ($discussion->anonymous == 1 || $forum->anonymous == 1) {
+        $post->userid = $CFG->anonymous_userid;
+        $post->hiddenuserid = $USER->id;
+    } else {
+        $post->userid = $USER->id;
+    }
+    /// end added by cfulton
 
     if (! $post->id = insert_record("forum_posts", $post) ) {
         return 0;
@@ -4034,7 +4054,11 @@ function forum_add_discussion($discussion,&$message) {
     $discussion->firstpost    = $post->id;
     $discussion->timemodified = $timenow;
     $discussion->usermodified = $post->userid;
-    $discussion->userid = $USER->id;
+    
+    /// CLAMP #175 2010-06-22 cfulton
+    /// Anonymize user if necessary.
+    $discussion->userid = ($post->userid == $CFG->anonymous_userid) ? $post->userid : $USER->id;
+    /// end added by cfulton
 
     if (! $post->discussion = insert_record("forum_discussions", $discussion) ) {
         delete_records("forum_posts", "id", $post->id);
@@ -4476,6 +4500,8 @@ function forum_user_can_post_discussion($forum, $currentgroup=null, $unused=-1, 
 
     if ($forum->type == 'news') {
         $capname = 'mod/forum:addnews';
+    } else if ($forum->type == 'qanda') {
+        $capname = 'mod/forum:startqandadiscussion';
     } else {
         $capname = 'mod/forum:startdiscussion';
     }
@@ -6952,6 +6978,40 @@ function forum_get_extra_capabilities() {
     return array('moodle/site:accessallgroups', 'moodle/site:viewfullnames', 'moodle/site:trustcontent');
 }
 
+/// CLAMP #175 2010-06-22 cfulton
+/**
+ * Adds anonymous user if not present
+ */
+function forum_add_anon_user() {
+    /// Add anonymous role account
+    $anon_user = new stdClass();
+    $anon_user->username = "anonymous_user";
+    $anon_user->password = hash_internal_user_password(mt_rand());  /// Shouldn't be possible to logon as the user
+    $anon_user->auth = "nologin";
+    $anon_user->firstname = "Anonymous";
+    $anon_user->lastname = "User";
+    if($result = insert_record('user', $anon_user)) {
+        /// User added - now update config to store user id
+        $record = new stdClass();
+        $record->name = "anonymous_userid";
+        $record->value = $result;
+        $result = insert_record('config', $record);
+    }
+}
+/**
+ * Anonymizes the user id     	
+ */ 
+function forum_scrub_userid($forum, $post) {
+    global $CFG, $USER ;
+    if($post->anonymous == '1' || $forum->anonymous=='1') {
+        $post->userid = $CFG->anonymous_userid;
+        $post->hiddenuserid = $USER->id;
+    } else {
+        $post->userid     = $USER->id;
+    }
+    return $post;
+}
+
 /**
  * Returns creation time of the first user's post in given discussion
  * @global object $DB
@@ -6968,5 +7028,4 @@ function forum_get_user_posted_time($did, $userid) {
     }
     return $posttime;
 }
-
 ?>
