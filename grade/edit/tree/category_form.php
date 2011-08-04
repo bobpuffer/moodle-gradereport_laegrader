@@ -121,6 +121,7 @@ class edit_category_form extends moodleform {
         $mform->addElement('select', 'grade_item_gradetype', get_string('gradetype', 'grades'), $options);
         $mform->setHelpButton('grade_item_gradetype', array('gradetype', get_string('gradetype', 'grades'), 'grade'), true);
         $mform->setDefault('grade_item_gradetype', GRADE_TYPE_VALUE);
+	$mform->setAdvanced('grade_item_gradetype'); // CLAMP #225 2010-06-24 cmoore
         $mform->disabledIf('grade_item_gradetype', 'aggregation', 'eq', GRADE_AGGREGATE_SUM);
 
         //$mform->addElement('text', 'calculation', get_string('calculation', 'grades'));
@@ -147,16 +148,19 @@ class edit_category_form extends moodleform {
 
         $mform->addElement('select', 'grade_item_scaleid', get_string('scale'), $options);
         $mform->setHelpButton('grade_item_scaleid', array('scaleid', get_string('scaleid', 'grades'), 'grade'), true);
+	$mform->setAdvanced('grade_item_scaleid'); // CLAMP #225 2010-06-24 cmoore
         $mform->disabledIf('grade_item_scaleid', 'grade_item_gradetype', 'noteq', GRADE_TYPE_SCALE);
         $mform->disabledIf('grade_item_scaleid', 'aggregation', 'eq', GRADE_AGGREGATE_SUM);
 
         $mform->addElement('text', 'grade_item_grademax', get_string('grademax', 'grades'));
         $mform->setHelpButton('grade_item_grademax', array('grademax', get_string('grademax', 'grades'), 'grade'), true);
+	//$mform->setAdvanced('grade_item_grademax'); // CLAMP #225 2010-06-24 cmoore
         $mform->disabledIf('grade_item_grademax', 'grade_item_gradetype', 'noteq', GRADE_TYPE_VALUE);
         $mform->disabledIf('grade_item_grademax', 'aggregation', 'eq', GRADE_AGGREGATE_SUM);
 
         $mform->addElement('text', 'grade_item_grademin', get_string('grademin', 'grades'));
         $mform->setHelpButton('grade_item_grademin', array('grademin', get_string('grademin', 'grades'), 'grade'), true);
+	$mform->setAdvanced('grade_item_grademin'); // CLAMP #225 2010-06-24 cmoore
         $mform->disabledIf('grade_item_grademin', 'grade_item_gradetype', 'noteq', GRADE_TYPE_VALUE);
         $mform->disabledIf('grade_item_grademin', 'aggregation', 'eq', GRADE_AGGREGATE_SUM);
 
@@ -205,6 +209,7 @@ class edit_category_form extends moodleform {
         // advcheckbox is not compatible with disabledIf!
         $mform->addElement('checkbox', 'grade_item_hidden', get_string('hidden', 'grades'));
         $mform->setHelpButton('grade_item_hidden', array('hidden', get_string('hidden', 'grades'), 'grade'));
+	$mform->setAdvanced('grade_item_hidden'); // CLAMP #225 2010-06-24 cmoore
         $mform->addElement('date_time_selector', 'grade_item_hiddenuntil', get_string('hiddenuntil', 'grades'), array('optional'=>true));
         $mform->setHelpButton('grade_item_hiddenuntil', array('hiddenuntil', get_string('hiddenuntil', 'grades'), 'grade'));
         $mform->disabledIf('grade_item_hidden', 'grade_item_hiddenuntil[off]', 'notchecked');
@@ -212,6 +217,7 @@ class edit_category_form extends moodleform {
         /// locking
         $mform->addElement('checkbox', 'grade_item_locked', get_string('locked', 'grades'));
         $mform->setHelpButton('grade_item_locked', array('locked', get_string('locked', 'grades'), 'grade'));
+	$mform->setAdvanced('grade_item_locked'); // CLAMP #225 2010-06-24 cmoore
 
         $mform->addElement('date_time_selector', 'grade_item_locktime', get_string('locktime', 'grades'), array('optional'=>true));
         $mform->setHelpButton('grade_item_locktime', array('lockedafter', get_string('locktime', 'grades'), 'grade'));
