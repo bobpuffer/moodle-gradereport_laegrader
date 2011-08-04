@@ -35,6 +35,16 @@ function xmldb_chat_upgrade($oldversion=0) {
     }
 
 //===== 1.9.0 upgrade line ======//
+    /// CLAMP #149 2010-01-07 cfulton
+    if ($result && $oldversion < 2010010702) {
+    
+    /// Adding configurable value for scrollback history
+        $table = new XMLDBTable('chat');
+        $field = new XMLDBField('showhistory');
+        $field->setAttributes(XMLDB_TYPE_CHAR,'20',null,XMLDB_NULL,null,null,null,null);
+        $result = $result && add_field($table, $field);
+    }
+    /// end added by cfulton
 
     return $result;
 }
