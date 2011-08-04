@@ -559,6 +559,13 @@ if ($nextstage == SAVE) {
     $str .= "\r\n";
 
     $str .= 'require_once("$CFG->dirroot/lib/setup.php");'."\r\n";
+    // CLAMP
+    $str .= '// Force server-side form validation; required for FCKeditor'."\r\n";
+    $str .= '$CFG->validateforms = \'server'."';\r\n";
+    $str .= '$CFG->defaulthtmleditor=\'tinymce'."';\r\n";
+    $str .= '$CFG->grade_profilereport=\'laeuser' . "';\r\n";
+    $str .= '$CFG->grade_navmethod=2' . ";\r\n";
+    // END CLAMP
     $str .= '// MAKE SURE WHEN YOU EDIT THIS FILE THAT THERE ARE NO SPACES, BLANK LINES,'."\r\n";
     $str .= '// RETURNS, OR ANYTHING ELSE AFTER THE TWO CHARACTERS ON THE NEXT LINE.'."\r\n";
     $str .= '?>';
