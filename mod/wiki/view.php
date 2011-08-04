@@ -182,7 +182,7 @@
         if($wiki->ewikiacceptbinary) {
             define("EWIKI_UPLOAD_MAXSIZE", get_max_upload_file_size());
             define("EWIKI_SCRIPT_BINARY", $ewbase."&binary=");
-            define("EWIKI_ALLOW_BINARY",1);
+            define("EWIKI_ACCEPT_BINARY",1);
             define("EWIKI_IMAGE_CACHING",1);
             #define("EWIKI_AUTOVIEW",1);
             include_once($CFG->dirroot."/mod/wiki/ewiki/plugins/lib/mime_magic.php");
@@ -192,7 +192,7 @@
             include_once($CFG->dirroot."/mod/wiki/ewiki/plugins/moodle/moodle_binary_store.php");
         } else {
             define("EWIKI_SCRIPT_BINARY", 0);
-            define("EWIKI_ALLOW_BINARY",0);
+            define("EWIKI_ACCEPT_BINARY",0);
         }
 
         # The mighty Wiki itself
@@ -242,6 +242,7 @@
 
         global $ewiki_author, $USER;
         $ewiki_author=fullname($USER);
+        $page = (empty($pagename) ? EWIKI_DEFAULT_ACTION . EWIKI_ACTION_SEP_CHAR . $page : $page);
         $content=ewiki_page($page);
         $content2='';
 
@@ -318,7 +319,11 @@
         echo '<td class="sideblockheading">'
             .get_string('otherwikis', 'wiki').':&nbsp;&nbsp;';
         $script = 'self.location=getElementById(\'otherwikis\').wikiselect.options[getElementById(\'otherwikis\').wikiselect.selectedIndex].value';
-        choose_from_menu($wiki_list, "wikiselect", $selected, "choose", $script);
+        
+        /// CLAMP #219 2010-06-25 cfulton
+        /// passes null action to prevent choosing non-extant wiki
+        $nothing = 'javascript:void(0)';
+        choose_from_menu($wiki_list, "wikiselect", $selected, "choose", $script, $nothing);
         echo '</td>';
         echo '</tr></table>';
         echo '</form>';
@@ -381,7 +386,9 @@
         $currenttab = '';
         foreach ($tabs as $tab) {
             $tabname = get_string("tab$tab", 'wiki');
-            $row[] = new tabobject($tabname, $ewbase.'&amp;page='.$tab.'/'.s($ewiki_id), $tabname);
+            /// CLAMP #11 MDL-17237 2010-06-26 cfulton
+            /// Urlencode $ewiki_id or special characters are lost
+            $row[] = new tabobject($tabname, $ewbase.'&amp;page='.$tab.'/'.s(urlencode($ewiki_id)), $tabname);
             if ($ewiki_action == "$tab" or in_array($page, $specialpages)) {
                 $currenttab = $tabname;
             }

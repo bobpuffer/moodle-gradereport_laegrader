@@ -51,8 +51,9 @@ class mod_wiki_mod_form extends moodleform_mod {
         $mform->setHelpButton('ewikiacceptbinary', array('ewikiacceptbinary', get_string('ewikiacceptbinary', 'wiki'), 'wiki'));
         $mform->setAdvanced('ewikiacceptbinary');
 
+        // CLAMP #183 cfulton 2011-06-27
         $mform->addElement('advcheckbox', 'disablecamelcase', get_string('wikilinkoptions', 'wiki'), get_string('disablecamel', 'wiki'));
-        $mform->setDefault('disablecamelcase', 0);
+        $mform->setDefault('disablecamelcase', 1);
         $mform->setHelpButton('disablecamelcase', array('wikilinkoptions', get_string('wikilinkoptions', 'wiki'), 'wiki'));
         $mform->setAdvanced('disablecamelcase');
 
