@@ -478,6 +478,13 @@ img.iconkbhelp {
   border:0px;
 }
 
+img.icontoggle {
+  width:50px;
+  height:17px;
+  border:0px;
+  vertical-align:middle;
+}
+
 /*Accessibility: text 'seen' by screen readers but not visual users. Fixed for RTL languages, example Farsi. */
 .accesshide {
   position:absolute;
@@ -2784,7 +2791,8 @@ body.notes .notesgroup {
   background-image: url(pix/tab/left_hover.gif);
 }
 
-.tabrow0 .here a:hover {
+.tabrow0 .here a:link:hover,
+.tabrow0 .here a:visited:hover {
   background-image: url(pix/tab/left.gif);
 }
 
@@ -3876,7 +3884,10 @@ body#mod-quiz-view .generalbox#feedback .overriddennotice {
 #mod-quiz-attempt #timer {
   position:absolute;
   /*top:100px; is set by js*/
-  left:10px
+  /*MDL-8547 */
+  /* CLAMP # 114 2010-06-23 bobpuffer */
+  right:10px
+  /* CLAMP # 114 2010-06-23 end */
 }
 
 body#question-preview .quemodname,
@@ -4310,3 +4321,17 @@ wikiadminactions {
   border: 1px dashed #ddd;
   padding: 3px;
 }
+#help #emoticons{
+    text-align: center;clear:both;width: 300px;margin-right: auto; margin-left:auto;
+}
+#help #emoticons ul{
+    list-style-type: none;
+}
+#help #emoticons li{
+    margin-bottom: 3px;
+    width: 120px;
+    border-left: 3px solid gray;
+    padding-left: 7px;
+    float: left;
+}
+
