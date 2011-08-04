@@ -54,11 +54,13 @@ if (!empty($CFG->disablecourseajax)) {
 require_sesskey();
 
 // OK, now let's process the parameters and do stuff
+// MDL-10221 the DELETE method is not allowed on some web servers, so we simulate it with the action URL param
+$requestmethod = $_SERVER['REQUEST_METHOD'];
+if ($pageaction == 'DELETE') {
+    $requestmethod = 'DELETE';
+}
 
-$req_method = ($pageaction == 'DELETE') ? 'DELETE' : $_SERVER['REQUEST_METHOD'];
-
-switch($req_method) {
-
+switch($requestmethod) {
     case 'POST':
 
         switch ($class) {
