@@ -75,11 +75,13 @@
                 .$param->extras
                 ." ORDER BY ".$param->orderby;
         }
+        //CLAMP:
+        error_log($sql);
 
         $courses = get_records_sql($sql, 0, $numcourses);
 
         if (empty($courses)) {
-            notify(get_string('statsnodata'));
+            notify(get_string('statsnodata'));echo '</td></tr></table>';echo '<p>after notify</p>';
             echo '</td></tr></table>';
 
         } else {
