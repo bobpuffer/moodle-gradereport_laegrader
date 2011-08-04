@@ -36,6 +36,12 @@ if (has_capability('moodle/site:sendmessage', get_context_instance(CONTEXT_SYSTE
     echo $stylesheetshtml;
     include($CFG->javascript);
 
+    require_once($CFG->libdir .'/editor/htmlEditor.class.php');
+    $htmlEditorObject = new htmlEditor();
+    echo $htmlEditorObject->configure();
+
+    echo '<title> </title></head>';
+
 /// Script parameters
     $userid   = required_param('id', PARAM_INT);
     $message  = optional_param('message', '', PARAM_CLEANHTML);
@@ -62,6 +68,7 @@ if (has_capability('moodle/site:sendmessage', get_context_instance(CONTEXT_SYSTE
         }
     }
 
+    echo '<body class="message course-1" id="message-send">';
 
     if ($message!='' and confirm_sesskey()) {   /// Current user has just sent a message
 
@@ -95,22 +102,22 @@ if (has_capability('moodle/site:sendmessage', get_context_instance(CONTEXT_SYSTE
     echo '<body class="message course-1" id="message-send">';
     echo '<center>';
     echo '<form id="editing" method="post" action="send.php">';
-    echo '<div>';
+    echo '<div class="message-form">';
     echo '<input type="hidden" name="id" value="'.$user->id.'" />';
     echo '<input type="hidden" name="sesskey" value="'.$USER->sesskey.'" />';
 
     $usehtmleditor = (can_use_html_editor() && get_user_preferences('message_usehtmleditor', 0));
     if ($usehtmleditor) {
-        echo '<table><tr><td class="fixeditor" align="center">';
-        print_textarea($usehtmleditor, 9, 200, 0, 0, 'message', '');
-        echo '</td></tr></table>';
-        echo '<input type="submit" value="'.get_string('sendmessage', 'message').'" />';
-        use_html_editor('message', 'formatblock subscript superscript copy cut paste clean undo redo justifyleft justifycenter justifyright justifyfull lefttoright righttoleft insertorderedlist insertunorderedlist outdent indent inserthorizontalrule createanchor nolink inserttable');
+        echo '<div class="message-send-box">';
+        print_textarea($usehtmleditor, 5, 34, 0, 0, 'message', '', 0, false, '', 'form-textarea-simple');
+        echo '</div>';
+        echo '<input class="message-send-button" type="submit" value="'.get_string('sendmessage', 'message').'" />';
+        //use_html_editor('message', 'formatblock subscript superscript copy cut paste clean undo redo justifyleft justifycenter justifyright justifyfull lefttoright righttoleft insertorderedlist insertunorderedlist outdent indent inserthorizontalrule createanchor nolink inserttable');
         echo '<input type="hidden" name="format" value="'.FORMAT_HTML.'" />';
     } else {
         print_textarea(false, 5, 34, 0, 0, 'message', '');
         echo '<input type="hidden" name="format" value="'.FORMAT_MOODLE.'" />';
-        echo '<br /><input type="submit" value="'.get_string('sendmessage', 'message').'" />';
+        echo '<br /><input class="message-send-button" type="submit" value="'.get_string('sendmessage', 'message').'" />';
     }
     echo '</div>';
     echo '</form>';
@@ -120,9 +127,14 @@ if (has_capability('moodle/site:sendmessage', get_context_instance(CONTEXT_SYSTE
     echo '<div class="noframesjslink"><a target="_parent" href="discussion.php?id='.$userid.'&amp;noframesjs=1">'.get_string('noframesjs', 'message').'</a></div>';
     echo '</center>';
 
-    echo "\n<script type=\"text/javascript\">\n<!--\n";                  /// Focus on the textarea
-    echo 'document.getElementById("edit-message").focus();'."\n";
-    echo "\n-->\n</script>\n\n";
+    echo <<<EOF
+<script type="text/javascript">
+//<![CDATA[
+    'document.getElementById("edit-message").focus();'."\n";
+//]]>
+</script>
+
+EOF;
 
     echo '</body></html>';
 }
