@@ -1695,4 +1695,10 @@ function error ($message, $link='') {
 
     die;
 }
+
+// CLAMP
+function use_html_editor($name='', $editorhidebuttons='', $id='') {
+    // error('use_html_editor() not available anymore');
+}
+// END CLAMP
 ?>
