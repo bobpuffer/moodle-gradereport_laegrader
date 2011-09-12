@@ -648,3 +648,13 @@ white-space:nowrap;
     text-align:right;
     padding-right: 5px;
 }
+/***
+*** added the following for the alignment issues
+***/
+.gradestable th.user{ height: 40px } 
+.grade-report-laegrader table#user-grades tr.even td.cell { height: 40px !important; } 
+.grade-report-laegrader table#user-grades tr.odd td.cell { height: 40px !important; } 
+.grade-report-grader table#fixed_column tr.odd th, .grade-report-grader table#user-grades tr.odd th { height: 40px; } 
+.grade-report-grader table#fixed_column tr.even th, .grade-report-grader table#user-grades tr.even th { height: 40px; } 
+.grade-report-grader table#user-grades td.cell { height: 40px; } 
+.grade_icons img.iconsmall { width: 14px; height: 14px; }
