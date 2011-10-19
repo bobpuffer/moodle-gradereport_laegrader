@@ -38,6 +38,9 @@ The following bug fixes (with their CLAMP tracking number) were added as part of
 * CLAMP-307: Forum: Q&A allows students to start discussions
 * CLAMP-316: Bad HTML code in section header may disallow editing it
 * CLAMP-318: Grader Preference not saved, value inserted into DB to long for user_preferences.value field
+********************************
+* CLAMP-355: Added some css in order to mitigate some instances of alignment problems with laegrader report when quick feedback is turned on
+* CLAMP-357: Changed LAE assignment grading interface from using '-1' to using '-' to indicate no grade (compatible with grader reports)
 
 Regarding the CamelCase fix: the solution to this was to disable CamelCase for new installations, thus preventing it from being used in the first place.
 
