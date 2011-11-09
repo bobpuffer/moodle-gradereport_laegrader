@@ -1,8 +1,9 @@
-===Moodle 1.9.13+Liberal Arts Edition v1.4 Release Notes===
+===Moodle 1.9.14+Liberal Arts Edition v1.5 Release Notes===
 
-Welcome to the Moodle 1.9.13+Liberal Arts Edition v1.4. The goal of LAE is to provide a coherent package for modules, patches,  and code developed (or improved) by the Collaborative Liberal Arts Moodle Project. 
+Welcome to the Moodle 1.9.14+Liberal Arts Edition v1.5. The goal of LAE is to provide a coherent package for modules, patches,  and code developed (or improved) by the Collaborative Liberal Arts Moodle Project. 
 
 This package consists of the code that the developers and instructional technologists at CLAMP schools have deemed essential to their operation of Moodle. A number of other recommend add-ons for Moodle are available through CLAMP web site (http://www.clamp-it.org). These recommended add-ons,  however,  have certain caveats that you should be aware of, and it's imperative that you read their respective lae_readme.txt files before installing them.
+
 
 ===LEGAL===
 The LAE is offered "as is", with no warranty. The institutions that comprise CLAMP have done their best to test this code, but we're offering it strictly as a connivence to our members. 
@@ -18,7 +19,7 @@ We recommend using Firefox 3.x with Moodle: Liberal Arts Edition. It has excelle
 
 ===CONTENTS===
 
-Moodle 1.9.13+LAEv1.4 consists of Moodle 1.9.13 (20110801) as well as a number of CLAMP-developed features and bug fixes.
+Moodle 1.9.14+LAEv1.5 consists of Moodle 1.9.14 (20111010) as well as a number of CLAMP-developed features and bug fixes. This is a security release that incorporates the 1.9.14 fixes into the Liberal Arts Edition. 
 
 The following features are included:
 
@@ -45,10 +46,11 @@ One new feature was added: if groupings are enabled, LAE will automatically grea
 
 * CLAMP-333: Auto-adding of grouping (if enabled) for each created group in a course
 
-The following features have been added in the v1.4 release:
+The following changes were added to v1.5:
 
-* Moodle 1.9.13 (20110801) merged into LAE
-* Note: With this release we are retiring our SVN repository in favor of Git. Git is Moodle core's new standard, and all current and future development is being done using this version control software.
+* Moodle 1.9.14 (20111010) merged into LAE
+* When editing grades in assignment view, the "-1" value has been changed to a "-" value.
+
 
 ====Anonymous Forums====
 A completely new version of the Anonymous Forums option in Moodle. This version introduces a new "anonymous user" who is attached to forum posts, allowing faculty to back up and restore a forum without losing anonymity. There is an upgrade tool that automatically runs when LAE v1.1.1 is installed to convert the previous version of the Anonymous forums to the new format. Note: This feature is disabled by default.
@@ -216,7 +218,7 @@ Fixed an css issue that caused rows to mis-aligned when both the Grader and LAE 
 
 http://redmine.clamp-it.org/issues/show/300
 
-* Course Backup Enahncements
+* Course Backup Enhancements
 
 If you have ZipArchive installed on your system, then the Moodle backup code will now take advantage of it. This allows for larger archives when running scheduled backups.
 
@@ -236,7 +238,7 @@ http://www.clamp-it.org/code/
 
 * Download the current release branch from the CLAMP Subversion repository:
 
-git clone -b LAE_19 ssh://<username>@clamp-it.org/var/git/moodle 1.9.13-LAE1.4
+git clone -b 1.9.14-LAE1.5 ssh://<username>@clamp-it.org/var/git/moodle 1.9.14-LAE1.5
 
 ===INSTALLING THE LAE===
 If you are installing Moodle for the first time, you can follow the standard Moodle installation instructions (substituting the LAE Moodle package for the regular Moodle one)
@@ -262,4 +264,4 @@ A few notes:
 
 2) We *strongly* recommend doing a test upgrade on a development Moodle instance before upgrading your production instance.
 
-3) If you have a more current version of Moodle installed (one later than 1.9.13 (20110801), do not attempt to install LAE v1.4, as it will cause a conflict with your newer database, and the installation will fail. You can find your current version by logging into Moodle as an administrator and then going to Administration > Notifications and looking at the bottom of the page for the Moodle version.
+3) If you have a more current version of Moodle installed (one later than 1.9.13 (20111010), do not attempt to install LAE v1.5, as it will cause a conflict with your newer database, and the installation will fail. You can find your current version by logging into Moodle as an administrator and then going to Administration > Notifications and looking at the bottom of the page for the Moodle version.
