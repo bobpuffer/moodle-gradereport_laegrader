@@ -49,8 +49,8 @@ One new feature was added: if groupings are enabled, LAE will automatically grea
 The following changes were added to v1.5:
 
 * Moodle 1.9.14 (20111010) merged into LAE
-* When editing grades in assignment view, the "-1" value has been changed to a "-" value.
-
+* CLAMP-355: Added some css in order to mitigate some instances of alignment problems with laegrader report when quick feedback is turned on
+* CLAMP-357: Changed LAE assignment grading interface from using '-1' to using '-' to indicate no grade (compatible with grader reports)
 
 ====Anonymous Forums====
 A completely new version of the Anonymous Forums option in Moodle. This version introduces a new "anonymous user" who is attached to forum posts, allowing faculty to back up and restore a forum without losing anonymity. There is an upgrade tool that automatically runs when LAE v1.1.1 is installed to convert the previous version of the Anonymous forums to the new format. Note: This feature is disabled by default.
