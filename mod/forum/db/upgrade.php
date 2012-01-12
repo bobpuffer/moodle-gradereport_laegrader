@@ -344,7 +344,30 @@ function xmldb_forum_upgrade($oldversion) {
     // Moodle v2.2.0 release upgrade line
     // Put any upgrade step following this
 
+    /// Add anonymous forums support
+    if ($oldversion < 2011112901) {
+        require($CFG->dirroot . '/mod/forum/lib.php');
+        
+        // Migrate the old config setting, if present
+        if(!empty($CFG->forum_anonymous)) {
+            set_config('forum_enableanonymousposts', $CFG->forum_anonymous);
+            set_config('forum_anonymous', null);
+        }
+        
+        forum_add_anonymous_user();	// Add the user
+        
+        // add hooks to _forum and _forum_posts
+        $table = new xmldb_table('forum');
+        $field = new xmldb_field('anonymous');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'completionposts');
+        if (!$dbman->field_exists($table, $field)) $dbman->add_field($table, $field);
+
+        $table = new xmldb_table('forum_posts');
+        $field = new xmldb_field('hiddenuserid');
+        $field->set_attributes(XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, null, null, null, null, 'mailnow');
+        if (!$dbman->field_exists($table, $field)) $dbman->add_field($table, $field);        
+        upgrade_mod_savepoint(true, 2011112901, 'forum');
+    }
+
     return true;
 }
-
-
