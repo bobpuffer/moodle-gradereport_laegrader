@@ -166,4 +166,4 @@ $THEME->hidefromselector = true;
 
 /** List of javascript files that need to included on each page */
 $THEME->javascripts = array();
-$THEME->javascripts_footer = array();
+$THEME->javascripts_footer = array('confirm-leave');
