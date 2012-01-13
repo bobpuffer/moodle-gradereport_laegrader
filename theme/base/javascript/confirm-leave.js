@@ -21,7 +21,6 @@ confirmLeave.divArray = document.getElementsByTagName('div');
 for (i = 0; i < confirmLeave.divArray.length; i++) {
 	var divId = confirmLeave.divArray[i].id;
 	if (divId.match('filemanager-') == 'filemanager-') {
-		confirmLeave.FileManDiv = confirmLeave.divArray[i];
 		var fileForm;
 		fileForm = document.getElementById('mform1');
 		fileForm.onsubmit = function(){markClean();};
