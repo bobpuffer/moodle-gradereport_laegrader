@@ -238,7 +238,7 @@ http://www.clamp-it.org/code/
 
 * Download the current release branch from the CLAMP Subversion repository:
 
-git clone -b 1.9.14-LAE1.5 ssh://<username>@clamp-it.org/var/git/moodle 1.9.14-LAE1.5
+git clone -b v1.9.16-LAE1.6 ssh://<username>@clamp-it.org/var/git/moodle v1.9.16-LAE1.6
 
 ===INSTALLING THE LAE===
 If you are installing Moodle for the first time, you can follow the standard Moodle installation instructions (substituting the LAE Moodle package for the regular Moodle one)
@@ -264,4 +264,4 @@ A few notes:
 
 2) We *strongly* recommend doing a test upgrade on a development Moodle instance before upgrading your production instance.
 
-3) If you have a more current version of Moodle installed (one later than 1.9.13 (20111010), do not attempt to install LAE v1.5, as it will cause a conflict with your newer database, and the installation will fail. You can find your current version by logging into Moodle as an administrator and then going to Administration > Notifications and looking at the bottom of the page for the Moodle version.
+3) If you have a more current version of Moodle installed (one later than 1.9.16 [20120109]),  do not attempt to install LAE v1.6, as it will cause a conflict with your newer database, and the installation will fail. You can find your current version by logging into Moodle as an administrator and then going to Administration > Notifications and looking at the bottom of the page for the Moodle version.
