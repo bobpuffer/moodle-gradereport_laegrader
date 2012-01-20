@@ -30,7 +30,10 @@ class block_quickmail extends block_list {
         $config = quickmail::load_config($COURSE->id);
         $permission = has_capability('block/quickmail:cansend', $context);
 
-        if ($permission or !empty($config['allowstudents'])) {
+        //if ($permission and !empty($config['allowstudents'])) {  // ckm and dab: 1/13/12 this used to be an "or"
+		// ckm and dab: 1/19/12 removed the checking for allowstudents - it doesn't work.
+		        
+        if ($permission) {
             $cparam = array('courseid' => $COURSE->id);
 
             $send_email_str = quickmail::_s('composenew');
@@ -57,10 +60,8 @@ class block_quickmail extends block_list {
             );
             $this->content->items[] = $drafts;
             $this->content->icons[] = $OUTPUT->pix_icon('i/settings', $drafts_email_str);
-        }
-
-        // History can't be view by students
-        if ($permission) {
+            
+            // ckm and dab: 1/13/12 display view history link
             $history_str = quickmail::_s('history');
             $history = html_writer::link(
                 new moodle_url('/blocks/quickmail/emaillog.php', $cparam),
