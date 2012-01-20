@@ -2,6 +2,9 @@
 
 // Written at Louisiana State University
 
+// DAMON AND CAROLINE, SMITH COLLEGE:
+// This file is for the individual course admin settings page for Quickmail
+
 require_once $CFG->libdir . '/formslib.php';
 
 class config_form extends moodleform {
@@ -18,8 +21,9 @@ class config_form extends moodleform {
 
         $student_select = array(0 => get_string('no'), 1 => get_string('yes'));
 
-        $mform->addElement('select', 'allowstudents',
-            quickmail::_s('allowstudents'), $student_select);
+		// dab and ckm: 1/19/12 removed because it's BAD (it breaks things!)
+        //$mform->addElement('select', 'allowstudents',
+        //    quickmail::_s('allowstudents'), $student_select);
 
         $roles =& $mform->addElement('select', 'roleselection',
             quickmail::_s('select_roles'), $this->_customdata['roles']);

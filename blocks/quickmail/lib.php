@@ -140,11 +140,12 @@ abstract class quickmail extends lsu_dev {
 
         if(empty($config)) {
             $m = 'moodle';
-            $allowstudents = get_config($m, 'block_quickmail_allowstudents');
+            // dab and ckm: 1-19-12 commented out because allowstudents breaks things
+            //$allowstudents = get_config($m, 'block_quickmail_allowstudents');
             $roleselection = get_config($m, 'block_quickmail_roleselection');
 
             $config = array(
-                'allowstudents' => $allowstudents,
+                //'allowstudents' => $allowstudents,
                 'roleselection' => $roleselection
             );
         }
