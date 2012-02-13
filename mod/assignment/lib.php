@@ -642,23 +642,23 @@ class assignment_base {
                     if ($updatedb){
                         // MDL-9085 BOBPUFFER 2010-10-07 HACK TO PROCESS TEXT INPUT FIELDS
 //                        if ($newsubmission) {
-                    	if (trim($submission->grade == '-')) {
+                    	if (trim($submission->grade == '-') && $submission->submissioncomment === null) {
                     		continue;
                     	} else if ((is_numeric($submission->grade) && !(floatval($submission->grade) > floatval($this->assignment->grade))) 
-                    			|| trim($submission->grade) == "" || $this->assignment->grade < 0)  {
+                    			|| trim($submission->grade) == "" || $this->assignment->grade < 0 || $submission->submissioncomment !== null)  {
                             if ($newsubmission) {  // END OF HACK BOBPUFFER
-                                if (!isset($submission->submissioncomment)) {
-                                    $submission->submissioncomment = '';
-                                }
-                                if (!$sid = insert_record('assignment_submissions', $submission)) {
-                                    return false;
-                                }
-                                $submission->id = $sid;
-                            } else {
-                                if (!update_record('assignment_submissions', $submission)) {
-                                    return false;
-                                }
-                            }
+	                            if (!isset($submission->submissioncomment)) {
+	                                $submission->submissioncomment = '';
+	                            }
+	                            if (!$sid = insert_record('assignment_submissions', $submission)) {
+	                                return false;
+	                            }
+	                            $submission->id = $sid;
+	                        } else {
+	                            if (!update_record('assignment_submissions', $submission)) {
+	                                return false;
+	                            }
+	                        }
                     	} else {
                             echo '<script type="text/javascript">alert("' . $submission->grade
                                     . ' is not a valid number no greater than ' . $this->assignment->grade . '")</script>';
