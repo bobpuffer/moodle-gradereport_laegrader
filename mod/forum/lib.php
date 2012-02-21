@@ -381,7 +381,7 @@ function forum_cron() {
                 }
 
                 // Don't send email if the forum is Q&A and the user has not posted
-                if ($forum->type == 'qanda' && !forum_get_user_posted_time($discussion->id, $userto->id)) {
+                if ($forum->type == 'qanda' && !forum_get_user_posted_time($discussion->id, $userto->id) && $pid != $discussion->firstpost) {
                     mtrace('Did not email '.$userto->id.' because user has not posted in discussion');
                     continue;
                 }
