@@ -23,8 +23,7 @@ directionality: \"$directionality\",
 plugins: 
 \"spellchecker,emotions,paste,directionality,contextmenu,dragmath,advlist\",
 content_css : \"{$CFG->httpswwwroot}/lib/editor/tinymce/moodlecontent.css\",
-spellchecker_languages : \"+English=en,Danish=da,Dutch=nl,Finnish=fi,French=fr,German=de,Italian=it,Polish=pl,Portuguese=pt,Spanish=es,Swedish=sv\",
-spellchecker_rpc_url : \"{$CFG->httpswwwroot}/lib/editor/tinymce/jscripts/tiny_mce/plugins/spellchecker/rpc.php\"
+spellchecker_languages : \"+English=en,Danish=da,Dutch=nl,Finnish=fi,French=fr,German=de,Italian=it,Polish=pl,Portuguese=pt,Spanish=es,Swedish=sv\"
 });
 tinyMCE.init({
 mode: \"textareas\",
@@ -40,7 +39,6 @@ language: \"$editorlanguage\",
 directionality: \"$directionality\",  plugins: 
 \"advimage,media,safari,table,style,layer,advhr,advlink,advlist,emotions,inlinepopups,searchreplace,paste,directionality,fullscreen,nonbreaking,contextmenu,insertdatetime,save,iespell,preview,print,noneditable,visualchars,xhtmlxtras,template,pagebreak,spellchecker,dragmath,moodleimage\",     
 spellchecker_languages : \"+English=en,Danish=da,Dutch=nl,Finnish=fi,French=fr,German=de,Italian=it,Polish=pl,Portuguese=pt,Spanish=es,Swedish=sv\",
-spellchecker_rpc_url : \"{$CFG->httpswwwroot}/lib/editor/tinymce/jscripts/tiny_mce/plugins/spellchecker/rpc.php\",
 theme_advanced_font_sizes: \"1,2,3,4,5,6,7\",
 theme_advanced_layout_manager: \"SimpleLayout\",
 theme_advanced_toolbar_align : \"left\",
