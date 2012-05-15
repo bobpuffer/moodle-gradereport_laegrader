@@ -1,9 +1,8 @@
-===Moodle 1.9.16+Liberal Arts Edition v1.6 Release Notes===
+===Moodle 1.9.16+Liberal Arts Edition v1.6.1 Release Notes===
 
-Welcome to the Moodle 1.9.16+Liberal Arts Edition v1.6. The goal of LAE is to provide a coherent package for modules, patches, and code developed (or improved) by the Collaborative Liberal Arts Moodle Project. 
+Welcome to the Moodle 1.9.16+Liberal Arts Edition v1.6.1. The goal of LAE is to provide a coherent package for modules, patches, and code developed (or improved) by the Collaborative Liberal Arts Moodle Project. 
 
 This package consists of the code that the developers and instructional technologists at CLAMP schools have deemed essential to their operation of Moodle. A number of other recommend add-ons for Moodle are available through CLAMP web site (http://www.clamp-it.org). These recommended add-ons,  however,  have certain caveats that you should be aware of, and it's imperative that you read their respective lae_readme.txt files before installing them.
-
 
 ===LEGAL===
 The LAE is offered "as is", with no warranty. The institutions that comprise CLAMP have done their best to test this code, but we're offering it strictly as a connivence to our members. 
@@ -19,7 +18,7 @@ We recommend using Firefox with Moodle: Liberal Arts Edition. It has excellent s
 
 ===CONTENTS===
 
-Moodle 1.9.16+LAEv1.6 consists of Moodle 1.9.16 (20120109) as well as a number of CLAMP-developed features and bug fixes. This is a security release that incorporates the 1.9.16 fixes into the Liberal Arts Edition. 
+Moodle 1.9.16+LAEv1.6.1 consists of Moodle 1.9.16 (20120109) as well as a number of CLAMP-developed features and bug fixes. This is a security release that incorporates the 1.9.18 fixes into the Liberal Arts Edition. 
 
 The following features are included:
 
@@ -51,6 +50,10 @@ One new feature was added: if groupings are enabled, LAE will automatically grea
 The following changes were added to v1.6:
 
 * Moodle 1.9.16 (20120109) merged into LAE
+
+The following changes were added to v1.6.1:
+
+* Moodle 1.9.18 bugfixes backported to LAE
 
 ====Anonymous Forums====
 A completely new version of the Anonymous Forums option in Moodle. This version introduces a new "anonymous user" who is attached to forum posts, allowing faculty to back up and restore a forum without losing anonymity. There is an upgrade tool that automatically runs when LAE v1.1.1 is installed to convert the previous version of the Anonymous forums to the new format. Note: This feature is disabled by default.
@@ -238,7 +241,7 @@ http://www.clamp-it.org/code/
 
 * Download the current release branch from the CLAMP Subversion repository:
 
-git clone -b v1.9.16-LAE1.6 ssh://<username>@clamp-it.org/var/git/moodle v1.9.16-LAE1.6
+git clone -b v1.9.16-LAE1.6.1 ssh://<username>@clamp-it.org/home/git/moodle v1.9.16-LAE1.6.1
 
 ===INSTALLING THE LAE===
 If you are installing Moodle for the first time, you can follow the standard Moodle installation instructions (substituting the LAE Moodle package for the regular Moodle one)
@@ -264,4 +267,4 @@ A few notes:
 
 2) We *strongly* recommend doing a test upgrade on a development Moodle instance before upgrading your production instance.
 
-3) If you have a more current version of Moodle installed (one later than 1.9.16 [20120109]),  do not attempt to install LAE v1.6, as it will cause a conflict with your newer database, and the installation will fail. You can find your current version by logging into Moodle as an administrator and then going to Administration > Notifications and looking at the bottom of the page for the Moodle version.
+3) If you have a more current version of Moodle installed (one later than 1.9.16 [20120109]),  do not attempt to install LAE v1.6.1, as it will cause a conflict with your newer database, and the installation will fail. You can find your current version by logging into Moodle as an administrator and then going to Administration > Notifications and looking at the bottom of the page for the Moodle version.
