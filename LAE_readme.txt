@@ -1,6 +1,6 @@
 ===Moodle 1.9.16+Liberal Arts Edition v1.6.1 Release Notes===
 
-Welcome to the Moodle 1.9.16+Liberal Arts Edition v1.6.1. The goal of LAE is to provide a coherent package for modules, patches, and code developed (or improved) by the Collaborative Liberal Arts Moodle Project. 
+Welcome to the Moodle 1.9.16+Liberal Arts Edition v1.6.2. The goal of LAE is to provide a coherent package for modules, patches, and code developed (or improved) by the Collaborative Liberal Arts Moodle Project. 
 
 This package consists of the code that the developers and instructional technologists at CLAMP schools have deemed essential to their operation of Moodle. A number of other recommend add-ons for Moodle are available through CLAMP web site (http://www.clamp-it.org). These recommended add-ons,  however,  have certain caveats that you should be aware of, and it's imperative that you read their respective lae_readme.txt files before installing them.
 
@@ -18,7 +18,7 @@ We recommend using Firefox with Moodle: Liberal Arts Edition. It has excellent s
 
 ===CONTENTS===
 
-Moodle 1.9.16+LAEv1.6.1 consists of Moodle 1.9.16 (20120109) as well as a number of CLAMP-developed features and bug fixes. This is a security release that incorporates the 1.9.18 fixes into the Liberal Arts Edition. 
+Moodle 1.9.16+LAEv1.6.2 consists of Moodle 1.9.16 (20120109) as well as a number of CLAMP-developed features and bug fixes. 
 
 The following features are included:
 
@@ -55,6 +55,11 @@ The following changes were added to v1.6.1:
 
 * Moodle 1.9.18 bugfixes backported to LAE
 
+The following changes were added to v1.6.2:
+
+* CLAMP-370: TinyMCE was updated to 3.52b
+* CLAMP-393: Allow saving of feedback without a grade in quick grading
+
 ====Anonymous Forums====
 A completely new version of the Anonymous Forums option in Moodle. This version introduces a new "anonymous user" who is attached to forum posts, allowing faculty to back up and restore a forum without losing anonymity. There is an upgrade tool that automatically runs when LAE v1.1.1 is installed to convert the previous version of the Anonymous forums to the new format. Note: This feature is disabled by default.
 
@@ -78,7 +83,7 @@ Simple File Upload adds the resource option of "Upload a File" to the "Resources
 =====SimpleRSS=====
 Moodle sometimes fails to parse RSS feeds. This is because it relies on the unmaintained and buggy Magpie RSS library with SimplePie RSS, a current and well-maintained PHP library for parsing RSS feeds. This CLAMP-created fix is scheduled for inclusion in Moodle 2.0 (http://tracker.moodle.org/browse/MDL-7946)
 
-====TinyMCE 3.37====
+====TinyMCE 3.52b====
 This is an upgrade from TinyMCE 2.x., our replacement editor for HTML Area. TinyMCE offers a superior feature set, and far better support for cutting and pasting from Microsoft Word. We need to verify that it works properly and upgrades cleanly from previous versions of LAE. Note: TinyMCE uses different HTML syntax from HTML area, so certain formating -- like bold or italics -- can't be undone using TinyMCE, and have to be changed in HTML view. 
 
 ====Re-organized Files Upload UI====
@@ -241,7 +246,7 @@ http://www.clamp-it.org/code/
 
 * Download the current release branch from the CLAMP Subversion repository:
 
-git clone -b v1.9.16-LAE1.6.1 ssh://<username>@clamp-it.org/home/git/moodle v1.9.16-LAE1.6.1
+git clone -b v1.9.16-LAE1.6.2 ssh://<username>@clamp-it.org/home/git/moodle v1.9.16-LAE1.6.2
 
 ===INSTALLING THE LAE===
 If you are installing Moodle for the first time, you can follow the standard Moodle installation instructions (substituting the LAE Moodle package for the regular Moodle one)
