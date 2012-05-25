@@ -7606,9 +7606,13 @@ function zip_files ($originalfiles, $destination) {
         foreach($files as $file) {
             if(is_dir($file)) {
                 $archive->addEmptyDir(basename($file));
-                $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file));
+                $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($file), RecursiveIteratorIterator::SELF_FIRST);
                 foreach ($iterator as $key=>$value) {
-                    $archive->addFile(realpath($key), substr($key, $start)) or notice ("ERROR: Could not add file: $key");
+                    if (is_dir($value)) {
+                        $archive->addEmptyDir(basename($file) . '/' . str_replace($file . '/', '', $value));
+                    } else {
+                        $archive->addFile(realpath($key), substr($key, $start)) or notice ("ERROR: Could not add file: $key");
+                    }
                 }
             } else {
                 $archive->addFile($file, basename($file));
