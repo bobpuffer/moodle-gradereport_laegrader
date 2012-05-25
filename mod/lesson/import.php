@@ -42,13 +42,11 @@
 
         $form->format = clean_param($form->format, PARAM_SAFEDIR); // For safety
 
-        if (empty($_FILES['newfile'])) {      // file was just uploaded
+        // move the file into the dataroot
+        $importfile = $CFG->dataroot . '/temp/' . $_FILES['newfile']['name'];
+        
+        if (!move_uploaded_file($_FILES['newfile']['tmp_name'], $importfile)) {
             notify(get_string("uploadproblem") );
-        }
-
-        if ((!is_uploaded_file($_FILES['newfile']['tmp_name']) or $_FILES['newfile']['size'] == 0)) {
-            notify(get_string("uploadnofilefound") );
-
         } else {  // Valid file is found
 
             if (! is_readable("$CFG->dirroot/question/format/$form->format/format.php")) {
@@ -65,7 +63,7 @@
                 error("Error occurred during pre-processing!");
             }
 
-            if (! $format->importprocess($_FILES['newfile']['tmp_name'], $lesson, $pageid)) {    // Process the uploaded file
+            if (! $format->importprocess($importfile, $lesson, $pageid)) {    // Process the uploaded file
                 error("Error occurred during processing!");
             }
 
