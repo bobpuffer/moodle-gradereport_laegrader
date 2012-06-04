@@ -177,6 +177,7 @@ if (!$categories = get_categories()) {    /// No category yet!
     $tempcat->context = get_context_instance(CONTEXT_COURSECAT, $tempcat->id);
     mark_context_dirty('/'.SYSCONTEXTID);
     fix_course_sortorder(); // Required to build course_categories.depth and .path.
+    set_config('defaultrequestcategory', $tempcat->id);
 }
 
 /// Move a category to a new parent if required
@@ -373,6 +374,7 @@ function print_category_edit($category, $displaylist, $parentslist, $depth=-1, $
         echo '</td>';
         echo '</tr>';
     } else {
+        $category = new stdClass();
         $category->id = '0';
     }
 
