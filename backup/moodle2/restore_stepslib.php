@@ -211,6 +211,8 @@ class restore_gradebook_structure_step extends restore_structure_step {
         $data->itemid = $this->get_new_parentid('grade_item');
 
         $data->userid = $this->get_mappingid('user', $data->userid, NULL);
+        if (empty($data->userid)) return;
+
         $data->usermodified = $this->get_mappingid('user', $data->usermodified, NULL);
         $data->locktime     = $this->apply_date_offset($data->locktime);
         // TODO: Ask, all the rest of locktime/exported... work with time... to be rolled?
