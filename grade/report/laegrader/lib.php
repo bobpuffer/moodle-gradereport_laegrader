@@ -1048,14 +1048,11 @@ class grade_report_laegrader extends grade_report_grader {
 
                     // If quickfeedback is on, print an input element
                     if ($showquickfeedback and $grade->is_editable()) {
-
-                        if (! $item->is_course_item() and ! $item->is_category_item()) {
-                            $studentshtml .= '<input type="hidden" name="oldfeedback_'
-                                          .$userid.'_'.$item->id.'" value="' . s($grade->feedback) . '" />';
-                            $studentshtml .= '<input class="quickfeedback" tabindex="' . $tabindices[$item->id]['feedback']
-                                          . '" size="6" title="' . $strfeedback . '" type="text" name="feedback_'
-                                          .$userid.'_'.$item->id.'" value="' . s($grade->feedback) . '" />';
-                        }
+                        $studentshtml .= '<input type="hidden" name="oldfeedback_'
+                                      .$userid.'_'.$item->id.'" value="' . s($grade->feedback) . '" />';
+                        $studentshtml .= '<input class="quickfeedback" tabindex="' . $tabindices[$item->id]['feedback']
+                                      . '" size="6" title="' . $strfeedback . '" type="text" name="feedback_'
+                                      .$userid.'_'.$item->id.'" value="' . s($grade->feedback) . '" />';
                     }
 
                 } else { // Not editing
