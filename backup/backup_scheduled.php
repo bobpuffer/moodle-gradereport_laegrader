@@ -110,19 +110,16 @@ function schedule_backup_cron() {
                     $logexists = record_exists_sql($sql);
                     if (!$logexists) {
                         mtrace("            SKIPPING - hidden+unmodified");
-                        set_field("backup_courses", "laststatus", "3", "courseid", $backup_course->courseid);
+                        set_field("backup_courses", "laststatus", BACKUP_STATE_SKIPPED, "courseid", $backup_course->courseid);
                         $skipped = true;
                     }
                 } else {
- 	            $space = get_directory_size("$CFG->dataroot/$course->id/");
-		    // CLAMP # 299 2011-05-24 cfulton
-                    if( (!empty($CFG->maxbackupsize)) && (($CFG->maxbackupsize * (1024 * 1024)) < $space)) {
-                     	 mtrace("            SKIPPING - exceeds maximum size");
+		    // CLAMP #389: Skip oversize backups
+                    if (!empty($CFG->maxbackupsize) && (($CFG->maxbackupsize * (1024 * 1024)) < get_directory_size("$CFG->dataroot/$course->$id/"))) {
+                        mtrace("            SKIPPING - exceeds maximum size");
+                        set_field("backup_courses","laststatus", BACKUP_STATE_OVERSIZE,"courseid",$backup_course->courseid);
                         $skipped = true;
-                    	 set_field("backup_courses","laststatus","4","courseid",$backup_course->courseid);
-                        set_field("backup_courses","lastendtime",time(),"courseid",$backup_course->courseid);
-    	             }
-    	             // CLAMP # 299 2011-05-24 end
+    	            }
     	        }
 	        // CLAMP # 114 2010-06-23 end
                 //Now we backup every non-skipped course
