@@ -1210,10 +1210,84 @@ class restore_course_structure_step extends restore_structure_step {
     }
 
     protected function after_execute() {
-        // Add course related files, without itemid to match
+        global $DB;
+
+        // Add course related files, without itemid to match.
         $this->add_related_files('course', 'summary', null);
+
+        // Deal with legacy allowed modules.
+        if ($this->legacyrestrictmodules) {
+            $context = context_course::instance($this->get_courseid());
+
+            list($roleids) = get_roles_with_cap_in_context($context, 'moodle/course:manageactivities');
+            list($managerroleids) = get_roles_with_cap_in_context($context, 'moodle/site:config');
+            foreach ($managerroleids as $roleid) {
+                unset($roleids[$roleid]);
+            }
+
+            foreach (get_plugin_list('mod') as $modname => $notused) {
+                if (isset($this->legacyallowedmodules[$modname])) {
+                    // Module is allowed, no worries.
+                    continue;
+                }
+
+                $capability = 'mod/' . $modname . ':addinstance';
+                foreach ($roleids as $roleid) {
+                    assign_capability($capability, CAP_PREVENT, $roleid, $context);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Structure step that will migrate legacy files if present.
+ */
+class restore_course_legacy_files_step extends restore_structure_step {
+    protected function define_structure() {
+        $course = new restore_path_element('course', '/course');
+
+        return array($course);
+    }
+
+    /**
+     * Processing functions go here.
+     *
+     * @global moodledatabase $DB
+     * @param stdClass $data
+     */
+    public function process_course($data) {
+        global $CFG, $DB;
+
+        $data = new object();
+        $data->id = $this->get_courseid();
+
+        // Check if we have legacy files, and enable them if we do.
+        $sql = 'SELECT count(*) AS newitemid
+                  FROM {backup_files_temp}
+                 WHERE backupid = ?
+                   AND contextid = ?
+                   AND component = ?
+                   AND filearea  = ?';
+        $params = array($this->get_restoreid(), $this->task->get_old_contextid(), 'course', 'legacy');
+
+        if ($DB->count_records_sql($sql, $params)) {
+            // Enable the legacy files.
+            $data->legacyfiles = 2;
+
+            // Course record ready, update it.
+            $DB->update_record('course', $data);
+        }
+
+    }
+
+    protected function after_execute() {
+        global $DB;
+
+        // Add course legacy files, without itemid to match.
         $this->add_related_files('course', 'legacy', null);
     }
+
 }
 
 
