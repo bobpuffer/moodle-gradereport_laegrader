@@ -2,25 +2,20 @@
 
 // Written at Louisiana State University
 
-// DAMON AND CAROLINE, SMITH COLLEGE:
-// This file is for the SITE admin settings page for Quickmail
-
 defined('MOODLE_INTERNAL') || die;
 
 if($ADMIN->fulltree) {
     require_once $CFG->dirroot . '/blocks/quickmail/lib.php';
 
     $select = array(0 => get_string('no'), 1 => get_string('yes'));
-	
-	/*
+
     $allow = quickmail::_s('allowstudents');
     $settings->add(
         new admin_setting_configselect('block_quickmail_allowstudents',
             $allow, $allow, 0, $select
         )
     );
-	*/
-	
+
     $roles = $DB->get_records('role', null, 'sortorder ASC');
 
     $default_sns = array('editingteacher', 'teacher', 'student');
@@ -36,6 +31,26 @@ if($ADMIN->fulltree) {
             $select_roles, $select_roles,
             array_keys($defaults),
             array_map($only_names, $roles)
+        )
+    );
+
+    $settings->add(
+        new admin_setting_configselect('block_quickmail_receipt',
+        quickmail::_s('receipt'), quickmail::_s('receipt_help'),
+        0, $select
+        )
+    );
+
+    $options = array(
+        0 => get_string('none'),
+        'idnumber' => get_string('idnumber'),
+        'shortname' => get_string('shortname')
+    );
+
+    $settings->add(
+        new admin_setting_configselect('block_quickmail_prepend_class',
+            quickmail::_s('prepend_class'), quickmail::_s('prepend_class_desc'),
+            0, $options
         )
     );
 }
