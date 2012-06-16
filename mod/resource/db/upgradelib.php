@@ -249,6 +249,9 @@ function resource_20_prepare_migration() {
         return false;
     }
 
+    // pre-migrate simple file upload to standard file resource type
+    $DB->set_field_select('resource', 'type', 'file', 'type = ?', array('fileupload'));
+
     // copy old data, the intro text format was FORMAT_MOODLE==0
     $sql = "INSERT INTO {resource_old} (oldid, course, name, type, reference, intro, introformat, alltext, popup, options, timemodified, cmid)
             SELECT r.id, r.course, r.name, r.type, r.reference, r.summary, 0, r.alltext, r.popup, r.options, r.timemodified, cm.id
