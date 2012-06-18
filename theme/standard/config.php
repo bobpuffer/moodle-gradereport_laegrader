@@ -46,4 +46,3 @@ $THEME->sheets = array(
     'css3'      /** Sets up CSS 3 + browser specific styles **/
 );
 $THEME->enable_dock = true;
-$THEME->javascripts_footer = array('jquery-1.7.2.min');
