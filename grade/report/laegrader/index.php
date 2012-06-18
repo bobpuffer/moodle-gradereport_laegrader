@@ -180,7 +180,7 @@ foreach($warnings as $warning) {
 $studentsperpage = 0; // forced for laegrader
 $reporthtml = $report->get_grade_table();
 $reporthtml .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$CFG->wwwroot/grade/report/laegrader/styles.css\" />";
-
+$reporthtml .= '<script src="' . $CFG->wwwroot . '/lib/jquery/jquery-1.7.2.min.js" type="text/javascript"></script>';
 		/*
        	 * code going into the html entity to enable scrolling columns and rows
        	 */
