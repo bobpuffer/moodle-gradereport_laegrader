@@ -9,13 +9,6 @@ if($ADMIN->fulltree) {
 
     $select = array(0 => get_string('no'), 1 => get_string('yes'));
 
-    $allow = quickmail::_s('allowstudents');
-    $settings->add(
-        new admin_setting_configselect('block_quickmail_allowstudents',
-            $allow, $allow, 0, $select
-        )
-    );
-
     $roles = $DB->get_records('role', null, 'sortorder ASC');
 
     $default_sns = array('editingteacher', 'teacher', 'student');

@@ -32,12 +32,7 @@ if (!empty($type) and empty($typeid)) {
 $config = quickmail::load_config($courseid);
 
 $context = get_context_instance(CONTEXT_COURSE, $courseid);
-$has_permission = (
-    has_capability('block/quickmail:cansend', $context) or
-    !empty($config['allowstudents'])
-);
-
-if (!$has_permission) {
+if (!has_capability('block/quickmail:cansend', $context)) {
     print_error('no_permission', 'block_quickmail');
 }
 

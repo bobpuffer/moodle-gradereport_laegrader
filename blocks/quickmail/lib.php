@@ -123,13 +123,11 @@ abstract class quickmail {
 
         if (empty($config)) {
             $m = 'moodle';
-            $allowstudents = get_config($m, 'block_quickmail_allowstudents');
             $roleselection = get_config($m, 'block_quickmail_roleselection');
             $prepender = get_config($m, 'block_quickmail_prepend_class');
             $receipt = get_config($m, 'block_quickmail_receipt');
 
             $config = array(
-                'allowstudents' => $allowstudents,
                 'roleselection' => $roleselection,
                 'prepend_class' => $prepender,
                 'receipt' => $receipt
