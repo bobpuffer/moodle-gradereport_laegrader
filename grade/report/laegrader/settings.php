@@ -105,7 +105,6 @@ if ($ADMIN->fulltree) {
                                                      '3' => '3',
                                                      '4' => '4',
                                                      '5' => '5')));
-	// later implementation, possibly only Luther
-//	$settings->add(new admin_setting_configcheckbox('grade_report_laegrader_accuratetotals', get_string('accuratetotals', 'gradereport_laegrader'), get_string('configaccuratetotals', 'gradereport_laegrader'), 2, PARAM_INT));
+	$settings->add(new admin_setting_configcheckbox('grade_report_laegrader_accuratetotals', get_string('accuratetotals', 'gradereport_laegrader'), get_string('configaccuratetotals', 'gradereport_laegrader'), 2, PARAM_INT));
                                               
 }

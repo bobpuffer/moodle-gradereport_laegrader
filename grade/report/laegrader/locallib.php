@@ -267,16 +267,48 @@ class grade_tree_local extends grade_tree {
         $tooltip = $strzerofill;
         $actiontext = '<img alt="' . $type . '" class="smallicon" title="' . $strzerofill . '" src="' . $CFG->wwwroot . '/grade/report/laegrader/images/zerofill.png" />';
         $url->param('action', 'zerofill');
-        $zerofillicon = $OUTPUT->action_link($url, 'text', null, array('class' => 'action-icon', 'onclick'=>'"zerofill(' . $element['object']->id . ')"'));
+        $zerofillicon = $OUTPUT->action_link($url, 'text', null, array('class' => 'action-icon', 'onclick'=>'zerofill(' . $element['object']->id . ')'));
 		preg_match('/(.*href=")/',$zerofillicon, $matches);
 		// sending back an empty href with onclick
 		$zerofillicontemp = $matches[0] . '#">' . $actiontext . '</a>';
         return $zerofillicontemp;
     }
     
-    
+    function limit_item($this_cat,$items,&$grade_values,&$grade_maxes) {
+    	$extraused = $this_cat->is_extracredit_used();
+    	if (!empty($this_cat->droplow)) {
+    		asort($grade_values, SORT_NUMERIC);
+    		$dropped = 0;
+    		foreach ($grade_values as $itemid=>$value) {
+    			if ($dropped < $this_cat->droplow) {
+    				if ($extraused and $items[$itemid]->aggregationcoef > 0) {
+    					// no drop low for extra credits
+    				} else {
+    					unset($grade_values[$itemid]);
+    					unset($grade_maxes[$itemid]);
+    					$dropped++;
+    				}
+    			} else {
+    				// we have dropped enough
+    				break;
+    			}
+    		}
+    	} else if (!empty($this_cat->keephigh)) {
+    		arsort($grade_values, SORT_NUMERIC);
+    		$kept = 0;
+    		foreach ($grade_values as $itemid=>$value) {
+    			if ($extraused and $items[$itemid]->aggregationcoef > 0) {
+    				// we keep all extra credits
+    			} else if ($kept < $this_cat->keephigh) {
+    				$kept++;
+    			} else {
+    				unset($grade_values[$itemid]);
+    				unset($grade_maxes[$itemid]);
+    			}
+    		}
+    	}
+    }
 }
-
 
 /*
  * LAE keeps track of the parents of items in case we need to actually compute accurate point totals instead of everything = 100 points (same as percent, duh)

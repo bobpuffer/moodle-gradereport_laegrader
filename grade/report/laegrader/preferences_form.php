@@ -48,7 +48,8 @@ class laegrader_report_preferences_form extends moodleform {
 
         $canviewhidden = has_capability('moodle/grade:viewhidden', $context);
 
-        $checkbox_default = array(GRADE_REPORT_PREFERENCE_DEFAULT => '*default*', 0 => get_string('no'), 1 => get_string('yes'));
+        $checkbox_default = 'checkbox';
+//        $checkbox_default = array(GRADE_REPORT_PREFERENCE_DEFAULT => '*default*', 0 => get_string('no'), 1 => get_string('yes'));
 
         $advanced = array();
 /// form definition with preferences defaults
@@ -116,7 +117,7 @@ class laegrader_report_preferences_form extends moodleform {
             $preferences['prefshow']['showactivityicons'] = $checkbox_default;
             $preferences['prefshow']['showranges'] = $checkbox_default;
             $preferences['prefshow']['showanalysisicon'] = $checkbox_default;
-//            $preferences['prefshow']['showzerofill'] = $checkbox_default; // have to get this fixed first
+            $preferences['prefshow']['showzerofill'] = $checkbox_default; // have to get this fixed first
             
             if ($canviewhidden) {
                 $preferences['prefrows']['shownumberofgrades'] = $checkbox_default;
