@@ -30,11 +30,9 @@ class block_quickmail extends block_list {
         $config = quickmail::load_config($COURSE->id);
         $permission = has_capability('block/quickmail:cansend', $context);
 
-        $can_send = ($permission or !empty($config['allowstudents']));
-
         $icon_class = array('class' => 'icon');
 
-        if ($can_send) {
+        if ($permission) {
             $cparam = array('courseid' => $COURSE->id);
 
             $send_email_str = quickmail::_s('composenew');
