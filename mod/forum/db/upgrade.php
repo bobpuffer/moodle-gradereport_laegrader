@@ -55,6 +55,14 @@ function xmldb_forum_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2007101511, 'forum');
     }
 
+    /// CLAMP-449: reset version if set too high
+    if ($oldversion == 2010062501) {
+        $module = $DB->get_record('modules', array('name' => 'forum'));
+        $module->version = 2007101511;
+        $DB->update_record('modules', $module);
+        $oldversion = $module->version;
+    }
+
     if ($oldversion < 2008072800) {
     /// Define field completiondiscussions to be added to forum
         $table = new xmldb_table('forum');
