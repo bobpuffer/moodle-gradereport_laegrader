@@ -14,32 +14,34 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>..
 
-require_once($CFG->dirroot.'/mod/scorm/lib.php');
+require_once($CFG->dirroot.'/mod/ouwiki/lib.php');
 
-class report_editdates_mod_scorm_date_extractor
-        extends report_editdates_mod_date_extractor {
+class report_editdates_mod_ouwiki_date_extractor
+extends report_editdates_mod_date_extractor {
 
     public function __construct($course) {
-        parent::__construct($course, 'scorm');
+        parent::__construct($course, 'ouwiki');
         parent::load_data();
     }
 
     public function get_settings(cm_info $cm) {
         $mod = $this->mods[$cm->instance];
-        return array('timeopen' => new report_editdates_date_setting(
-                                        get_string("scormopen", "scorm"),
-                                        $mod->timeopen, self::DATETIME, true, 5),
-                     'timeclose' => new report_editdates_date_setting(
-                                        get_string("scormclose", "scorm"),
-                                        $mod->timeclose, self::DATETIME, true, 5)
+
+        return array('editbegin' => new report_editdates_date_setting(
+                                        get_string('editbegin', 'ouwiki'),
+                                        $mod->editbegin, self::DATETIME, true, 5),
+                     'editend' => new report_editdates_date_setting(
+                                        get_string('editend', 'ouwiki'),
+                                        $mod->editend, self::DATETIME, true, 5)
         );
+
     }
 
     public function validate_dates(cm_info $cm, array $dates) {
         $errors = array();
-        if ($dates['timeopen'] != 0 && $dates['timeclose'] != 0
-                && $dates['timeclose'] < $dates['timeopen']) {
-            $errors['timeclose'] = get_string('timeclose', 'report_editdates');
+        if ($dates['editbegin'] != 0 && $dates['editend'] != 0
+                && $dates['editend'] < $dates['editbegin']) {
+            $errors['editend'] = get_string('editend', 'report_editdates');
         }
         return $errors;
     }
