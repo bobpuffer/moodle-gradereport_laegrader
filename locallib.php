@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once $CFG->dirroot.'/lib/grade/grade_item.php';
 require_once $CFG->dirroot.'/lib/grade/grade_category.php';
 require_once $CFG->dirroot.'/lib/grade/grade_object.php';
@@ -31,13 +31,13 @@ class grade_tree_local extends grade_tree {
      * @var array $items
      */
     public $levelitems;
-    
+
     /**
      * LAE structure used to get the damn category names into the category-item object
      * @var array $items
      */
     public $catitems;
-    
+
     /**
      * Constructor, retrieves and stores a hierarchical array of all grade_category and grade_item
      * objects for the given courseid. Full objects are instantiated. Ordering sequence is fixed if needed.
@@ -75,7 +75,7 @@ class grade_tree_local extends grade_tree {
         if ($category_grade_last) {
             grade_tree_local::category_grade_last($this->top_element);
         }
-		
+
         // key to LAE grader, no levels
         grade_tree_local::fill_levels($this->levelitems, $this->top_element, 0);
 
@@ -138,7 +138,7 @@ class grade_tree_local extends grade_tree {
 	    if ($titlelength) {
 	        $header = wordwrap($header, $titlelength, '<br />');
         }
-        
+
         if ($icon) {
             $header = $this->get_element_icon($element, $spacerifnone) . '<br />' . $header;
         }
@@ -273,7 +273,7 @@ class grade_tree_local extends grade_tree {
 		$zerofillicontemp = $matches[0] . '#">' . $actiontext . '</a>';
         return $zerofillicontemp;
     }
-    
+
     function limit_item($this_cat,$items,&$grade_values,&$grade_maxes) {
     	$extraused = $this_cat->is_extracredit_used();
     	if (!empty($this_cat->droplow)) {
@@ -325,7 +325,7 @@ function fill_parents(&$parents, &$items, $cats, $element, $idnumber,$accurateto
             default:
                 $childid = substr($child['eid'],1,8);
         }
-        if (!isset($parents[$childid]) && isset($element['type']) && $element['type'] <> 'courseitem') {
+        if (!isset($parents[$childid]) && isset($element['type']) && $element['type'] <> 'courseitem' && isset($idnumber)) {
             $parents[$childid]->id = $idnumber;
             $parents[$childid]->agg = $element['object']->aggregation;
         }
@@ -335,7 +335,7 @@ function fill_parents(&$parents, &$items, $cats, $element, $idnumber,$accurateto
         // accumulate max scores for parent
 //        if ($accuratetotals && $alltotals) {
         if (isset($accuratetotals) && $accuratetotals && isset($alltotals) && $alltotals && ((isset($items[$childid]->aggregationcoef) && $items[$childid]->aggregationcoef <> 1) || (isset($parents[$childid]->agg) && $parents[$childid]->agg == GRADE_AGGREGATE_WEIGHTED_MEAN))) {
-            $items[$idnumber]->max_earnable += (isset($items[$childid]->max_earnable)) ? $items[$childid]->max_earnable : $items[$childid]->grademax;            
+            $items[$idnumber]->max_earnable += (isset($items[$childid]->max_earnable)) ? $items[$childid]->max_earnable : $items[$childid]->grademax;
         }
     }
     return;

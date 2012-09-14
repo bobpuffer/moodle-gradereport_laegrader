@@ -178,7 +178,7 @@ class grade_report_laegrader extends grade_report {
         $queue = array();
         $this->load_users();
         $this->load_final_grades();
-        
+
         foreach ($data as $varname => $postedvalue) {
 
             // skip, not a grade nor feedback
@@ -189,14 +189,14 @@ class grade_report_laegrader extends grade_report {
             } else {
                 continue;
             }
-        	
+
             $gradeinfo = explode("_", $varname);
             $userid = clean_param($gradeinfo[1], PARAM_INT);
             $itemid = clean_param($gradeinfo[2], PARAM_INT);
 
             // Was change requested?
             $oldvalue = $data->{'old'.$varname};
-                        
+
             /// BP: moved this up to speed up the process of eliminating unchanged values
             if ($oldvalue == $postedvalue) { // string comparison
                 continue;
@@ -477,7 +477,7 @@ class grade_report_laegrader extends grade_report {
             foreach ($grades as $graderec) {
                 if (in_array($graderec->userid, $userids) and array_key_exists($graderec->itemid, $this->gtree->get_items())) { // some items may not be present!!
                     $this->grades[$graderec->userid][$graderec->itemid] = new grade_grade($graderec, false);
-                    $this->grades[$graderec->userid][$graderec->itemid]->grade_item =& $this->gtree->get_item($graderec->itemid); // db caching
+                    $this->grades[$graderec->userid][$graderec->itemid]->grade_item = $this->gtree->get_item($graderec->itemid); // db caching
                 }
             }
         }
@@ -629,7 +629,7 @@ class grade_report_laegrader extends grade_report {
         
 //        $studentheader->text = $output . $arrows['studentname'];
         $studentheader->text = $arrows['studentname'];
-                
+
         $headerrow->cells[] = $studentheader;
 
         if (has_capability('gradereport/'.$CFG->grade_profilereport.':view', $this->context)) {
@@ -656,7 +656,7 @@ class grade_report_laegrader extends grade_report {
         $rows = $this->get_left_range_row($rows, $colspan);
         $rows = $this->get_left_avg_row($rows, $colspan, true);
         $rows = $this->get_left_avg_row($rows, $colspan);
-        
+
         $rowclasses = array('even', 'odd');
 
         $suspendedstring = null;
@@ -745,7 +745,7 @@ class grade_report_laegrader extends grade_report {
 
         $headingrow = new html_table_row();
         $headingrow->attributes['class'] = 'heading_name_row';
-        
+
         // these vars used to color backgrounds of items belonging to particular categories since our header display is flat
         $catcolors = array(' catblue ', ' catorange ');
         $catcolorindex = 0;
@@ -754,7 +754,7 @@ class grade_report_laegrader extends grade_report {
         	$coursecat = substr($this->gtree->top_element['eid'],1,9);
 			if ($element['object']->categoryid === $coursecat || $element['type'] == 'courseitem') {
 				$currentcatcolor = ''; // individual items belonging to the course category and course total are white background
-			} elseif ($element['type'] !== 'categoryitem' && $element['object']->categoryid !== $currentcat) { // alternate background colors for 
+			} elseif ($element['type'] !== 'categoryitem' && $element['object']->categoryid !== $currentcat) { // alternate background colors for
 				$currentcat = $element['object']->categoryid;
 				$catcolorindex++;
 				$currentcatcolor = $catcolors[$catcolorindex % 2];
@@ -795,12 +795,12 @@ class grade_report_laegrader extends grade_report {
 			$headingrow->cells[] = $itemcell;
         }
         $rows[] = $headingrow;
-        
+
         $rows = $this->get_right_icons_row($rows);
         $rows = $this->get_right_range_row($rows);
         $rows = $this->get_right_avg_row($rows, true);
         $rows = $this->get_right_avg_row($rows);
-        
+
         // Preload scale objects for items with a scaleid and initialize tab indices
         $scaleslist = array();
         $tabindices = array();
@@ -916,7 +916,7 @@ class grade_report_laegrader extends grade_report {
                     $hidden = ' hidden ';
                 }
                 $itemcell->attributes['class'] .= $hidden;
-                
+
                 $gradepass = ' gradefail ';
                 if ($grade->is_passed($item)) {
                     $gradepass = ' gradepass ';
@@ -975,7 +975,7 @@ class grade_report_laegrader extends grade_report {
                     	// We always want to display the correct (first) displaytype when editing
                     	// regardless of grade_report_gradeeditalways
                     	$gradedisplaytype = (integer) substr( (string) $item->get_displaytype(),0,1);
-                    	 
+
                     	// if we have an accumulated total points that's not accurately reflected in the db, then we want to display the ACCURATE number
                         // we only need to take the extra calculation into account if points display since percent and letter are accurate by their nature
                         // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no earned_total value
@@ -1036,7 +1036,7 @@ class grade_report_laegrader extends grade_report {
                         // We always want to display the correct (first) displaytype when editing
                     	// regardless of grade_report_gradeeditalways
                     	$gradedisplaytype = (integer) substr( (string) $item->get_displaytype(),0,1);
-                    	 
+
                     	// if we have an accumulated total points that's not accurately reflected in the db, then we want to display the ACCURATE number
                         // we only need to take the extra calculation into account if points display since percent and letter are accurate by their nature
                         // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no earned_total value
@@ -1106,7 +1106,7 @@ class grade_report_laegrader extends grade_report {
         $rightrows = $this->get_right_rows();
 
         $html = '';
-        
+
         $fulltable = new html_table();
         $fulltable->attributes['class'] = 'laegradestable';
         $fulltable->id = 'lae-user-grades';
@@ -1292,7 +1292,7 @@ class grade_report_laegrader extends grade_report {
 //                	$this->gtree->items[$this->gtree->parents[$itemid]->id]->cat_item[$itemid] = $gradeval;
                 	$this->gtree->items[$this->gtree->parents[$itemid]->id]->cat_max[$itemid] = $item->grademax;
                 }
-                
+
                 $hidden = '';
                 if ($item->is_hidden()) {
                     $hidden = ' hidden ';
@@ -1514,7 +1514,7 @@ class grade_report_laegrader extends grade_report {
         $showhideicon        = '';
         $lockunlockicon      = '';
         $zerofillicon      = '';
-        
+
         if (has_capability('moodle/grade:manage', $this->context)) {
             if ($this->get_pref('showcalculations')) {
                 $editcalculationicon = $this->gtree->get_calculation_icon($element, $this->gpr);
@@ -1577,7 +1577,7 @@ class grade_report_laegrader extends grade_report {
         return $icon;
     }
 
-    
+
     /**
      * Given the name of a user preference (without grade_report_ prefix), locally saves then returns
      * the value of that preference. If the preference has already been fetched before,
@@ -1592,9 +1592,9 @@ class grade_report_laegrader extends grade_report {
     	global $CFG;
     	$fullprefname = 'grade_report_' . $pref;
     	$shortprefname = 'grade_' . $pref;
-    
+
     	$retval = null;
-    
+
     	if (!isset($this) OR get_class($this) != 'grade_report_laegrader') {
     		if (!empty($objectid)) {
     			$retval = get_user_preferences($fullprefname . $objectid, grade_report::get_pref($pref));
@@ -1607,7 +1607,7 @@ class grade_report_laegrader extends grade_report {
     		}
     	} else {
     		if (empty($this->prefs[$pref.$objectid])) {
-    
+
     			if (!empty($objectid)) {
     				$retval = get_user_preferences($fullprefname . $objectid);
     				if (empty($retval)) {
@@ -1623,10 +1623,10 @@ class grade_report_laegrader extends grade_report {
     			$retval = $this->prefs[$pref.$objectid];
     		}
     	}
-    
+
     	return $retval;
     }
-    
+
     /**
      * Processes a single action against a category, grade_item or grade.
      * @param string $target eid ({type}{id}, e.g. c4 for category4)
@@ -1753,7 +1753,7 @@ class grade_report_laegrader extends grade_report {
 
         $strgrades = get_string('grades');
         $accuratetotals = get_user_preferences('accuratepointtotals') == null ? 1 : 0;
-        
+
     /// Calculate file name
         $shortname = format_string($this->course->shortname, true, array('context' => get_context_instance(CONTEXT_COURSE, $this->course->id)));
         $downloadfilename = clean_filename("$shortname $strgrades.xls");
@@ -1770,9 +1770,9 @@ class grade_report_laegrader extends grade_report {
         $myxls->write_string(0,2,get_string("idnumber"));
         $myxls->write_string(0,3,get_string("email"));
         $pos=4;
-        
-        
-/*        
+
+
+/*
         foreach ($this->columns as $grade_item) {
             $myxls->write_string(0, $pos++, $this->format_column_name($grade_item));
 
@@ -1804,7 +1804,7 @@ class grade_report_laegrader extends grade_report {
                 $myxls->write_string(0, $pos++, $grade_item->itemname);
             }
         }
-/*        
+/*
         // write out range row
         $myxls->write_string(1, 2, 'Maximum grade->');
         $pos=4;
@@ -1835,8 +1835,8 @@ class grade_report_laegrader extends grade_report {
             }
         }
 
-*/        
-/*        
+*/
+/*
     /// Print all the lines of data.
         $i = 2;
 //        $geub = new grade_export_update_buffer();
@@ -1915,7 +1915,7 @@ class grade_report_laegrader extends grade_report {
 					$this->grades[$userid][$this->gtree->parents[$grade->itemid]->id]->cat_max[$grade->itemid] = $grade->rawgrademax;
 		   		}
                 $gradestr = grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype, null);
-		   		
+
 /*
 		   		if ($gradedisplaytype == GRADE_DISPLAY_TYPE_REAL && $this->accuratetotals) {
                     $gradestr = grade_format_gradevalue($grade->earned_total, $item, true, $gradedisplaytype, null);
@@ -1936,15 +1936,15 @@ class grade_report_laegrader extends grade_report {
                 if ($this->export_feedback) {
                     $myxls->write_string($i, $j++, $this->format_feedback($userdata->feedbacks[$itemid]));
                 }
- * 
+ *
  */
 //            }
 //        }
-        
-        
-        
-/*        
-        
+
+
+
+/*
+
         $gui->close();
         $geub->close();
 
@@ -1953,7 +1953,7 @@ class grade_report_laegrader extends grade_report {
 
         exit;
     }
-*/    
+*/
     function quick_dumpOLD() {
         global $CFG;
         require_once($CFG->dirroot.'/lib/excellib.class.php');
@@ -1979,7 +1979,7 @@ class grade_report_laegrader extends grade_report {
         $myxls->write_string(0,2,get_string("idnumber"));
         $myxls->write_string(0,3,get_string("email"));
         $pos=4;
-        
+
         // write out column headers
         foreach ($this->gtree->items as $grade_item) {
 //            $myxls->write_string(0, $pos++, $this->format_column_name($grade_item));
@@ -2076,7 +2076,7 @@ class grade_report_laegrader extends grade_report {
 					$this->grades[$userid][$this->gtree->parents[$grade->itemid]->id]->cat_max[$grade->itemid] = $grade->rawgrademax;
 		   		}
                 $gradestr = grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype, null);
-		   		
+
 /*
 		   		if ($gradedisplaytype == GRADE_DISPLAY_TYPE_REAL && $this->accuratetotals) {
                     $gradestr = grade_format_gradevalue($grade->earned_total, $item, true, $gradedisplaytype, null);
@@ -2097,7 +2097,7 @@ class grade_report_laegrader extends grade_report {
                 if ($this->export_feedback) {
                     $myxls->write_string($i, $j++, $this->format_feedback($userdata->feedbacks[$itemid]));
                 }
- * 
+ *
  */
             }
         }
@@ -2108,7 +2108,7 @@ class grade_report_laegrader extends grade_report {
         $workbook->close();
 
         exit;
-    }    
+    }
 }
 
 function grade_report_laegrader_settings_definition(&$mform) {
