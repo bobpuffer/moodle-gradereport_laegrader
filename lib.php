@@ -778,7 +778,7 @@ class grade_report_laegrader extends grade_report {
 			}
 
 			// LAE this line calls a local instance of get_element_header with the name of the grade item or category
-			$headerlink = $this->gtree->get_element_header($element, true, $this->get_pref('showactivityicons'), false, 25,$this->gtree->items[$key]->itemname);
+			$headerlink = $this->gtree->get_element_header($element, true, $this->get_pref('showactivityicons'), false);
 
 			$itemcell = new html_table_cell();
 			$itemcell->attributes['class'] = $type . ' ' . $catlevel . 'highlightable' . $currentcatcolor;
@@ -991,7 +991,7 @@ class grade_report_laegrader extends grade_report {
                         }
                       	$value = grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype, null);
 						$item->grademax = $tempmax;
-                      	if (! $grade->is_hidden() && $gradeval <> null && $this->accuratetotals) {
+                      	if (! $grade->is_hidden() && $gradeval <> null && $this->accuratetotals && isset($this->gtree->parents[$grade->itemid]->id)) {
                 			$this->grades[$userid][$this->gtree->parents[$grade->itemid]->id]->cat_item[$grade->itemid] = $gradeval;
 							$this->grades[$userid][$this->gtree->parents[$grade->itemid]->id]->cat_max[$grade->itemid] = $grade->rawgrademax;
 				   		}
@@ -1051,8 +1051,8 @@ class grade_report_laegrader extends grade_report {
 			       			$item->grademax = array_sum($grade_maxes);
                         }
 //                      	$value = grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype, null);
-						$item->grademax = $tempmax;
-                      	if (! $grade->is_hidden() && $gradeval <> null && $this->accuratetotals) {
+						$item->grademax = $tempmax;  // TODO: check on this clause to make sure it does what we want it to do
+                      	if (! $grade->is_hidden() && $gradeval !== null && $this->accuratetotals && isset($this->gtree->parents[$grade->itemid]->id)) {
                 			$this->grades[$userid][$this->gtree->parents[$grade->itemid]->id]->cat_item[$grade->itemid] = $gradeval;
 							$this->grades[$userid][$this->gtree->parents[$grade->itemid]->id]->cat_max[$grade->itemid] = $grade->rawgrademax;
 				   		}

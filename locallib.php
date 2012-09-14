@@ -123,8 +123,9 @@ class grade_tree_local extends grade_tree {
      *
      * @return string header
      */
-    function get_element_header(&$element, $withlink=false, $icon=true, $spacerifnone=false, $titlelength = null, $catname) {
+    function get_element_header(&$element, $withlink=false, $icon=true, $spacerifnone=false) {
         $header = '';
+        $titlelength = 25;
 
 		switch ($element['type']) {
 			case 'courseitem':
@@ -133,11 +134,9 @@ class grade_tree_local extends grade_tree {
 			case 'categoryitem':
 				$header .= 'CATEGORY TOTAL<br />';
 			default:
- 		       	$header .= $catname;
+ 		       	$header .= $element['object']->itemname;
 		}
-	    if ($titlelength) {
-	        $header = wordwrap($header, $titlelength, '<br />');
-        }
+ 		$header = wordwrap($header, $titlelength, '<br />');
 
         if ($icon) {
             $header = $this->get_element_icon($element, $spacerifnone) . '<br />' . $header;
