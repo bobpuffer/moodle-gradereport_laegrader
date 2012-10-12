@@ -642,7 +642,9 @@ class assignment_base {
                     if ($updatedb){
                         // MDL-9085 BOBPUFFER 2010-10-07 HACK TO PROCESS TEXT INPUT FIELDS
 //                        if ($newsubmission) {
-                    	if (trim($submission->grade == '-') && $submission->submissioncomment === null) {
+						// CLAMP-460 kwiliarty 2012-10-12 adjustment to prevent quickgrade saves from converting empty grades to zeros
+                    	// if (trim($submission->grade == '-') && $submission->submissioncomment === null) {
+                    	if (trim($submission->grade == '-') && $submission->submissioncomment == null) { // end of hack CLAMP-460
                     		continue;
                     	} else if ((is_numeric($submission->grade) && !(floatval($submission->grade) > floatval($this->assignment->grade))) 
                     			|| trim($submission->grade) == "" || $this->assignment->grade < 0 || $submission->submissioncomment !== null)  {
