@@ -189,6 +189,15 @@ class restore_gradebook_structure_step extends restore_structure_step {
                 $data->id = $newitemid = $existinggradeitem->id;
                 $DB->update_record('grade_items', $data);
             }
+        } else if ($data->itemtype == 'manual') {
+            // Manual items aren't assigned to a cm, so don't go duplicating them in the target if one exists.
+            $gi = array(
+                'itemtype' => $data->itemtype,
+                'courseid' => $data->courseid,
+                'itemname' => $data->itemname,
+                'categoryid' => $data->categoryid,
+            );
+            $newitemid = $DB->get_field('grade_items', 'id', $gi);
         }
 
         if (empty($newitemid)) {
@@ -286,8 +295,13 @@ class restore_gradebook_structure_step extends restore_structure_step {
 
         $data->courseid = $this->get_courseid();
 
-        $newitemid = $DB->insert_record('grade_settings', $data);
-        //$this->set_mapping('grade_setting', $oldid, $newitemid);
+        if (!$DB->record_exists('grade_settings', array('courseid' => $data->courseid, 'name' => $data->name))) {
+            $newitemid = $DB->insert_record('grade_settings', $data);
+        } else {
+            $newitemid = $data->id;
+        }
+
+        $this->set_mapping('grade_setting', $oldid, $newitemid);
     }
 
     /**
@@ -2838,9 +2852,6 @@ class restore_create_categories_and_questions extends restore_structure_step {
             $data->penalty = 1;
         }
 
-        $data->timecreated  = $this->apply_date_offset($data->timecreated);
-        $data->timemodified = $this->apply_date_offset($data->timemodified);
-
         $userid = $this->get_mappingid('user', $data->createdby);
         $data->createdby = $userid ? $userid : $this->task->get_userid();
 
@@ -2894,6 +2905,22 @@ class restore_create_categories_and_questions extends restore_structure_step {
                        AND ' . $DB->sql_compare_text('hint', 255) . ' = ' . $DB->sql_compare_text('?', 255);
             $params = array($newquestionid, $data->hint);
             $newitemid = $DB->get_field_sql($sql, $params);
+
+            // Not able to find the hint, let's try cleaning the hint text
+            // of all the question's hints in DB as slower fallback. MDL-33863.
+            if (!$newitemid) {
+                $potentialhints = $DB->get_records('question_hints',
+                        array('questionid' => $newquestionid), '', 'id, hint');
+                foreach ($potentialhints as $potentialhint) {
+                    // Clean in the same way than {@link xml_writer::xml_safe_utf8()}.
+                    $cleanhint = preg_replace('/[\x-\x8\xb-\xc\xe-\x1f\x7f]/is','', $potentialhint->hint); // Clean CTRL chars.
+                    $cleanhint = preg_replace("/\r\n|\r/", "\n", $cleanhint); // Normalize line ending.
+                    if ($cleanhint === $data->hint) {
+                        $newitemid = $data->id;
+                    }
+                }
+            }
+
             // If we haven't found the newitemid, something has gone really wrong, question in DB
             // is missing hints, exception
             if (!$newitemid) {

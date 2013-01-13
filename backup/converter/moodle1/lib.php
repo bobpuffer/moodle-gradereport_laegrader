@@ -640,7 +640,10 @@ class moodle1_converter extends base_converter {
             return $files;
         }
         foreach ($matches[2] as $match) {
-            $files[] = str_replace(array('$@FILEPHP@$', '$@SLASH@$', '$@FORCEDOWNLOAD@$'), array('', '/', ''), $match);
+            $file = str_replace(array('$@FILEPHP@$', '$@SLASH@$', '$@FORCEDOWNLOAD@$'), array('', '/', ''), $match);
+            if ($file === clean_param($file, PARAM_PATH)) {
+                $files[] = rawurldecode($file);
+            }
         }
 
         return array_unique($files);
@@ -657,9 +660,16 @@ class moodle1_converter extends base_converter {
     public static function rewrite_filephp_usage($text, array $files) {
 
         foreach ($files as $file) {
+            // Expect URLs properly encoded by default.
+            $parts   = explode('/', $file);
+            $encoded = implode('/', array_map('rawurlencode', $parts));
+            $fileref = '$@FILEPHP@$'.str_replace('/', '$@SLASH@$', $encoded);
+            $text    = str_replace($fileref.'$@FORCEDOWNLOAD@$', '@@PLUGINFILE@@'.$encoded.'?forcedownload=1', $text);
+            $text    = str_replace($fileref, '@@PLUGINFILE@@'.$encoded, $text);
+            // Add support for URLs without any encoding.
             $fileref = '$@FILEPHP@$'.str_replace('/', '$@SLASH@$', $file);
-            $text    = str_replace($fileref.'$@FORCEDOWNLOAD@$', '@@PLUGINFILE@@'.$file.'?forcedownload=1', $text);
-            $text    = str_replace($fileref, '@@PLUGINFILE@@'.$file, $text);
+            $text    = str_replace($fileref.'$@FORCEDOWNLOAD@$', '@@PLUGINFILE@@'.$encoded.'?forcedownload=1', $text);
+            $text    = str_replace($fileref, '@@PLUGINFILE@@'.$encoded, $text);
         }
 
         return $text;
@@ -1204,6 +1214,10 @@ class moodle1_file_manager implements loggable {
     public function migrate_file($sourcepath, $filepath = '/', $filename = null, $sortorder = 0, $timecreated = null, $timemodified = null) {
 
         $sourcefullpath = $this->basepath.'/'.$sourcepath;
+
+        if ($sourcefullpath !== clean_param($sourcefullpath, PARAM_PATH)) {
+            throw new moodle1_convert_exception('file_invalid_path', $sourcefullpath);
+        }
 
         if (!is_readable($sourcefullpath)) {
             throw new moodle1_convert_exception('file_not_readable', $sourcefullpath);

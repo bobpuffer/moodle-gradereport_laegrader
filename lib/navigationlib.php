@@ -3138,9 +3138,9 @@ class settings_navigation extends navigation_node {
                         continue;
                     }
                     if ($type->modclass == MOD_CLASS_RESOURCE) {
-                        $resources[html_entity_decode($type->type)] = $type->typestr;
+                        $resources[html_entity_decode($type->type, ENT_QUOTES, 'UTF-8')] = $type->typestr;
                     } else {
-                        $activities[html_entity_decode($type->type)] = $type->typestr;
+                        $activities[html_entity_decode($type->type, ENT_QUOTES, 'UTF-8')] = $type->typestr;
                     }
                 }
             } else {
@@ -3785,7 +3785,7 @@ class settings_navigation extends navigation_node {
 
         // Messaging
         if (($currentuser && has_capability('moodle/user:editownmessageprofile', $systemcontext)) || (!isguestuser($user) && has_capability('moodle/user:editmessageprofile', $usercontext) && !is_primary_admin($user->id))) {
-            $url = new moodle_url('/message/edit.php', array('id'=>$user->id, 'course'=>$course->id));
+            $url = new moodle_url('/message/edit.php', array('id'=>$user->id));
             $usersetting->add(get_string('editmymessage', 'message'), $url, self::TYPE_SETTING);
         }
 
@@ -4070,7 +4070,7 @@ class navigation_json {
         }
 
         if ($child->forcetitle || $child->title !== $child->text) {
-            $attributes['title'] = htmlentities($child->title);
+            $attributes['title'] = htmlentities($child->title, ENT_QUOTES, 'UTF-8');
         }
         if (array_key_exists($child->key.':'.$child->type, $this->expandable)) {
             $attributes['expandable'] = $child->key;
