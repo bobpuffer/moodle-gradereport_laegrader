@@ -30,7 +30,4 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['language'] = 'שפת ממשק';
-$string['next'] = 'הלאה';
-$string['previous'] = 'קודם';
-$string['reload'] = 'טען מחדש';
+$string['missingrequiredfield'] = 'بعضی از فیلدهای ضروری خالی است';

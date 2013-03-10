@@ -76,9 +76,10 @@ if (!$course = $DB->get_record('course', array('id'=>$courseid))) {
 $PAGE->set_course($course);
 
 // init repository plugin
-$sql = 'SELECT i.name, i.typeid, r.type FROM {repository} r, {repository_instances} i '.
+$sql = 'SELECT i.name, i.typeid, i.contextid, r.type FROM {repository} r, {repository_instances} i '.
        'WHERE i.id=? AND i.typeid=r.id';
 if ($repository = $DB->get_record_sql($sql, array($repo_id))) {
+    repository::check_capability($contextid, $repository);
     $type = $repository->type;
     if (file_exists($CFG->dirroot.'/repository/'.$type.'/lib.php')) {
         require_once($CFG->dirroot.'/repository/'.$type.'/lib.php');
@@ -94,6 +95,10 @@ if ($repository = $DB->get_record_sql($sql, array($repo_id))) {
 }
 
 // Make sure maxbytes passed is within site filesize limits.
+$coursemaxbytes = 0;
+if (!empty($course)) {
+   $coursemaxbytes = $course->maxbytes;
+}
 $maxbytes = get_max_upload_file_size($CFG->maxbytes, $coursemaxbytes, $maxbytes);
 
 $params = array('ctx_id' => $contextid, 'itemid' => $itemid, 'env' => $env, 'course'=>$courseid, 'maxbytes'=>$maxbytes, 'maxfiles'=>$maxfiles, 'subdirs'=>$subdirs, 'sesskey'=>sesskey());
@@ -136,12 +141,12 @@ case 'search':
         echo '<table>';
         foreach ($search_result['list'] as $item) {
             echo '<tr>';
-            echo '<td><img src="'.$item['thumbnail'].'" />';
+            echo '<td><img src="'.$item['thumbnail'].'" alt="" />';
             echo '</td><td>';
             if (!empty($item['url'])) {
-                echo html_writer::link($item['url'], $item['title'], array('target'=>'_blank'));
+                echo html_writer::link($item['url'], s($item['title']), array('target'=>'_blank'));
             } else {
-                echo $item['title'];
+                echo s($item['title']);
             }
             echo '</td>';
             echo '<td>';
@@ -198,7 +203,7 @@ case 'sign':
                         'draftpath'=>$draftpath,
                         'savepath'=>$savepath
                         ));
-                    echo '<strong>' . html_writer::link($pathurl, $p['name']) . '</strong>';
+                    echo '<strong>' . html_writer::link($pathurl, s($p['name'])) . '</strong>';
                     echo '<span> / </span>';
                 }
             }
@@ -227,9 +232,9 @@ case 'sign':
                 echo '<td><img src="'.$item['thumbnail'].'" />';
                 echo '</td><td>';
                 if (!empty($item['url'])) {
-                    echo html_writer::link($item['url'], $item['title'], array('target'=>'_blank'));
+                    echo html_writer::link($item['url'], s($item['title']), array('target'=>'_blank'));
                 } else {
-                    echo $item['title'];
+                    echo s($item['title']);
                 }
                 echo '</td>';
                 echo '<td>';
@@ -338,8 +343,8 @@ case 'plugins':
         $aurl->params(array('savepath'=>$savepath, 'action' => 'list', 'repo_id' => $info->id, 'draftpath'=>$draftpath));
 
         echo '<li>';
-        echo '<img src="'.$info->icon.'" alt="'.$info->name.'" width="16" height="16" /> ';
-        echo html_writer::link($aurl, $info->name);
+        echo html_writer::empty_tag('img', array('src'=>$info->icon, 'alt'=>$info->name, 'class'=>'icon icon-pre'));
+        echo html_writer::link($aurl, s($info->name));
         echo '</li>';
     }
     echo '</ul>';

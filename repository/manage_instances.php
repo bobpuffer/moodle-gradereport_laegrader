@@ -106,6 +106,14 @@ if (!empty($new)){
     $type = repository::get_type_by_id($instance->options['typeid']);
 }
 
+// The context passed MUST match the context of the repository. And as both have to be
+// similar, this also ensures that the context is either a user one, or a course one.
+if (!empty($instance)) {
+    if ($instance->instance->contextid != $context->id) {
+        print_error('invalidcontext');
+    }
+}
+
 if (isset($type)) {
     if (!$type->get_visible()) {
         print_error('typenotvisible', 'repository', $baseurl);
