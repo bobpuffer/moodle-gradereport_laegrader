@@ -1526,37 +1526,13 @@
 
         $status = true;
 
-        // see if ALL grade items of type mod of this course are being backed up
-        // if not, we do not need to backup grade category and associated grade items/grades
-        $backupall = true;
-
-        if ($grade_items = get_records_sql("SELECT *
-                                              FROM {$CFG->prefix}grade_items
-                                             WHERE courseid = $preferences->backup_course
-                                                   AND itemtype = 'mod'")) {
-            foreach ($grade_items as $grade_item) {
-                // get module information
-                // if some activities not selected, we do not backup categories at all
-                if (!backup_mod_selected($preferences,$grade_item->itemmodule,$grade_item->iteminstance)) {
-                    $backupall = false;
-                    break;
-                }
-            }
-            unset($grade_items); //free memory
-        }
-
         //Gradebook header
         fwrite ($bf,start_tag("GRADEBOOK",2,true));
 
         $status = backup_gradebook_outcomes_info($bf, $preferences);
         $status = backup_gradebook_grade_letters_info($bf,$preferences);
-
-        // Now backup grade_item (inside grade_category)
-        if ($backupall) {
-            $status = backup_gradebook_category_info($bf,$preferences);
-        }
-
-        $status = backup_gradebook_item_info($bf,$preferences, $backupall);
+        $status = backup_gradebook_category_info($bf,$preferences);
+        $status = backup_gradebook_item_info($bf,$preferences);
 
         // backup gradebook histories (only if grade history is enabled and selected)
         if (empty($CFG->disablegradehistory) && $preferences->backup_gradebook_history) {
@@ -1618,7 +1594,7 @@
     }
 
     //Backup gradebook_item (called from backup_gradebook_info
-    function backup_gradebook_item_info($bf, $preferences, $backupall) {
+    function backup_gradebook_item_info($bf, $preferences) {
         global $CFG;
 
         $status = true;
@@ -1641,13 +1617,6 @@
                 if ($grade_item->itemtype == 'mod') {
                     //MDL-12463 - exclude grade_items of instances not chosen for backup
                     if (empty($preferences->mods[$grade_item->itemmodule]->instances[$grade_item->iteminstance]->backup)) {
-                        continue;
-                    }
-
-                } else if ($grade_item->itemtype == 'category') {
-                    // if not all grade items are being backed up
-                    // we ignore this type of grade_item and grades associated
-                    if (!$backupall) {
                         continue;
                     }
                 }
