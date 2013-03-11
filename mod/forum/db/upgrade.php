@@ -51,7 +51,7 @@ function xmldb_forum_upgrade($oldversion) {
     // Put any upgrade step following this
 
     /// Add anonymous forums support
-    if ($oldversion < 2012061703) {
+    if ($oldversion < 2012061702) {
         require_once($CFG->dirroot . '/mod/forum/lib.php');
         
         // Migrate the old config setting, if present
@@ -79,7 +79,7 @@ function xmldb_forum_upgrade($oldversion) {
 
     // Forcefully assign mod/forum:allowforcesubscribe to frontpage role, as we missed that when
     // capability was introduced.
-    if ($oldversion < 2012061702) {
+    if ($oldversion < 2012061703) {
         // If capability mod/forum:allowforcesubscribe is defined then set it for frontpage role.
         if (get_capability_info('mod/forum:allowforcesubscribe')) {
             assign_legacy_capabilities('mod/forum:allowforcesubscribe', array('frontpage' => CAP_ALLOW));
