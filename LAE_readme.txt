@@ -1,6 +1,6 @@
-===Moodle 1.9.19+Liberal Arts Edition v1.7.4 Release Notes===
+===Moodle 1.9.19+Liberal Arts Edition v1.7.5 Release Notes===
 
-Welcome to the Moodle 1.9.19+Liberal Arts Edition v1.7.4. The goal of LAE is to provide a coherent package for modules, patches, and code developed (or improved) by the Collaborative Liberal Arts Moodle Project. 
+Welcome to the Moodle 1.9.19+Liberal Arts Edition v1.7.5. The goal of LAE is to provide a coherent package for modules, patches, and code developed (or improved) by the Collaborative Liberal Arts Moodle Project. 
 
 This package consists of the code that the developers and instructional technologists at CLAMP schools have deemed essential to their operation of Moodle. A number of other recommend add-ons for Moodle are available through CLAMP web site (http://www.clamp-it.org). These recommended add-ons,  however,  have certain caveats that you should be aware of, and it's imperative that you read their respective lae_readme.txt files before installing them.
 
@@ -17,7 +17,7 @@ http://redmine.clamp-it.org/projects/development
 We recommend using Firefox with Moodle: Liberal Arts Edition. It has excellent support for web standards and works best with the LAE's built-in TinyMCE text editor. Other browsers work, but we have seen occasional quicks in how they interact with TinyMCE.
 
 ===CONTENTS===
-Moodle 1.9.19+LAEv1.7.4 consists of Moodle 1.9.19+ (20130125) as well as a number of CLAMP-developed features and bug fixes. 
+Moodle 1.9.19+LAEv1.7.5 consists of Moodle 1.9.19+ (20130513) as well as a number of CLAMP-developed features and bug fixes. 
 
 The following features are included:
 
