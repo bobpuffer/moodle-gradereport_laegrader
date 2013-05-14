@@ -30,5 +30,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['parentlanguage'] = 'he';
-$string['thislanguage'] = 'עברית בתי־ספר';
+$string['clitypevalue'] = 'tipo reikšmė';
+$string['clitypevaluedefault'] = 'tipo reikšmė, paspauskite „Enter“, jei norite naudoti numatytąją reikšmę ({$a})';
+$string['cliunknowoption'] = 'Neatpažintos parinktys: {$a} naudokite --žinyno parinktį.';
+$string['environmentrequireinstall'] = 'turi būti įdiegta ir įjungta';
+$string['environmentrequireversion'] = 'būtina naudoti versiją {$a->needed}, o jūs naudojate {$a->current}';
