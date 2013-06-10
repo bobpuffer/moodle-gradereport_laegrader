@@ -50,6 +50,10 @@ if (!defined('FORUM_CRON_USER_CACHE')) {
     define('FORUM_CRON_USER_CACHE', 5000);
 }
 
+define('FORUM_ANONYMOUS_NEVER', 0);
+define('FORUM_ANONYMOUS_ALWAYS', 1);
+define('FORUM_ANONYMOUS_ALLOWED', 2);
+
 /// STANDARD FUNCTIONS ///////////////////////////////////////////////////////////
 
 /**
@@ -3186,6 +3190,11 @@ function forum_print_post($post, $discussion, $forum, &$cm, $course, $ownpost=fa
     // String cache
     static $str;
 
+    // If anonymous is the poster check who the actual owner is
+    if(!empty($post->hiddenuserid) && !empty($USER)) {
+        $ownpost = ($USER->id == $post->hiddenuserid);
+    }
+
     $modcontext = context_module::instance($cm->id);
 
     $post->course = $course->id;
@@ -4324,6 +4333,10 @@ function forum_add_new_post($post, $mform, &$message) {
     $post->userid     = $USER->id;
     $post->attachment = "";
 
+    if($post->anonymous || ($forum->anonymous == FORUM_ANONYMOUS_ALWAYS)) {
+        $post = forum_scrub_userid($post);
+    }
+
     $post->id = $DB->insert_record("forum_posts", $post);
     $post->message = file_save_draft_area_files($post->itemid, $context->id, 'mod_forum', 'post', $post->id,
             mod_forum_post_form::editor_options(), $post->message);
@@ -4437,6 +4450,10 @@ function forum_add_discussion($discussion, $mform=null, &$message=null, $userid=
     $post->course        = $forum->course; // speedup
     $post->mailnow       = $discussion->mailnow;
 
+    if($discussion->anonymous || ($forum->anonymous == FORUM_ANONYMOUS_ALWAYS)) {
+        $post = forum_scrub_userid($post);
+    }
+
     $post->id = $DB->insert_record("forum_posts", $post);
 
     // TODO: Fix the calling code so that there always is a $cm when this function is called
@@ -4452,7 +4469,7 @@ function forum_add_discussion($discussion, $mform=null, &$message=null, $userid=
     $discussion->firstpost    = $post->id;
     $discussion->timemodified = $timenow;
     $discussion->usermodified = $post->userid;
-    $discussion->userid       = $userid;
+    $discussion->userid       = $post->userid;
 
     $post->discussion = $DB->insert_record("forum_discussions", $discussion);
 
@@ -8480,4 +8497,15 @@ function forum_get_posts_by_user($user, array $courses, $musthaveaccess = false,
     }
 
     return $return;
+}
+
+/**
+ * Anonymizes the forum userid (if necessary)
+ */
+function forum_scrub_userid($post) {
+    global $CFG;
+
+    $post->hiddenuserid = $post->userid;
+    $post->userid = $CFG->anonymous_userid;
+    return $post;
 }

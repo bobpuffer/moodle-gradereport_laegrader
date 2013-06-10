@@ -118,6 +118,10 @@ class mod_forum_post_form extends moodleform {
             $mform->addElement('checkbox', 'mailnow', get_string('mailnow', 'forum'));
         }
 
+        if ($forum->anonymous == FORUM_ANONYMOUS_ALLOWED && ($post->userid != $CFG->anonymous_userid)) {
+            $mform->addElement('checkbox', 'anonymous', get_string('forum:anonymouspost', 'lae'));
+        }
+
         if (!empty($CFG->forum_enabletimedposts) && !$post->parent && has_capability('mod/forum:viewhiddentimedposts', $coursecontext)) { // hack alert
             $mform->addElement('header', '', get_string('displayperiod', 'forum'));
 
