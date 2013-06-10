@@ -1,10 +1,25 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 $string['auser_firstname'] = 'Anonymous';
 $string['auser_lastname'] = 'User';
 $string['forum:allowanonymous'] = 'Anonymize posts?';
 $string['forum:allowanonymous_help'] = 'If anonymous posts for forums are enabled, users can post messages in forums and discussions without revealing their name to other users. All such posts will appear as by an anonymous user.
 
-The instructor can choose three different modes for this setting. Note that the logs still report user activity so this is not truly anonymous. 
+The instructor can choose three different modes for this setting. Note that the logs still report user activity so this is not truly anonymous.
 
 There are three choices for this setting:
 
@@ -17,4 +32,3 @@ $string['forum:anonyes'] = 'Yes, always';
 $string['forum:anonymouspost'] = 'Post anonymously';
 $string['forum:configenableanonymouspost'] = 'Set to \'yes\' if you want to enable Anonymous Forums.';
 $string['pluginname'] = 'Liberal Arts Edition';
-?>
