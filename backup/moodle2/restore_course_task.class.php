@@ -182,15 +182,6 @@ class restore_course_task extends restore_task {
             $overwrite->set_visibility(backup_setting::HIDDEN);
         }
         $this->add_setting($overwrite);
-        
-        // Define legacy_files to decide if legacy files will be restored.
-        $legacyfiles = new restore_course_legacy_files_setting('legacy_files', base_setting::IS_BOOLEAN, false);
-        $legacyfiles->set_ui(new backup_setting_ui_select($legacyfiles, $legacyfiles->get_name(), array(1=>get_string('yes'), 0=>get_string('no'))));
-        $legacyfiles->get_ui()->set_label(get_string('setting_legacyfiles', 'backup'));
-        if ($this->get_target() == backup::TARGET_NEW_COURSE) {
-            $legacyfiles->set_value(true);
-        }
-        $this->add_setting($legacyfiles);
 
     }
 }

@@ -1467,7 +1467,7 @@ class restore_course_structure_step extends restore_structure_step {
     protected function after_execute() {
         global $DB;
 
-        // Add course related files, without itemid to match.
+        // Add course related files, without itemid to match
         $this->add_related_files('course', 'summary', null);
         $this->add_related_files('course', 'overviewfiles', null);
 
@@ -1497,7 +1497,6 @@ class restore_course_structure_step extends restore_structure_step {
 }
 
 /**
-<<<<<<< HEAD
  * Execution step that will migrate legacy files if present.
  */
 class restore_course_legacy_files_step extends restore_execution_step {
@@ -1506,31 +1505,6 @@ class restore_course_legacy_files_step extends restore_execution_step {
 
         // Do a check for legacy files and skip if there are none.
         $sql = 'SELECT count(*)
-=======
- * Structure step that will migrate legacy files if present.
- */
-class restore_course_legacy_files_step extends restore_structure_step {
-    protected function define_structure() {
-        $course = new restore_path_element('course', '/course');
-
-        return array($course);
-    }
-
-    /**
-     * Processing functions go here.
-     *
-     * @global moodledatabase $DB
-     * @param stdClass $data
-     */
-    public function process_course($data) {
-        global $CFG, $DB;
-
-        $data = new object();
-        $data->id = $this->get_courseid();
-
-        // Check if we have legacy files, and enable them if we do.
-        $sql = 'SELECT count(*) AS newitemid
->>>>>>> MDL-32598 restore: Seperate the restore of legacy files from course config
                   FROM {backup_files_temp}
                  WHERE backupid = ?
                    AND contextid = ?
@@ -1539,33 +1513,12 @@ class restore_course_legacy_files_step extends restore_structure_step {
         $params = array($this->get_restoreid(), $this->task->get_old_contextid(), 'course', 'legacy');
 
         if ($DB->count_records_sql($sql, $params)) {
-<<<<<<< HEAD
             $DB->set_field('course', 'legacyfiles', 2, array('id' => $this->get_courseid()));
             restore_dbops::send_files_to_pool($this->get_basepath(), $this->get_restoreid(), 'course',
                 'legacy', $this->task->get_old_contextid(), $this->task->get_userid());
         }
     }
 }
-=======
-            // Enable the legacy files.
-            $data->legacyfiles = 2;
-
-            // Course record ready, update it.
-            $DB->update_record('course', $data);
-        }
-
-    }
-
-    protected function after_execute() {
-        global $DB;
-
-        // Add course legacy files, without itemid to match.
-        $this->add_related_files('course', 'legacy', null);
-    }
-
-}
-
->>>>>>> MDL-32598 restore: Seperate the restore of legacy files from course config
 
 /*
  * Structure step that will read the roles.xml file (at course/activity/block levels)
