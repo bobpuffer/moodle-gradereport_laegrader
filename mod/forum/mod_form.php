@@ -57,11 +57,11 @@ class mod_forum_mod_form extends moodleform_mod {
 
         if(isset($CFG->forum_enableanonymousposts) && $CFG->forum_enableanonymousposts) {
             $options = array();
-            $options[FORUM_ANONYMOUS_NEVER] = get_string('forum:anonno', 'lae');
-            $options[FORUM_ANONYMOUS_ALWAYS] = get_string('forum:anonyes', 'lae');
-            $options[FORUM_ANONYMOUS_ALLOWED] = get_string('forum:anonoptional', 'lae');
-            $mform->addElement('select','anonymous',get_string('forum:allowanonymous', 'lae'), $options);
-            $mform->addHelpButton('anonymous', 'forum:allowanonymous', 'lae');
+            $options[FORUM_ANONYMOUS_NEVER] = get_string('forum:anonno', 'local_lae');
+            $options[FORUM_ANONYMOUS_ALWAYS] = get_string('forum:anonyes', 'local_lae');
+            $options[FORUM_ANONYMOUS_ALLOWED] = get_string('forum:anonoptional', 'local_lae');
+            $mform->addElement('select','anonymous',get_string('forum:allowanonymous', 'local_lae'), $options);
+            $mform->addHelpButton('anonymous', 'forum:allowanonymous', 'local_lae');
         }
 
         $options = array();
