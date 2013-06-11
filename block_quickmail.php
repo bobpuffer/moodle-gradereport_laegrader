@@ -27,6 +27,10 @@ class block_quickmail extends block_list {
         return array('site' => false, 'my' => false, 'course' => true);
     }
 
+    public function has_config() {
+        return true;
+    }
+
     public function get_content() {
         global $CFG, $COURSE, $OUTPUT;
 

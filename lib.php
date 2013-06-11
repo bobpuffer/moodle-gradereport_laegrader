@@ -204,7 +204,7 @@ abstract class quickmail {
         return $html;
     }
 
-    public function list_entries($courseid, $type, $page, $perpage, $userid, $count, $can_delete) {
+    public static function list_entries($courseid, $type, $page, $perpage, $userid, $count, $can_delete) {
         global $CFG, $DB, $OUTPUT;
 
         $dbtable = 'block_quickmail_'.$type;
