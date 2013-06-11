@@ -1,17 +1,31 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// Written at Louisiana State University
+// Written at Louisiana State University.
 
 abstract class quickmail {
     public static function _s($key, $a = null) {
         return get_string($key, 'block_quickmail', $a);
     }
 
-    static function format_time($time) {
+    public static function format_time($time) {
         return userdate($time, '%A, %d %B %Y, %I:%M %P');
     }
 
-    static function cleanup($table, $contextid, $itemid) {
+    public static function cleanup($table, $contextid, $itemid) {
         global $DB;
 
         // Clean up the files associated with this email
@@ -34,15 +48,15 @@ abstract class quickmail {
         return $DB->delete_records($table, array('id' => $itemid));
     }
 
-    static function history_cleanup($contextid, $itemid) {
-        return quickmail::cleanup('block_quickmail_log', $contextid, $itemid);
+    public static function history_cleanup($contextid, $itemid) {
+        return self::cleanup('block_quickmail_log', $contextid, $itemid);
     }
 
-    static function draft_cleanup($contextid, $itemid) {
-        return quickmail::cleanup('block_quickmail_drafts', $contextid, $itemid);
+    public static function draft_cleanup($contextid, $itemid) {
+        return self::cleanup('block_quickmail_drafts', $contextid, $itemid);
     }
 
-    static function process_attachments($context, $email, $table, $id) {
+    public static function process_attachments($context, $email, $table, $id) {
         global $CFG, $USER;
 
         $base_path = "block_quickmail/{$USER->id}";
@@ -75,8 +89,9 @@ abstract class quickmail {
             $stored_files = array();
 
             foreach ($files as $file) {
-                if($file->is_directory() and $file->get_filename() == '.')
+                if ($file->is_directory() and $file->get_filename() == '.') {
                     continue;
+                }
 
                 $stored_files[$file->get_filepath().$file->get_filename()] = $file;
             }
@@ -87,7 +102,7 @@ abstract class quickmail {
         return array($zipname, $zip, $actual_zip);
     }
 
-    static function attachment_names($draft) {
+    public static function attachment_names($draft) {
         global $USER;
 
         $usercontext = get_context_instance(CONTEXT_USER, $USER->id);
@@ -106,13 +121,13 @@ abstract class quickmail {
         return implode(',', $only_named_files);
     }
 
-    static function filter_roles($user_roles, $master_roles) {
+    public static function filter_roles($user_roles, $master_roles) {
         return array_uintersect($master_roles, $user_roles, function($a, $b) {
             return strcmp($a->shortname, $b->shortname);
         });
     }
 
-    static function load_config($courseid) {
+    public static function load_config($courseid) {
         global $DB;
 
         $fields = 'name,value';
@@ -137,17 +152,17 @@ abstract class quickmail {
         return $config;
     }
 
-    static function default_config($courseid) {
+    public static function default_config($courseid) {
         global $DB;
 
         $params = array('coursesid' => $courseid);
         $DB->delete_records('block_quickmail_config', $params);
     }
 
-    static function save_config($courseid, $data) {
+    public static function save_config($courseid, $data) {
         global $DB;
 
-        quickmail::default_config($courseid);
+        self::default_config($courseid);
 
         foreach ($data as $name => $value) {
             $config = new stdClass;
@@ -159,13 +174,14 @@ abstract class quickmail {
         }
     }
 
-    function delete_dialog($courseid, $type, $typeid) {
+    public function delete_dialog($courseid, $type, $typeid) {
         global $CFG, $DB, $USER, $OUTPUT;
 
         $email = $DB->get_record('block_quickmail_'.$type, array('id' => $typeid));
 
-        if (empty($email))
+        if (empty($email)) {
             print_error('not_valid_typeid', 'block_quickmail', '', $typeid);
+        }
 
         $params = array('courseid' => $courseid, 'type' => $type);
         $yes_params = $params + array('typeid' => $typeid, 'action' => 'confirm');
@@ -174,21 +190,21 @@ abstract class quickmail {
         $optionno = new moodle_url('/blocks/quickmail/emaillog.php', $params);
 
         $table = new html_table();
-        $table->head = array(get_string('date'), quickmail::_s('subject'));
+        $table->head = array(get_string('date'), self::_s('subject'));
         $table->data = array(
             new html_table_row(array(
-                new html_table_cell(quickmail::format_time($email->time)),
+                new html_table_cell(self::format_time($email->time)),
                 new html_table_cell($email->subject))
             )
         );
 
-        $msg = quickmail::_s('delete_confirm', html_writer::table($table));
+        $msg = self::_s('delete_confirm', html_writer::table($table));
 
         $html = $OUTPUT->confirm($msg, $optionyes, $optionno);
         return $html;
     }
 
-    function list_entries($courseid, $type, $page, $perpage, $userid, $count, $can_delete) {
+    public function list_entries($courseid, $type, $page, $perpage, $userid, $count, $can_delete) {
         global $CFG, $DB, $OUTPUT;
 
         $dbtable = 'block_quickmail_'.$type;
@@ -199,13 +215,13 @@ abstract class quickmail {
         $logs = $DB->get_records($dbtable, $params,
             'time DESC', '*', $page * $perpage, $perpage * ($page + 1));
 
-        $table->head= array(get_string('date'), quickmail::_s('subject'),
-            quickmail::_s('attachment'), get_string('action'));
+        $table->head= array(get_string('date'), self::_s('subject'),
+            self::_s('attachment'), get_string('action'));
 
         $table->data = array();
 
         foreach ($logs as $log) {
-            $date = quickmail::format_time($log->time);
+            $date = self::format_time($log->time);
             $subject = $log->subject;
             $attachments = $log->attachment;
 

@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 interface quickmail_alternate_actions {
     const VIEW = 'view';
@@ -69,12 +83,12 @@ abstract class quickmail_alternate implements quickmail_alternate_actions {
 
         $back_url = self::base_url($course->id);
 
-        // Pass through already valid entries
+        // Pass through already valid entries.
         if ($entry->valid) {
             redirect($back_url);
         }
 
-        // Verify key
+        // Verify key.
         if (empty($value) or !$key = $DB->get_record('user_private_key', $params)) {
             $reactivate = self::base_url($course->id, array(
                 'id' => $id, 'action' => self::INFORMATION
@@ -85,7 +99,7 @@ abstract class quickmail_alternate implements quickmail_alternate_actions {
             return $html;
         }
 
-        // One at a time...They can resend the link if they want
+        // One at a time...They can resend the link if they want.
         delete_user_key('blocks/quickmail', $userid);
 
         $entry->valid = 1;
@@ -104,8 +118,8 @@ abstract class quickmail_alternate implements quickmail_alternate_actions {
 
         $entry = self::get_one($id);
 
-        // No restriction
-        // Valid forever
+        // No restriction.
+        // Valid forever.
         $value = get_user_key('blocks/quickmail', $USER->id, $course->id);
 
         $url = self::base_url($course->id);
@@ -126,7 +140,7 @@ abstract class quickmail_alternate implements quickmail_alternate_actions {
         $html_body = quickmail::_s('alternate_body', $a);
         $body = strip_tags($html_body);
 
-        // Send email
+        // Send email.
         $user = clone($USER);
         $user->email = $entry->address;
         $user->firstname = quickmail::_s('pluginname');
@@ -134,7 +148,7 @@ abstract class quickmail_alternate implements quickmail_alternate_actions {
 
         $result = email_to_user($user, $from, $subject, $body, $html_body);
 
-        // Add to log
+        // Add to log.
         add_to_log($course->id, 'quickmail', 'add', $url->out(),
             quickmail::_s('alternate') . ' ' . $entry->address);
 
@@ -163,7 +177,7 @@ abstract class quickmail_alternate implements quickmail_alternate_actions {
         } else if ($data = $form->get_data()) {
             global $DB;
 
-            // Check if email exists in this course
+            // Check if email exists in this course.
             $older = $DB->get_record('block_quickmail_alternate', array(
                 'address' => $data->address, 'courseid' => $data->courseid
             ));
@@ -198,7 +212,7 @@ abstract class quickmail_alternate implements quickmail_alternate_actions {
             $form->set_data(self::get_one($id));
         }
 
-        // MDL-31677
+        // MDL-31677.
         $reflect = new ReflectionClass('quickmail_alternate_form');
         $form_field = $reflect->getProperty('_form');
         $form_field->setAccessible(true);
