@@ -189,7 +189,7 @@ class email_form extends moodleform {
         } else {
             $options = array(0 => $USER->email) + $alternates;
             $mform->addElement('select', 'alternateid', quickmail::_s('from'), $options);
-            $mform->setType('alternateid', PARAM_EMAIL);
+            $mform->setType('alternateid', PARAM_INT);
         }
 
         $mform->addElement('static', 'selectors', '', html_writer::table($table));
@@ -201,7 +201,7 @@ class email_form extends moodleform {
         $mform->addElement('text', 'subject', quickmail::_s('subject'));
         $mform->setType('subject', PARAM_TEXT);
         $mform->addRule('subject', null, 'required');
-        $mform->addRule('subject', get_string('maximumchars', '', 255), 'maxlength', 255, 'client'); 
+        $mform->addRule('subject', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
         $mform->addElement('editor', 'message_editor', quickmail::_s('message'),
             null, $this->_customdata['editor_options']);
