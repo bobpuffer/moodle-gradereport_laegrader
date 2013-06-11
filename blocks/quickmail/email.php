@@ -1,6 +1,20 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// Written at Louisiana State University
+// Written at Louisiana State University.
 
 require_once('../../config.php');
 require_once('lib.php');
@@ -17,7 +31,7 @@ if (!$course = $DB->get_record('course', array('id' => $courseid))) {
     print_error('no_course', 'block_quickmail', '', $courseid);
 }
 
-if (!empty($type) and !in_array($type, array('log', 'drafts'))){
+if (!empty($type) and !in_array($type, array('log', 'drafts'))) {
     print_error('no_type', 'block_quickmail', '', $type);
 }
 
@@ -54,6 +68,7 @@ $PAGE->set_title($blockname . ': '. $header);
 $PAGE->set_heading($blockname . ': '.$header);
 $PAGE->set_url('/course/view.php', array('courseid' => $courseid));
 $PAGE->set_pagetype($blockname);
+$PAGE->set_pagelayout('standard');
 
 $PAGE->requires->js('/blocks/quickmail/js/jquery.js');
 $PAGE->requires->js('/blocks/quickmail/js/selection.js');
@@ -81,7 +96,7 @@ if (!has_capability('moodle/site:accessallgroups', $context)) {
 
 $globalaccess = empty($allgroups);
 
-// Fill the course users by
+// Fill the course users by.
 $users = array();
 $users_to_roles = array();
 $users_to_groups = array();
@@ -100,10 +115,11 @@ foreach ($everyone as $userid => $user) {
     $userroles = get_user_roles($context, $userid);
     $filterd = quickmail::filter_roles($userroles, $roles);
 
-    // Available groups
+    // Available groups.
     if ((!$globalaccess and !$mastercap) and
-        empty($gids) or empty($filterd) or $userid == $USER->id)
+        empty($gids) or empty($filterd) or $userid == $USER->id) {
         continue;
+    }
 
     $groupmapper = function($id) use ($allgroups) { return $allgroups[$id]; };
 
@@ -134,7 +150,7 @@ $default_sigid = $DB->get_field('block_quickmail_signatures', 'id', array(
 ));
 $email->sigid = $default_sigid ? $default_sigid : -1;
 
-// Some setters for the form
+// Some setters for the form.
 $email->type = $type;
 $email->typeid = $typeid;
 
@@ -156,17 +172,19 @@ if (!empty($email->mailto)) {
     }
 }
 
-$form = new email_form(null, array(
-    'editor_options' => $editor_options,
-    'selected' => $selected,
-    'users' => $users,
-    'roles' => $roles,
-    'groups' => $groups,
-    'users_to_roles' => $users_to_roles,
-    'users_to_groups' => $users_to_groups,
-    'sigs' => array_map(function($sig) { return $sig->title; }, $sigs),
-    'alternates' => $alternates
-));
+$form = new email_form(null,
+    array(
+        'editor_options' => $editor_options,
+        'selected' => $selected,
+        'users' => $users,
+        'roles' => $roles,
+        'groups' => $groups,
+        'users_to_roles' => $users_to_roles,
+        'users_to_groups' => $users_to_groups,
+        'sigs' => array_map(function($sig) { return $sig->title; }, $sigs),
+        'alternates' => $alternates
+    )
+);
 
 $warnings = array();
 
@@ -183,13 +201,13 @@ if ($form->is_cancelled()) {
 
     if (empty($warnings)) {
 
-        // Submitted data
+        // Submitted data.
         $data->time = time();
         $data->format = $data->message_editor['format'];
         $data->message = $data->message_editor['text'];
         $data->attachment = quickmail::attachment_names($data->attachments);
 
-        // Store data; id is needed for file storage
+        // Store data; id is needed for file storage.
         if (isset($data->send)) {
             $data->id = $DB->insert_record('block_quickmail_log', $data);
             $table = 'log';
@@ -216,7 +234,7 @@ if ($form->is_cancelled()) {
             $subject = $data->subject;
         }
 
-        // An instance id is needed before storing the file repository
+        // An instance id is needed before storing the file repository.
         file_save_draft_area_files($data->attachments, $context->id,
             'block_quickmail', 'attachment_' . $table, $data->id);
 
@@ -240,12 +258,12 @@ if ($form->is_cancelled()) {
                 $data->message .= $signaturetext;
             }
 
-            // Prepare html content of message
+            // Prepare html content of message.
             $data->message = file_rewrite_pluginfile_urls($data->message, 'pluginfile.php',
                 $context->id, 'block_quickmail', $table, $data->id,
                 $editor_options);
 
-            // Same user, alternate email
+            // Same user, alternate email.
             if (!empty($data->alternateid)) {
                 $user = clone($USER);
                 $user->email = $alternates[$data->alternateid];
@@ -257,7 +275,7 @@ if ($form->is_cancelled()) {
                 $success = email_to_user($everyone[$userid], $user, $subject,
                     strip_tags($data->message), $data->message, $zip, $zipname);
 
-                if(!$success) {
+                if (!$success) {
                     $warnings[] = get_string("no_email", 'block_quickmail', $everyone[$userid]);
                 }
             }
@@ -276,7 +294,7 @@ if ($form->is_cancelled()) {
 }
 
 if (empty($email->attachments)) {
-    if(!empty($type)) {
+    if (!empty($type)) {
         $attachid = file_get_submitted_draft_itemid('attachment');
         file_prepare_draft_area(
             $attachid, $context->id, 'block_quickmail',
@@ -289,11 +307,12 @@ if (empty($email->attachments)) {
 $form->set_data($email);
 
 if (empty($warnings)) {
-    if (isset($email->send))
+    if (isset($email->send)) {
         redirect(new moodle_url('/blocks/quickmail/emaillog.php',
             array('courseid' => $course->id)));
-    else if (isset($email->draft))
+    } else if (isset($email->draft)) {
         $warnings['success'] = get_string("changessaved");
+    }
 }
 
 echo $OUTPUT->header();

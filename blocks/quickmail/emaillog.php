@@ -1,6 +1,20 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// Written at Louisiana State University
+// Written at Louisiana State University.
 
 require_once('../../config.php');
 require_once('lib.php');
@@ -21,7 +35,7 @@ if (!$course = $DB->get_record('course', array('id' => $courseid))) {
 
 $context = get_context_instance(CONTEXT_COURSE, $courseid);
 
-// Has to be in on of these
+// Has to be in on of these.
 if (!in_array($type, array('log', 'drafts'))) {
     print_error('not_valid', 'block_quickmail', '', $type);
 }
@@ -41,7 +55,7 @@ $proper_permission = ($can_send or !empty($config['allowstudents']));
 
 $can_delete = ($can_send or ($proper_permission and $type == 'drafts'));
 
-// Stops students from tempering with history
+// Stops students from tempering with history.
 if (!$proper_permission or (!$can_delete and in_array($action, $valid_actions))) {
     print_error('no_permission', 'block_quickmail');
 }
@@ -65,6 +79,7 @@ $PAGE->set_title($blockname . ': ' . $header);
 $PAGE->set_heading($blockname . ': ' . $header);
 $PAGE->set_url('/course/view.php', array('id' => $courseid));
 $PAGE->set_pagetype($blockname);
+$PAGE->set_pagelayout('standard');
 
 $dbtable = 'block_quickmail_' . $type;
 
@@ -79,8 +94,9 @@ switch ($action) {
                 'type' => $type
             ));
             redirect($url);
-        } else
+        } else {
             print_error('delete_failed', 'block_quickmail', '', $typeid);
+        }
     case "delete":
         $html = quickmail::delete_dialog($courseid, $type, $typeid);
         break;
@@ -88,7 +104,7 @@ switch ($action) {
         $html = quickmail::list_entries($courseid, $type, $page, $perpage, $userid, $count, $can_delete);
 }
 
-if($canimpersonate and $USER->id != $userid) {
+if ($canimpersonate and $USER->id != $userid) {
     $user = $DB->get_record('user', array('id' => $userid));
     $header .= ' for '. fullname($user);
 }
@@ -96,7 +112,7 @@ if($canimpersonate and $USER->id != $userid) {
 echo $OUTPUT->header();
 echo $OUTPUT->heading($header);
 
-if($canimpersonate) {
+if ($canimpersonate) {
     $sql = "SELECT DISTINCT(l.userid), u.firstname, u.lastname
                 FROM {block_quickmail_$type} l,
                      {user} u
@@ -115,7 +131,7 @@ if($canimpersonate) {
     echo $OUTPUT->single_select($url, 'userid', $user_options, $userid, $default_option);
 }
 
-if(empty($count)) {
+if (empty($count)) {
     echo $OUTPUT->notification(quickmail::_s('no_'.$type));
 
     echo $OUTPUT->continue_button('/blocks/quickmail/email.php?courseid='.$courseid);
