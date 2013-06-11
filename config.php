@@ -43,6 +43,7 @@ $PAGE->set_title($blockname . ': '. $header);
 $PAGE->set_heading($blockname. ': '. $header);
 $PAGE->navbar->add($header);
 $PAGE->set_pagetype($blockname);
+$PAGE->set_pagelayout('standard');
 
 $changed = false;
 

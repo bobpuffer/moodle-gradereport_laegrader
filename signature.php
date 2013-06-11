@@ -61,6 +61,7 @@ $PAGE->navbar->add($header);
 $PAGE->set_title($title);
 $PAGE->set_heading($title);
 $PAGE->set_pagetype($blockname);
+$PAGE->set_pagelayout('standard');
 
 $params = array('userid' => $USER->id);
 $dbsigs = $DB->get_records('block_quickmail_signatures', $params);

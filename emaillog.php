@@ -79,6 +79,7 @@ $PAGE->set_title($blockname . ': ' . $header);
 $PAGE->set_heading($blockname . ': ' . $header);
 $PAGE->set_url('/course/view.php', array('id' => $courseid));
 $PAGE->set_pagetype($blockname);
+$PAGE->set_pagelayout('standard');
 
 $dbtable = 'block_quickmail_' . $type;
 
