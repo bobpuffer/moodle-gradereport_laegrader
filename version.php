@@ -16,4 +16,6 @@
 
 // Written at Louisiana State University.
 
-$plugin->version = 2012061112;
+$plugin->version = 2013061100;
+$plugin->maturity = MATURITY_STABLE;
+$plugin->release = '2.0 (CLAMP)';
