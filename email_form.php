@@ -65,10 +65,15 @@ class email_form extends moodleform {
         $mform =& $this->_form;
 
         $mform->addElement('hidden', 'mailto', '');
+        $mform->setType('mailto', PARAM_RAW);
         $mform->addElement('hidden', 'userid', $USER->id);
+        $mform->setType('userid', PARAM_INT);
         $mform->addElement('hidden', 'courseid', $COURSE->id);
+        $mform->setType('courseid', PARAM_INT);
         $mform->addElement('hidden', 'type', '');
+        $mform->setType('type', PARAM_ALPHA);
         $mform->addElement('hidden', 'typeid', 0);
+        $mform->setType('typeid', PARAM_INT);
 
         $role_options = array('none' => quickmail::_s('no_filter'));
         foreach ($this->_customdata['roles'] as $role) {
@@ -180,14 +185,18 @@ class email_form extends moodleform {
 
         if (empty($alternates)) {
             $mform->addElement('static', 'from', quickmail::_s('from'), $USER->email);
+            $mform->setType('from', PARAM_EMAIL);
         } else {
             $options = array(0 => $USER->email) + $alternates;
             $mform->addElement('select', 'alternateid', quickmail::_s('from'), $options);
+            $mform->setType('alternateid', PARAM_EMAIL);
         }
 
         $mform->addElement('static', 'selectors', '', html_writer::table($table));
+        $mform->setType('selectors', PARAM_RAW);
 
         $mform->addElement('filemanager', 'attachments', quickmail::_s('attachment'));
+        $mform->setType('attachments', PARAM_FILE);
 
         $mform->addElement('text', 'subject', quickmail::_s('subject'));
         $mform->setType('subject', PARAM_TEXT);

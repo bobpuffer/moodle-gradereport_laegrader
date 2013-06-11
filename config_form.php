@@ -51,6 +51,7 @@ class config_form extends moodleform {
 
         $mform->addElement('submit', 'save', get_string('savechanges'));
         $mform->addElement('hidden', 'courseid', $this->_customdata['courseid']);
+        $mform->setType('courseid', PARAM_INT);
 
         $mform->addRule('roleselection', null, 'required');
     }
