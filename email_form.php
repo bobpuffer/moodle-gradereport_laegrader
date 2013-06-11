@@ -201,6 +201,7 @@ class email_form extends moodleform {
         $mform->addElement('text', 'subject', quickmail::_s('subject'));
         $mform->setType('subject', PARAM_TEXT);
         $mform->addRule('subject', null, 'required');
+        $mform->addRule('subject', get_string('maximumchars', '', 255), 'maxlength', 255, 'client'); 
 
         $mform->addElement('editor', 'message_editor', quickmail::_s('message'),
             null, $this->_customdata['editor_options']);

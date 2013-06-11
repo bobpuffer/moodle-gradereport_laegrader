@@ -33,6 +33,7 @@ class signature_form extends moodleform {
 
         $mform->addElement('text', 'title', quickmail::_s('title'));
         $mform->setType('title', PARAM_TEXT);
+        $mform->addRule('title', get_string('maximumchars', '', 125), 'maxlength', 125, 'client');
         $mform->addElement('editor', 'signature_editor', quickmail::_s('sig'),
             null, $this->_customdata['signature_options']);
         $mform->setType('signature_editor', PARAM_RAW);
