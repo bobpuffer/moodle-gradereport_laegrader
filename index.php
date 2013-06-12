@@ -39,6 +39,7 @@ $type          = optional_param('type', 0, PARAM_ALPHA);
 $target        = optional_param('target', 0, PARAM_ALPHANUM);
 $toggle        = optional_param('toggle', NULL, PARAM_INT);
 $toggle_type   = optional_param('toggle_type', 0, PARAM_ALPHANUM);
+$CFG->grade_report_aggregationposition = 1;
 
 $PAGE->set_url(new moodle_url('/grade/report/laegrader/index.php', array('id'=>$courseid)));
 
@@ -191,7 +192,7 @@ if (!empty($studentsperpage)) {
 
 $reporthtml = $report->get_grade_table();
 $reporthtml .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$CFG->wwwroot/grade/report/laegrader/styles.css\" />";
-$reporthtml .= '<script src="' . $CFG->wwwroot . '/lib/jquery/jquery-1.7.2.min.js" type="text/javascript"></script>';
+$reporthtml .= '<script src="jquery-1.7.2.min.js" type="text/javascript"></script>';
 		/*
        	 * code going into the html entity to enable scrolling columns and rows
        	 */
