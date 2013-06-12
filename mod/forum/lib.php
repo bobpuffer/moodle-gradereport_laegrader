@@ -4327,7 +4327,7 @@ function forum_add_new_post($post, $mform, &$message) {
     $post->userid     = $USER->id;
     $post->attachment = "";
     
-    if($post->anonymous || ($forum->anonymous == FORUM_ANONYMOUS_ALWAYS)) {
+    if ((isset($post->anonymous) && $post->anonymous) || ($forum->anonymous == FORUM_ANONYMOUS_ALWAYS)) {
         $post = forum_scrub_userid($post);
     }
 
@@ -4438,7 +4438,7 @@ function forum_add_discussion($discussion, $mform=null, &$message=null, $userid=
     $post->course        = $forum->course; // speedup
     $post->mailnow       = $discussion->mailnow;
 
-    if($discussion->anonymous || ($forum->anonymous == FORUM_ANONYMOUS_ALWAYS)) {
+    if ((isset($discussion->anonymous) && $discussion->anonymous) || ($forum->anonymous == FORUM_ANONYMOUS_ALWAYS)) {
         $post = forum_scrub_userid($post);
     }
 
