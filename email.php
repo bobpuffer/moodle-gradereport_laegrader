@@ -244,7 +244,7 @@ if ($form->is_cancelled()) {
                 quickmail::draft_cleanup($typeid);
             }
 
-            list($zipname, $zip, $actual_zip) = quickmail::process_attachments(
+            list($filename, $file, $actual_file) = quickmail::process_attachments(
                 $context, $data, $table, $data->id
             );
 
@@ -273,7 +273,7 @@ if ($form->is_cancelled()) {
 
             foreach (explode(',', $data->mailto) as $userid) {
                 $success = email_to_user($everyone[$userid], $user, $subject,
-                    strip_tags($data->message), $data->message, $zip, $zipname);
+                    strip_tags($data->message), $data->message, $file, $filename);
 
                 if (!$success) {
                     $warnings[] = get_string("no_email", 'block_quickmail', $everyone[$userid]);
@@ -282,11 +282,11 @@ if ($form->is_cancelled()) {
 
             if ($data->receipt) {
                 email_to_user($USER, $user, $subject,
-                    strip_tags($data->message), $data->message, $zip, $zipname);
+                    strip_tags($data->message), $data->message, $file, $filename);
             }
 
-            if (!empty($actual_zip)) {
-                unlink($actual_zip);
+            if (!empty($actual_file)) {
+                unlink($actual_file);
             }
         }
     }
