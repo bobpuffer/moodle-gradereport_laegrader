@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once $CFG->dirroot.'/lib/grade/grade_item.php';
 require_once $CFG->dirroot.'/lib/grade/grade_category.php';
 require_once $CFG->dirroot.'/lib/grade/grade_object.php';
@@ -31,13 +31,13 @@ class grade_tree_local extends grade_tree {
      * @var array $items
      */
     public $levelitems;
-    
+
     /**
      * LAE structure used to get the damn category names into the category-item object
      * @var array $items
      */
     public $catitems;
-    
+
     /**
      * Constructor, retrieves and stores a hierarchical array of all grade_category and grade_item
      * objects for the given courseid. Full objects are instantiated. Ordering sequence is fixed if needed.
@@ -75,7 +75,7 @@ class grade_tree_local extends grade_tree {
         if ($category_grade_last) {
             grade_tree_local::category_grade_last($this->top_element);
         }
-		
+
         // key to LAE grader, no levels
         grade_tree_local::fill_levels($this->levelitems, $this->top_element, 0);
 
@@ -123,7 +123,7 @@ class grade_tree_local extends grade_tree {
      *
      * @return string header
      */
-    function get_element_header(&$element, $withlink=false, $icon=true, $spacerifnone=false, $titlelength = null, $catname) {
+    function get_element_header_local(&$element, $withlink=false, $icon=true, $spacerifnone=false, $titlelength = null, $catname) {
         $header = '';
 
 		switch ($element['type']) {
@@ -138,7 +138,7 @@ class grade_tree_local extends grade_tree {
 	    if ($titlelength) {
 	        $header = wordwrap($header, $titlelength, '<br />');
         }
-        
+
         if ($icon) {
             $header = $this->get_element_icon($element, $spacerifnone) . '<br />' . $header;
         }
@@ -273,7 +273,49 @@ class grade_tree_local extends grade_tree {
 		$zerofillicontemp = $matches[0] . '#">' . $actiontext . '</a>';
         return $zerofillicontemp;
     }
-    
+
+    public function get_clearoverrides_icon($element, $gpr) {
+        global $CFG, $OUTPUT;
+
+        if (!has_capability('moodle/grade:manage', $this->context) and
+            !has_capability('moodle/grade:hide', $this->context)) {
+            return '';
+        }
+
+        $strparams = $this->get_params_for_iconstr($element);
+        $strclearoverrides = get_string('clearoverrides', 'gradereport_laegrader', $strparams);
+
+        $url = new moodle_url('/grade/report/laegrader/index.php', array('id' => $this->courseid, 'sesskey' => sesskey(), 'action' => 'clearoverrides', 'itemid'=>$element['object']->id));
+
+        $type = 'clearoverrides';
+        $tooltip = $strclearoverrides;
+        $actiontext = '<img alt="' . $type . '" class="smallicon" title="' . $strclearoverrides . '" src="' . $CFG->wwwroot . '/grade/report/laegrader/images/clearoverrides.gif" />';
+        $clearoverrides = $OUTPUT->action_link($url, $actiontext, null, array('class' => 'action-icon'));
+
+        return $clearoverrides;
+    }
+
+    public function get_changedisplay_icon($element) {
+        global $CFG, $OUTPUT;
+
+        if (!has_capability('moodle/grade:manage', $this->context) and
+            !has_capability('moodle/grade:hide', $this->context)) {
+            return '';
+        }
+
+        $strparams = $this->get_params_for_iconstr($element);
+        $strchangedisplay = get_string('changedisplay', 'gradereport_laegrader', $strparams);
+
+        $url = new moodle_url('/grade/report/laegrader/index.php', array('id' => $this->courseid, 'sesskey' => sesskey(), 'action' => 'changedisplay', 'itemid'=>$element['object']->id));
+
+        $type = 'changedisplay';
+        $tooltip = $strchangedisplay;
+        $actiontext = '<img alt="' . $type . ' title="' . $strchangedisplay . '" src="' . $CFG->wwwroot . '/grade/report/laegrader/images/changedisplay.png" />';
+        $changedisplay = $OUTPUT->action_link($url, $actiontext, null, array('class' => 'action-icon'));
+
+        return $changedisplay;
+    }
+
     function limit_item($this_cat,$items,&$grade_values,&$grade_maxes) {
     	$extraused = $this_cat->is_extracredit_used();
     	if (!empty($this_cat->droplow)) {
@@ -312,6 +354,14 @@ class grade_tree_local extends grade_tree {
 
 /*
  * LAE keeps track of the parents of items in case we need to actually compute accurate point totals instead of everything = 100 points (same as percent, duh)
+ * Recursive function for filling gtree-parents array keyed on item-id with elements id=itemid of parent, agg=aggtype of item
+ * accumulates $items->max_earnable with either the child's max_earnable or (in the case of a non-category) grademx
+ * @param array &$parents - what is being built in order to allow accurate accumulation of child elements' grademaxes (and earned grades) into the container element (category or course)
+ * @param array &$items - the array of grade item objects
+ * @param array $cats - array of category information used to get the actualy itemid for the child category cuz its not otherwise in item object
+ * @param object $element - level element which allows a top down approach to a bottom up procedure (i.e., find the children and store their accumulated values to the parents)
+ * @param boolean $accuratetotals - if user wants to see accurate point totals for their gradebook
+ * @param boolean $alltotals -- this is passed by the user report because max_earnable can only be figured on graded items
  */
 function fill_parents(&$parents, &$items, $cats, $element, $idnumber,$accuratetotals = false, $alltotals = true) {
     foreach($element['children'] as $sortorder=>$child) {
@@ -326,7 +376,8 @@ function fill_parents(&$parents, &$items, $cats, $element, $idnumber,$accurateto
                 $childid = substr($child['eid'],1,8);
         }
         if (!isset($parents[$childid]) && isset($element['type']) && $element['type'] <> 'courseitem') {
-            $parents[$childid]->id = $idnumber;
+            $parents[$childid] = new stdClass();
+        	$parents[$childid]->id = $idnumber;
             $parents[$childid]->agg = $element['object']->aggregation;
         }
         if (! empty($child['children'])) {
@@ -335,7 +386,7 @@ function fill_parents(&$parents, &$items, $cats, $element, $idnumber,$accurateto
         // accumulate max scores for parent
 //        if ($accuratetotals && $alltotals) {
         if (isset($accuratetotals) && $accuratetotals && isset($alltotals) && $alltotals && ((isset($items[$childid]->aggregationcoef) && $items[$childid]->aggregationcoef <> 1) || (isset($parents[$childid]->agg) && $parents[$childid]->agg == GRADE_AGGREGATE_WEIGHTED_MEAN))) {
-            $items[$idnumber]->max_earnable += (isset($items[$childid]->max_earnable)) ? $items[$childid]->max_earnable : $items[$childid]->grademax;            
+            $items[$idnumber]->max_earnable += (isset($items[$childid]->max_earnable)) ? $items[$childid]->max_earnable : $items[$childid]->grademax;
         }
     }
     return;

@@ -25,10 +25,8 @@ if ($ADMIN->fulltree) {
     $strletter              = get_string('letter', 'grades');
 
     /// Add settings for this module to the $settings object (it's already defined)
-/*
     $settings->add(new admin_setting_configtext('grade_report_studentsperpage', get_string('studentsperpage', 'grades'),
-                                            get_string('studentsperpage_help', 'grades'), 100));
-*/
+                                            get_string('studentsperpage_help', 'grades'), 1000));
     $settings->add(new admin_setting_configcheckbox('grade_report_quickgrading', get_string('quickgrading', 'grades'),
                                                 get_string('quickgrading_help', 'grades'), 1));
 
@@ -63,6 +61,12 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_configcheckbox('grade_report_showanalysisicon', get_string('showanalysisicon', 'core_grades'),
                                                 get_string('showanalysisicon_desc', 'core_grades'), 1));
+
+    $settings->add(new admin_setting_configcheckbox('grade_report_showzerofill', get_string('showzerofill', 'gradereport_laegrader'),
+                                                '', 1));
+
+    $settings->add(new admin_setting_configcheckbox('grade_report_showclearoverrides', get_string('showclearoverrides', 'gradereport_laegrader'),
+                                                '', 1));
 
     $settings->add(new admin_setting_configcheckbox('grade_report_showuserimage', get_string('showuserimage', 'grades'),
                                                 get_string('showuserimage_help', 'grades'), 1));
