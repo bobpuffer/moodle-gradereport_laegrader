@@ -1,6 +1,20 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// Written at Louisiana State University
+// Written at Louisiana State University.
 
 require_once($CFG->libdir . '/formslib.php');
 
@@ -31,7 +45,7 @@ class email_form extends moodleform {
 
         $roles = implode(',', array_map($only_sn, $users_to_roles[$user->id]));
 
-        // everyone defaults to none
+        // Everyone defaults to none.
         $roles .= ',none';
 
         if (empty($users_to_groups[$user->id])) {
@@ -51,10 +65,15 @@ class email_form extends moodleform {
         $mform =& $this->_form;
 
         $mform->addElement('hidden', 'mailto', '');
+        $mform->setType('mailto', PARAM_RAW);
         $mform->addElement('hidden', 'userid', $USER->id);
+        $mform->setType('userid', PARAM_INT);
         $mform->addElement('hidden', 'courseid', $COURSE->id);
+        $mform->setType('courseid', PARAM_INT);
         $mform->addElement('hidden', 'type', '');
+        $mform->setType('type', PARAM_ALPHA);
         $mform->addElement('hidden', 'typeid', 0);
+        $mform->setType('typeid', PARAM_INT);
 
         $role_options = array('none' => quickmail::_s('no_filter'));
         foreach ($this->_customdata['roles'] as $role) {
@@ -166,18 +185,23 @@ class email_form extends moodleform {
 
         if (empty($alternates)) {
             $mform->addElement('static', 'from', quickmail::_s('from'), $USER->email);
+            $mform->setType('from', PARAM_EMAIL);
         } else {
             $options = array(0 => $USER->email) + $alternates;
             $mform->addElement('select', 'alternateid', quickmail::_s('from'), $options);
+            $mform->setType('alternateid', PARAM_INT);
         }
 
         $mform->addElement('static', 'selectors', '', html_writer::table($table));
+        $mform->setType('selectors', PARAM_RAW);
 
         $mform->addElement('filemanager', 'attachments', quickmail::_s('attachment'));
+        $mform->setType('attachments', PARAM_FILE);
 
         $mform->addElement('text', 'subject', quickmail::_s('subject'));
         $mform->setType('subject', PARAM_TEXT);
         $mform->addRule('subject', null, 'required');
+        $mform->addRule('subject', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
         $mform->addElement('editor', 'message_editor', quickmail::_s('message'),
             null, $this->_customdata['editor_options']);

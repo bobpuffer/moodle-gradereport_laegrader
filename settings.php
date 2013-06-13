@@ -1,11 +1,25 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-// Written at Louisiana State University
+// Written at Louisiana State University.
 
 defined('MOODLE_INTERNAL') || die;
 
-if($ADMIN->fulltree) {
-    require_once $CFG->dirroot . '/blocks/quickmail/lib.php';
+if ($ADMIN->fulltree) {
+    require_once($CFG->dirroot . '/blocks/quickmail/lib.php');
 
     $select = array(0 => get_string('no'), 1 => get_string('yes'));
 
@@ -16,7 +30,7 @@ if($ADMIN->fulltree) {
         return in_array($role->shortname, $default_sns);
     });
 
-    $only_names = function ($role) { return $role->name; };
+    $only_names = function ($role) { return $role->shortname; };
 
     $select_roles = quickmail::_s('select_roles');
     $settings->add(
