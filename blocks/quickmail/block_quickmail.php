@@ -33,6 +33,7 @@ class block_quickmail extends block_list {
 
     public function get_content() {
         global $CFG, $COURSE, $OUTPUT;
+
         if ($this->content !== null) {
             return $this->content;
         }
