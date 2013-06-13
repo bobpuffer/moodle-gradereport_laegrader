@@ -56,6 +56,9 @@ abstract class quickmail {
         return self::cleanup('block_quickmail_drafts', $contextid, $itemid);
     }
 
+    /**
+     * Process the attached file(s). If multiple files, create a zip file.
+     */
     public static function process_attachments($context, $email, $table, $id) {
         global $CFG, $USER;
 
@@ -66,17 +69,13 @@ abstract class quickmail {
             mkdir($moodle_base, $CFG->directorypermissions, true);
         }
 
-        $zipname = $zip = $actual_zip = '';
+        $filename = $file = $actual_file = '';
 
         if (!empty($email->attachment)) {
-            $zipname = "attachment.zip";
-            $actual_zip = "$moodle_base/$zipname";
-
-            $safe_path = preg_replace('/\//', "\\/", $CFG->dataroot);
-            $zip = preg_replace("/$safe_path\\//", '', $actual_zip);
-
-            $packer = get_file_packer();
             $fs = get_file_storage();
+            $stored_files = array();
+            $safe_path = preg_replace('/\//', "\\/", $CFG->dataroot);
+            $base_file_path = preg_replace("/$safe_path\\//", '', $moodle_base);
 
             $files = $fs->get_area_files(
                 $context->id,
@@ -86,20 +85,30 @@ abstract class quickmail {
                 'id'
             );
 
-            $stored_files = array();
-
-            foreach ($files as $file) {
-                if ($file->is_directory() and $file->get_filename() == '.') {
+            // Cycle through files.
+            foreach ($files as $item) {
+                if ($item->is_directory() && $item->get_filename() == '.') {
                     continue;
                 }
-
-                $stored_files[$file->get_filepath().$file->get_filename()] = $file;
+                $stored_files[$item->get_filepath().$item->get_filename()] = $item;
             }
 
-            $packer->archive_to_pathname($stored_files, $actual_zip);
+            // Create a zip archive if more than one file.
+            if (count($stored_files) == 1) {
+                $obj = current($stored_files);
+                $filename = $obj->get_filename();
+                $file = $base_file_path . '/' . $filename;
+                $actual_file = $moodle_base . '/' . $filename;
+                $obj->copy_content_to($actual_file);
+            } else {
+                $filename = 'attachment.zip';
+                $file = $base_file_path . '/' . $filename;
+                $actual_file = $moodle_base . '/' . $filename;
+                $packer = get_file_packer();
+                $packer->archive_to_pathname($stored_files, $actual_file);
+            }
         }
-
-        return array($zipname, $zip, $actual_zip);
+        return array($filename, $file, $actual_file);
     }
 
     public static function attachment_names($draft) {
