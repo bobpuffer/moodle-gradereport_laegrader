@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 function xmldb_block_quickmail_upgrade($oldversion) {
     global $DB;
@@ -8,9 +22,9 @@ function xmldb_block_quickmail_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2011021812) {
-        // Compatibility for transition to LSU quickmail
-        
-        /// modify block_quickmail_log
+        // Compatibility for transition to LSU quickmail.
+
+        // Modify block_quickmail_log.
         $table = new xmldb_table('block_quickmail_log');
         $field = new xmldb_field('attachment', XMLDB_TYPE_TEXT, 'small', XMLDB_NOTNULL, null, null);
         $dbman->change_field_type($table, $field);
@@ -20,7 +34,7 @@ function xmldb_block_quickmail_upgrade($oldversion) {
             $dbman->rename_field($table, $field, 'time');
         }
 
-        /// add block_quickmail_signatures
+        // Add block_quickmail_signatures.
         $table = new xmldb_table('block_quickmail_signatures');
         $table->add_field('id', XMLDB_TYPE_INTEGER, 10, XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('userid', XMLDB_TYPE_INTEGER, 11, XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
@@ -31,8 +45,8 @@ function xmldb_block_quickmail_upgrade($oldversion) {
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
-        
-        /// add block_quickmail_drafts
+
+        // Add block_quickmail_drafts.
         $table = new xmldb_table('block_quickmail_drafts');
         $table->add_field('id', XMLDB_TYPE_INTEGER, 10, XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('courseid', XMLDB_TYPE_INTEGER, 11, XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0');
@@ -47,8 +61,8 @@ function xmldb_block_quickmail_upgrade($oldversion) {
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
-        
-        /// add block_quickmail_config
+
+        // Add block_quickmail_config.
         $table = new xmldb_table('block_quickmail_config');
         $table->add_field('id', XMLDB_TYPE_INTEGER, 10, XMLDB_UNSIGNED, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('coursesid', XMLDB_TYPE_INTEGER, 11, XMLDB_UNSIGNED, XMLDB_NOTNULL, null, null);
@@ -58,7 +72,7 @@ function xmldb_block_quickmail_upgrade($oldversion) {
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
-        
+
         upgrade_block_savepoint(true, 2011021812, 'quickmail');
     }
 
@@ -99,23 +113,23 @@ function xmldb_block_quickmail_upgrade($oldversion) {
         }
 
         foreach (array('log', 'drafts') as $table) {
-            // Define field alternateid to be added to block_quickmail_log
+            // Define field alternateid to be added to block_quickmail_log.
             $table = new xmldb_table('block_quickmail_' . $table);
             $field = new xmldb_field('alternateid', XMLDB_TYPE_INTEGER, '10',
                 XMLDB_UNSIGNED, null, null, null, 'userid');
 
-            // Conditionally launch add field alternateid
+            // Conditionally launch add field alternateid.
             if (!$dbman->field_exists($table, $field)) {
                 $dbman->add_field($table, $field);
             }
         }
 
-        // quickmail savepoint reached
+        // Quickmail savepoint reached.
         upgrade_block_savepoint($result, 2012021014, 'quickmail');
     }
 
     if ($oldversion < 2012061112) {
-        // Restructure database references to the new filearea locations
+        // Restructure database references to the new filearea locations.
         foreach (array('log', 'drafts') as $type) {
             $params = array(
                 'component' => 'block_quickmail_' . $type,
