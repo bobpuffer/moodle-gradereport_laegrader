@@ -101,8 +101,8 @@ $users = array();
 $users_to_roles = array();
 $users_to_groups = array();
 
-$everyone = get_role_users(0, $context, false, 'u.id, u.firstname, u.lastname,
-    u.email, u.mailformat, u.maildisplay, r.id AS roleid',
+$everyone = get_enrolled_users($context, '', 0,
+    'u.id, u.firstname, u.lastname, u.email, u.mailformat, u.maildisplay',
     'u.lastname, u.firstname');
 
 foreach ($everyone as $userid => $user) {
