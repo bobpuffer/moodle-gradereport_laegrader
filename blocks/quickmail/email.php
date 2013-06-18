@@ -73,12 +73,18 @@ $PAGE->set_pagelayout('standard');
 $PAGE->requires->js('/lib/jquery/jquery-1.7.2.min.js');
 $PAGE->requires->js('/blocks/quickmail/js/selection.js');
 
+// Build role arrays.
 $course_roles = get_roles_used_in_context($context);
-
 $filter_roles = $DB->get_records_select('role',
     sprintf('id IN (%s)', $config['roleselection']));
-
 $roles = quickmail::filter_roles($course_roles, $filter_roles);
+
+// Add role names.
+foreach ($roles as $id => $role) {
+    if (empty($role->name)) {
+        $roles[$id]->name = role_get_name($role, $context);
+    }
+}
 
 $allgroups = groups_get_all_groups($courseid);
 
@@ -101,8 +107,8 @@ $users = array();
 $users_to_roles = array();
 $users_to_groups = array();
 
-$everyone = get_role_users(0, $context, false, 'u.id, u.firstname, u.lastname,
-    u.email, u.mailformat, u.maildisplay, r.id AS roleid',
+$everyone = get_enrolled_users($context, '', 0,
+    'u.id, u.firstname, u.lastname, u.email, u.mailformat, u.maildisplay',
     'u.lastname, u.firstname');
 
 foreach ($everyone as $userid => $user) {
