@@ -2,8 +2,8 @@ LAEgrader Report Overview
 The LAEgrader report takes the place of the Grader report as the grades repository interface for the instructor for the course. It is based off from, and shares many library functions and classes with the Grader report. Therefore, the Grader report directory on your Moodle installation cannot be removed. The most notable difference between the LAEgrader and Grader is that the LAEgrader freezes both the column headers (grade item titles) and the student rows, while still allowing the user to scroll vertically and horizontally.
 
 LAEgrader Report Installation
-1. Download the LAEgrader report from https://github.com/bobpuffer/laegrader/archive/master.zip.  It is bundled with the LAE version of Moodle but can be extracted and used alone without other LAE enhancements.
-2. (If zipped) unzip the contents of the zip file.
+1. Download the LAEgrader report from https://github.com/bobpuffer/laegrader/archive/master.zip.  
+2. (If zipped) unzip the contents of the zip file and change the name of the unzipped folder from laegrader-master to laegrader.
 3. Place all contents of the grade/report/laegrader folder in the grade/report folder of your Moodle installation (you should then have a grade/report/laegrader folder)
 4. Under Site administration block run Notifications.
 5. Check to see that your permissions for your various roles are as you desire. It is recommended that access to the regular Grader report be set to "Prohibit" to avoid confusion. The admin will always see both reports. 
