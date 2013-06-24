@@ -44,7 +44,11 @@ function xmldb_local_lae_install() {
     if (empty($CFG->anonymous_userid)) {
         $anon_user = new stdClass;
         $anon_user->username = 'anonymous_user';
-        $anon_user->password = hash_internal_user_password(mt_rand());
+
+        // The password needs strings.
+        $anon_user->password = hash_internal_user_password(
+           str_shuffle($anon_user->username). (string)mt_rand()
+        );
         $anon_user->auth = 'nologin';
         $anon_user->firstname = get_string('auser_firstname', 'local_lae');
         $anon_user->lastname = get_string('auser_lastname', 'local_lae');
