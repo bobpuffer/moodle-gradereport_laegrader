@@ -43,7 +43,7 @@
         var sd2=document.createElement("div");
         sd2.id=tid+':scroller:fx:OuterDiv';
         sd2.style.cssText='position:relative;width:auto;overflow:hidden;overflow-x:hidden;padding:0px;margin:0px;';
-        sd2.innerHTML='<div id="' + tid + ':scroller:fx" style="text-align:left;position:relative;width:9999px;padding:0px;margin-left:0px;"><font size="3" color="red">Please wait while loading the table..</font></div>';
+//        sd2.innerHTML='<div id="' + tid + ':scroller:fx" style="text-align:left;position:relative;width:9999px;padding:0px;margin-left:0px;"><font size="3" color="red">Please wait while loading the table..</font></div>';
         var fc=null;
         if(noOfCols > 0) {
             fc=document.createElement("div");
