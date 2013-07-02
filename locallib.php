@@ -6,6 +6,13 @@ require_once $CFG->dirroot.'/grade/edit/tree/lib.php';
 require_once $CFG->dirroot.'/grade/lib.php';
 require_once($CFG->dirroot.'/grade/export/lib.php');
 
+function grade_tree_local_helper($courseid, $fillers=false, $category_grade_last=true, $collapsed=null, $nooutcomes=false, $currentgroup) {
+    global $CFG;
+    $CFG->currentgroup = $currentgroup;
+    return new grade_tree_local($courseid, $fillers, $category_grade_last, $collapsed, $nooutcomes);
+}
+
+
 class grade_tree_local extends grade_tree {
 
     /**
@@ -76,9 +83,26 @@ class grade_tree_local extends grade_tree {
             grade_tree_local::category_grade_last($this->top_element);
         }
 
+        // provide for crossindexing of modinfo and grades in the case of display by group so items not assigned to a group can be omitted
+        // first determine if enablegroupmembersonly is on, then determine if groupmode is set (separate or visible)
+        $this->modx = array();
+        if ($CFG->enablegroupmembersonly && $CFG->currentgroup > 0 ) {
+            $groupingsforthisgroup = $DB->get_fieldset_select('groupings_groups', 'groupingid', " groupid = $CFG->currentgroup ");
+            $groupingsforthisgroup = implode(',', $groupingsforthisgroup);
+
+            // get all the records for items that SHOULDN'T be included
+            $sql = "SELECT gi.id FROM " .  $CFG->prefix . "grade_items gi, " . $CFG->prefix . "modules m, " . $CFG->prefix . "course_modules cm
+                    WHERE m.name = gi.itemmodule
+                    AND cm.instance = gi.iteminstance
+                    AND cm.module = m.id
+                    AND gi.courseid = $courseid
+                    AND cm.groupingid <> 0
+                    AND cm.groupingid NOT IN($groupingsforthisgroup)";
+            $this->modx = $DB->get_records_sql($sql);
+        }
+
         // key to LAE grader, no levels
         grade_tree_local::fill_levels($this->levelitems, $this->top_element, 0);
-
     }
     /**
      * Static recursive helper - fills the levels array, useful when accessing tree elements of one level
@@ -90,8 +114,9 @@ class grade_tree_local extends grade_tree {
      */
     public function fill_levels(&$levelitems, &$element, $depth) {
 
-        // prepare unique identifier
-        if ($element['type'] == 'category') {
+        if (array_key_exists($element['object']->id, $this->modx)) { // don't include something made only for a different group
+            return;
+        } elseif ($element['type'] == 'category') { // prepare unique identifier
             $element['eid'] = 'c'.$element['object']->id;
             $this->catitems[$element['object']->id] = $element['object']->fullname;
         } else if (in_array($element['type'], array('item', 'courseitem', 'categoryitem'))) {
@@ -350,61 +375,68 @@ class grade_tree_local extends grade_tree {
     		}
     	}
     }
-}
 
-/*
- * LAE keeps track of the parents of items in case we need to actually compute accurate point totals instead of everything = 100 points (same as percent, duh)
- * Recursive function for filling gtree-parents array keyed on item-id with elements id=itemid of parent, agg=aggtype of item
- * accumulates $items->max_earnable with either the child's max_earnable or (in the case of a non-category) grademx
- * @param array &$parents - what is being built in order to allow accurate accumulation of child elements' grademaxes (and earned grades) into the container element (category or course)
- * @param array &$items - the array of grade item objects
- * @param array $cats - array of category information used to get the actualy itemid for the child category cuz its not otherwise in item object
- * @param object $element - level element which allows a top down approach to a bottom up procedure (i.e., find the children and store their accumulated values to the parents)
- * @param boolean $accuratetotals - if user wants to see accurate point totals for their gradebook
- * @param boolean $alltotals -- this is passed by the user report because max_earnable can only be figured on graded items
- */
-function fill_parents(&$parents, &$items, $cats, $element, $idnumber,$accuratetotals = false, $alltotals = true) {
-    foreach($element['children'] as $sortorder=>$child) {
-        switch ($child['type']) {
-            case 'courseitem':
-            case 'categoryitem':
-                continue 2;
-            case 'category':
-                $childid = $cats[$child['object']->id]->id;
-                break;
-            default:
-                $childid = substr($child['eid'],1,8);
+    /*
+     * LAE keeps track of the parents of items in case we need to actually compute accurate point totals instead of everything = 100 points (same as percent, duh)
+     * Recursive function for filling gtree-parents array keyed on item-id with elements id=itemid of parent, agg=aggtype of item
+     * accumulates $items->max_earnable with either the child's max_earnable or (in the case of a non-category) grademx
+     * @param array &$parents - what is being built in order to allow accurate accumulation of child elements' grademaxes (and earned grades) into the container element (category or course)
+     * @param array &$items - the array of grade item objects
+     * @param array $cats - array of category information used to get the actualy itemid for the child category cuz its not otherwise in item object
+     * @param object $element - level element which allows a top down approach to a bottom up procedure (i.e., find the children and store their accumulated values to the parents)
+     * @param boolean $accuratetotals - if user wants to see accurate point totals for their gradebook
+     * @param boolean $alltotals -- this is passed by the user report because max_earnable can only be figured on graded items
+     */
+    function fill_parents($element, $idnumber,$accuratetotals = false, $alltotals = true) {
+        foreach($element['children'] as $sortorder=>$child) {
+            // skip items that are only for another group than the one being considered
+            if (array_key_exists($child['object']->id, $this->modx)) {
+                continue;
+            }
+            switch ($child['type']) {
+                case 'courseitem':
+                case 'categoryitem':
+                    continue 2;
+                case 'category':
+                    $childid = $this->cats[$child['object']->id]->id;
+                    break;
+                default:
+                    $childid = substr($child['eid'],1,8);
+            }
+            if (!isset($this->parents[$childid]) && isset($element['type']) && $element['type'] <> 'courseitem') {
+                $this->parents[$childid] = new stdClass();
+            	$this->parents[$childid]->id = $idnumber;
+                $this->parents[$childid]->agg = $element['object']->aggregation;
+            }
+            if (! empty($child['children'])) {
+                $this->fill_parents($child, $childid, $accuratetotals, $alltotals);
+            }
+            // accumulate max scores for parent
+    //        if ($accuratetotals && $alltotals) {
+            if (isset($accuratetotals) && $accuratetotals
+                    && isset($alltotals) && $alltotals
+                    && ((isset($this->items[$childid]->aggregationcoef) && $this->items[$childid]->aggregationcoef <> 1)
+                            || (isset($this->parents[$childid]->agg) && $this->parents[$childid]->agg == GRADE_AGGREGATE_WEIGHTED_MEAN))) {
+                $this->items[$idnumber]->max_earnable += (isset($this->items[$childid]->max_earnable)) ? $this->items[$childid]->max_earnable : $this->items[$childid]->grademax;
+            }
         }
-        if (!isset($parents[$childid]) && isset($element['type']) && $element['type'] <> 'courseitem') {
-            $parents[$childid] = new stdClass();
-        	$parents[$childid]->id = $idnumber;
-            $parents[$childid]->agg = $element['object']->aggregation;
-        }
-        if (! empty($child['children'])) {
-            fill_parents($parents, $items, $cats, $child, $childid, $accuratetotals, $alltotals);
-        }
-        // accumulate max scores for parent
-//        if ($accuratetotals && $alltotals) {
-        if (isset($accuratetotals) && $accuratetotals && isset($alltotals) && $alltotals && ((isset($items[$childid]->aggregationcoef) && $items[$childid]->aggregationcoef <> 1) || (isset($parents[$childid]->agg) && $parents[$childid]->agg == GRADE_AGGREGATE_WEIGHTED_MEAN))) {
-            $items[$idnumber]->max_earnable += (isset($items[$childid]->max_earnable)) ? $items[$childid]->max_earnable : $items[$childid]->grademax;
+        return;
+    }
+
+    /*
+     * LAE need in order to get hold of the category name for the categoryitem structure without using the upper level category which we don't use
+    */
+    function fill_cats() {
+        foreach($this->items as $key=>$item) {
+            if (!$item->categoryid) {
+                $this->cats[$item->iteminstance] = $item;
+            }
         }
     }
-    return;
 }
-
 
 function is_percentage($gradestr = null) {
     return (substr(trim($gradestr),-1,1) == '%') ? true : false;
 }
 
-/*
- * LAE need in order to get hold of the category name for the categoryitem structure without using the upper level category which we don't use
- */
-Function fill_cats(&$tree) {
-	foreach($tree->items as $key=>$item) {
-		if (!$item->categoryid) {
-			$tree->cats[$item->iteminstance] = $item;
-		}
-	}
-}
 ?>
