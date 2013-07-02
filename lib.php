@@ -125,13 +125,13 @@ class grade_report_laegrader extends grade_report_grader {
         $switch = true;
 
         // Grab the grade_tree for this course
-        $this->gtree = new grade_tree_local($this->courseid, false, true, null, $nooutcomes);
+        $this->gtree = grade_tree_local_helper($this->courseid, false, true, null, $nooutcomes, $this->currentgroup);
 
         // Fill items with parent information needed later for laegrader report
         $this->gtree->parents = array();
 		$this->gtree->cats = array();
-        fill_cats($this->gtree);
-        fill_parents($this->gtree->parents, $this->gtree->items, $this->gtree->cats, $this->gtree->top_element, $this->gtree->top_element['object']->grade_item->id, $this->accuratetotals);
+        $this->gtree->fill_cats();
+        $this->gtree->fill_parents($this->gtree->top_element, $this->gtree->top_element['object']->grade_item->id, $this->accuratetotals);
 
         $this->sortitemid = $sortitemid;
 
