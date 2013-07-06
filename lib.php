@@ -779,6 +779,8 @@ class grade_report_laegrader extends grade_report_grader {
 
 			if (!$USER->gradeediting[$this->courseid]) {
 				$display = $this->gtree->get_changedisplay_icon($element);
+			} else {
+			    $display = null;
 			}
 			// LAE this line calls a local instance of get_element_header with the name of the grade item or category
 			$headerlink = $this->gtree->get_element_header_local($element, true, $this->get_pref('showactivityicons'), false, 25,$this->gtree->items[$key]->itemname);
@@ -1527,6 +1529,7 @@ class grade_report_laegrader extends grade_report_grader {
         $showhideicon        = '';
         $lockunlockicon      = '';
         $zerofillicon      = '';
+        $clearoverridesicon = '';
 
         if (has_capability('moodle/grade:manage', $this->context)) {
             if ($this->get_pref('showcalculations')) {
