@@ -387,7 +387,7 @@ class grade_tree_local extends grade_tree {
      * @param boolean $accuratetotals - if user wants to see accurate point totals for their gradebook
      * @param boolean $alltotals -- this is passed by the user report because max_earnable can only be figured on graded items
      */
-    function fill_parents($element, $idnumber,$accuratetotals = false, $alltotals = true) {
+    function fill_parents($element, $idnumber,$accuratetotals = false, $alltotals = true, $showtotalsifcontainhidden = 0) {
         foreach($element['children'] as $sortorder=>$child) {
             // skip items that are only for another group than the one being considered
             if (array_key_exists($child['object']->id, $this->modx)) {
@@ -409,11 +409,14 @@ class grade_tree_local extends grade_tree {
                 $this->parents[$childid]->agg = $element['object']->aggregation;
             }
             if (! empty($child['children'])) {
-                $this->fill_parents($child, $childid, $accuratetotals, $alltotals);
+                $this->fill_parents($child, $childid, $accuratetotals, $alltotals, $showtotalsifcontainhidden);
             }
             // accumulate max scores for parent
     //        if ($accuratetotals && $alltotals) {
-            if (isset($accuratetotals) && $accuratetotals
+            // this line needs to determine whether to include hidden items
+            if ($child['object']->is_hidden() && ($showtotalsifcontainhidden !== GRADE_REPORT_SHOW_REAL_TOTAL_IF_CONTAINS_HIDDEN)) {
+                echo null;
+            } elseif (isset($accuratetotals) && $accuratetotals
                     && isset($alltotals) && $alltotals
                     && ((isset($this->items[$childid]->aggregationcoef) && $this->items[$childid]->aggregationcoef <> 1)
                             || (isset($this->parents[$childid]->agg) && $this->parents[$childid]->agg == GRADE_AGGREGATE_WEIGHTED_MEAN))) {

@@ -76,6 +76,8 @@ class grade_report_laegrader extends grade_report_grader {
      */
     public $collapsed;
 
+    public $showtotalsifcontainhidden;
+
     /**
      * A count of the rows, used for css classes.
      * @var int $rowcount
@@ -111,6 +113,8 @@ class grade_report_laegrader extends grade_report_grader {
 
         $this->canviewhidden = has_capability('moodle/grade:viewhidden', get_context_instance(CONTEXT_COURSE, $this->course->id));
         $this->accuratetotals		= ($temp = grade_get_setting($this->courseid, 'report_laegrader_accuratetotals', $CFG->grade_report_laegrader_accuratetotals)) ? $temp : 0;
+        $this->showtotalsifcontainhidden = array($this->courseid => grade_get_setting($this->courseid, 'report_user_showtotalsifcontainhidden', $CFG->grade_report_user_showtotalsifcontainhidden));
+        $showtotalsifcontainhidden = $this->showtotalsifcontainhidden[$this->courseid];
 
         // need this array, even tho its useless in the laegrader report or we'll generate warnings
         $this->collapsed = array('aggregatesonly' => array(), 'gradesonly' => array());
@@ -131,7 +135,7 @@ class grade_report_laegrader extends grade_report_grader {
         $this->gtree->parents = array();
 		$this->gtree->cats = array();
         $this->gtree->fill_cats();
-        $this->gtree->fill_parents($this->gtree->top_element, $this->gtree->top_element['object']->grade_item->id, $this->accuratetotals);
+        $this->gtree->fill_parents($this->gtree->top_element, $this->gtree->top_element['object']->grade_item->id, $this->accuratetotals, true, $showtotalsifcontainhidden);
 
         $this->sortitemid = $sortitemid;
 
@@ -998,10 +1002,10 @@ class grade_report_laegrader extends grade_report_grader {
                         // we only need to take the extra calculation into account if points display since percent and letter are accurate by their nature
                         // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no earned_total value
 	                    $tempmax = $item->grademax;
-                        if ($gradedisplaytype == GRADE_DISPLAY_TYPE_REAL && isset($this->grades[$userid][$grade->itemid]->cat_item)) {
+                        if ($gradedisplaytype == GRADE_DISPLAY_TYPE_REAL && isset($grade->cat_item)) {
                         	$items = $this->gtree->items;
-		               		$grade_values = $this->grades[$userid][$grade->itemid]->cat_item;
-		               		$grade_maxes = $this->grades[$userid][$grade->itemid]->cat_max;
+		               		$grade_values = $grade->cat_item;
+		               		$grade_maxes = $grade->cat_max;
 		               		$this_cat = $this->gtree->items[$grade->itemid]->get_item_category();
 		               		$this->gtree->limit_item($this_cat,$items,$grade_values,$grade_maxes);
 			       			$gradeval = array_sum($grade_values);
@@ -1056,12 +1060,13 @@ class grade_report_laegrader extends grade_report_grader {
 
                     	// if we have an accumulated total points that's not accurately reflected in the db, then we want to display the ACCURATE number
                         // we only need to take the extra calculation into account if points display since percent and letter are accurate by their nature
-                        // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no earned_total value
+                        // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no cat_item value
 	                    $tempmax = $item->grademax;
-                        if ($gradedisplaytype == GRADE_DISPLAY_TYPE_REAL && isset($this->grades[$userid][$grade->itemid]->cat_item)) {
+	                    // TODO: check to see if cat_item is getting set whether accurate points is set or not
+                        if ($gradedisplaytype == GRADE_DISPLAY_TYPE_REAL && isset($grade->cat_item)) {
                         	$items = $this->gtree->items;
-		               		$grade_values = $this->grades[$userid][$grade->itemid]->cat_item;
-		               		$grade_maxes = $this->grades[$userid][$grade->itemid]->cat_max;
+		               		$grade_values = $grade->cat_item;
+		               		$grade_maxes = $grade->cat_max;
 		               		$this_cat = $this->gtree->items[$grade->itemid]->get_item_category();
 		               		$this->gtree->limit_item($this_cat,$items,$grade_values,$grade_maxes);
 			       			$gradeval = array_sum($grade_values);
@@ -1276,10 +1281,13 @@ class grade_report_laegrader extends grade_report_grader {
      * Builds and return the row of ranges for the right part of the grader report.
      * @param array $rows The Array of rows for the right part of the report
      * @return array Array of rows for the right part of the report
+     * This method needs to calculate up what the maximum is before its calculated while
+     * traversing the tree so it needs to traverse on its own
      */
     public function get_right_range_row($rows=array()) {
         global $OUTPUT;
 
+        $showtotalsifcontainhidden = $this->showtotalsifcontainhidden[$this->courseid];
         if ($this->get_pref('showranges')) {
             $rangesdisplaytype   = $this->get_pref('rangesdisplaytype');
             $rangesdecimalpoints = $this->get_pref('rangesdecimalpoints');
@@ -1289,24 +1297,16 @@ class grade_report_laegrader extends grade_report_grader {
             foreach ($this->gtree->items as $itemid=>$unused) {
                 $item =& $this->gtree->items[$itemid];
                 $itemcell = new html_table_cell();
-//                $itemcell->header = true;
                 $itemcell->attributes['class'] .= ' range';
                 // if we have an accumulated total points that's not accurately reflected in the db, then we want to display the ACCURATE number
                 // we only need to take the extra calculation into account if points display since percent and letter are accurate by their nature
                 // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no earned_total value
                 $tempmax = $item->grademax;
                 if (isset($this->gtree->items[$itemid]->cat_max)) {
-//                	$items = $this->gtree->items;
-//                	$grade_values = $this->gtree->items[$itemid]->cat_item;
                 	$grade_maxes = $this->gtree->items[$itemid]->cat_max;
-//                	$this_cat = $this->gtree->items[$itemid]->get_item_category();
-//                	$this->gtree->limit_item($this_cat,$items,$grade_values,$grade_maxes);
-//                	$gradeval = array_sum($grade_values);
                 	$item->grademax = array_sum($grade_maxes);
                 }
-//                $value = grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype, null);
-                if ($this->accuratetotals && isset($this->gtree->parents[$itemid]->id)) {
-//                	$this->gtree->items[$this->gtree->parents[$itemid]->id]->cat_item[$itemid] = $gradeval;
+               	if (!$unused->is_hidden() && $this->accuratetotals && isset($this->gtree->parents[$itemid]->id)) {
                 	$this->gtree->items[$this->gtree->parents[$itemid]->id]->cat_max[$itemid] = $item->grademax;
                 }
 
