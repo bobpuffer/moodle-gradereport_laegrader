@@ -134,9 +134,10 @@ class grade_report_laegrader extends grade_report_grader {
         // Fill items with parent information needed later for laegrader report
         $this->gtree->parents = array();
 		$this->gtree->cats = array();
-        $this->gtree->fill_cats();
-        $this->gtree->fill_parents($this->gtree->top_element, $this->gtree->top_element['object']->grade_item->id, $this->accuratetotals, true, $showtotalsifcontainhidden);
-
+        if ($this->accuratetotals) { // don't even go to fill_parents unless accuratetotals is set
+    		$this->gtree->fill_cats();
+            $this->gtree->fill_parents($this->gtree->top_element, $this->gtree->top_element['object']->grade_item->id, $showtotalsifcontainhidden);
+        }
         $this->sortitemid = $sortitemid;
 
         // base url for sorting by first/last name
@@ -481,7 +482,7 @@ class grade_report_laegrader extends grade_report_grader {
             foreach ($grades as $graderec) {
                 if (in_array($graderec->userid, $userids) and array_key_exists($graderec->itemid, $this->gtree->get_items())) { // some items may not be present!!
                     $this->grades[$graderec->userid][$graderec->itemid] = new grade_grade($graderec, false);
-                    $this->grades[$graderec->userid][$graderec->itemid]->grade_item =& $this->gtree->get_item($graderec->itemid); // db caching
+                    $this->grades[$graderec->userid][$graderec->itemid]->grade_item = $this->gtree->get_item($graderec->itemid); // db caching
                 }
             }
         }
@@ -1306,7 +1307,7 @@ class grade_report_laegrader extends grade_report_grader {
                 	$grade_maxes = $this->gtree->items[$itemid]->cat_max;
                 	$item->grademax = array_sum($grade_maxes);
                 }
-               	if (!$unused->is_hidden() && $this->accuratetotals && isset($this->gtree->parents[$itemid]->id)) {
+               	if ((!$unused->is_hidden() || $showtotalsifcontainhidden == GRADE_REPORT_SHOW_REAL_TOTAL_IF_CONTAINS_HIDDEN) && $this->accuratetotals && isset($this->gtree->parents[$itemid]->id)) {
                 	$this->gtree->items[$this->gtree->parents[$itemid]->id]->cat_max[$itemid] = $item->grademax;
                 }
 

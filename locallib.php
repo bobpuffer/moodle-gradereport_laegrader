@@ -387,7 +387,7 @@ class grade_tree_local extends grade_tree {
      * @param boolean $accuratetotals - if user wants to see accurate point totals for their gradebook
      * @param boolean $alltotals -- this is passed by the user report because max_earnable can only be figured on graded items
      */
-    function fill_parents($element, $idnumber,$accuratetotals = false, $alltotals = true, $showtotalsifcontainhidden = 0) {
+    function fill_parents($element, $idnumber, $showtotalsifcontainhidden = 0) {
         foreach($element['children'] as $sortorder=>$child) {
             // skip items that are only for another group than the one being considered
             if (array_key_exists($child['object']->id, $this->modx)) {
@@ -409,17 +409,15 @@ class grade_tree_local extends grade_tree {
                 $this->parents[$childid]->agg = $element['object']->aggregation;
             }
             if (! empty($child['children'])) {
-                $this->fill_parents($child, $childid, $accuratetotals, $alltotals, $showtotalsifcontainhidden);
+                $this->fill_parents($child, $childid, $showtotalsifcontainhidden);
             }
             // accumulate max scores for parent
     //        if ($accuratetotals && $alltotals) {
             // this line needs to determine whether to include hidden items
-            if ($child['object']->is_hidden() && ($showtotalsifcontainhidden !== GRADE_REPORT_SHOW_REAL_TOTAL_IF_CONTAINS_HIDDEN)) {
-                echo null;
-            } elseif (isset($accuratetotals) && $accuratetotals
-                    && isset($alltotals) && $alltotals
-                    && ((isset($this->items[$childid]->aggregationcoef) && $this->items[$childid]->aggregationcoef <> 1)
-                            || (isset($this->parents[$childid]->agg) && $this->parents[$childid]->agg == GRADE_AGGREGATE_WEIGHTED_MEAN))) {
+           	if ((!$child['object']->is_hidden() || $showtotalsifcontainhidden == GRADE_REPORT_SHOW_REAL_TOTAL_IF_CONTAINS_HIDDEN) // either its not hidden or the hiding setting allows it to be calculated into the total
+           	        && isset($this->parents[$childid]->id) // the parent of this item needs to be set
+                    && ((isset($this->items[$childid]->aggregationcoef) && $this->items[$childid]->aggregationcoef !== 1) // isn't an extra credit item -- has a weight and the weight isn't 1
+                    || (isset($this->parents[$childid]->agg) && $this->parents[$childid]->agg == GRADE_AGGREGATE_WEIGHTED_MEAN))) { // or has a weight but in a category using WM
                 $this->items[$idnumber]->max_earnable += (isset($this->items[$childid]->max_earnable)) ? $this->items[$childid]->max_earnable : $this->items[$childid]->grademax;
             }
         }
