@@ -794,7 +794,8 @@ class grade_report_laegrader extends grade_report_grader {
 			$itemcell->attributes['class'] = $type . ' ' . $catlevel . 'highlightable' . $currentcatcolor;
 
 			if ($element['object']->is_hidden()) {
-				$itemcell->attributes['class'] .= ' hidden';
+//				$itemcell->attributes['class'] .= ' hidden';
+				$itemcell->attributes['class'] .= ' gray';
 			}
 
 			$itemcell->colspan = 1; // $colspan;
@@ -933,7 +934,8 @@ class grade_report_laegrader extends grade_report_grader {
 
                 $hidden = '';
                 if ($grade->is_hidden()) {
-                    $hidden = ' hidden ';
+//                    $hidden = ' hidden ';
+                    $hidden = ' gray ';
                 }
                 $itemcell->attributes['class'] .= $hidden;
 

@@ -168,7 +168,9 @@ table#lae-user-grades.laegradestable tr.avg td.cell,
 }
 
 .laegradestable th.item.cell.hidden, 
-.laegradestable td.cell.grade.hidden {
+.laegradestable td.cell.grade.hidden,
+.laegradestable th.item.cell.gray, 
+.laegradestable td.cell.grade.gray {
 	background-color:#cfcfcf;
 }
 
