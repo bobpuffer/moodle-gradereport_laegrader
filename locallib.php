@@ -25,7 +25,7 @@ class grade_tree_local extends grade_tree {
      * 2D array of grade items and categories
      * @var array $levels
      */
- //   public $levels;
+    public $levels;
 
     /**
      * Grade items
@@ -37,7 +37,7 @@ class grade_tree_local extends grade_tree {
      * LAE Grade items used for cycling through the get_right_rows
      * @var array $items
      */
-    public $levelitems;
+//    public $levelitems;
 
     /**
      * LAE structure used to get the damn category names into the category-item object
@@ -102,7 +102,7 @@ class grade_tree_local extends grade_tree {
         }
 
         // key to LAE grader, no levels
-        grade_tree_local::fill_levels($this->levelitems, $this->top_element, 0);
+        grade_tree_local::fill_levels($this->levels, $this->top_element, 0);
     }
     /**
      * Static recursive helper - fills the levels array, useful when accessing tree elements of one level
@@ -112,6 +112,7 @@ class grade_tree_local extends grade_tree {
      * @param int   $depth How deep are we?
      * @return void
      */
+/*
     public function fill_levels(&$levelitems, &$element, $depth) {
 
         if (array_key_exists($element['object']->id, $this->modx)) { // don't include something made only for a different group
@@ -136,7 +137,7 @@ class grade_tree_local extends grade_tree {
             grade_tree_local::fill_levels($this->levelitems, $element['children'][$sortorder], $depth);
         }
     }
-
+*/
      /**
      * Returns name of element optionally with icon and link
      * USED BY LAEGRADER IN ORDER TO WRAP GRADE TITLES IN THE HEADER
@@ -255,6 +256,7 @@ class grade_tree_local extends grade_tree {
      * @return object element
      * LAE we don't use the standard tree (somebody say, "INEFFICIENT!!") so need local function
      */
+/*
     public function locate_element($id) {
         // it is a category or item
         foreach ($this->levelitems as $key=>$element) {
@@ -265,7 +267,7 @@ class grade_tree_local extends grade_tree {
 
         return null;
     }
-
+*/
     /**
      * Return hiding icon for give element
      *

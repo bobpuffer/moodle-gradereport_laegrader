@@ -1268,8 +1268,11 @@ class grade_report_laegrader extends grade_report_grader {
             $iconsrow->attributes['class'] = 'controls';
 
             foreach ($this->gtree->items as $itemid=>$unused) {
+                // get the eid so we can use the standard method for gtree->locate_element
+                $eid = $unused->itemtype == 'category' || $unused->itemtype == 'course' ? 'i' . $itemid : 'c' . $unused->iteminstance;
+
                 // emulate grade element
-                $element = $this->gtree->locate_element($itemid);
+                $element = $this->gtree->locate_element($eid);
                 $itemcell = new html_table_cell();
                 $itemcell->attributes['class'] = 'controls icons';
                 $itemcell->text = $this->get_icons($element);
