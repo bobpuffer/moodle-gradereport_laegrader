@@ -37,7 +37,7 @@ class grade_tree_local extends grade_tree {
      * LAE Grade items used for cycling through the get_right_rows
      * @var array $items
      */
-//    public $levelitems;
+    public $levelitems;
 
     /**
      * LAE structure used to get the damn category names into the category-item object
@@ -103,6 +103,7 @@ class grade_tree_local extends grade_tree {
 
         // key to LAE grader, no levels
         grade_tree_local::fill_levels($this->levels, $this->top_element, 0);
+        grade_tree_local::fill_levels_local($this->levelitems, $this->top_element, 0);
     }
     /**
      * Static recursive helper - fills the levels array, useful when accessing tree elements of one level
@@ -112,8 +113,8 @@ class grade_tree_local extends grade_tree {
      * @param int   $depth How deep are we?
      * @return void
      */
-/*
-    public function fill_levels(&$levelitems, &$element, $depth) {
+
+    public function fill_levels_local(&$levelitems, &$element, $depth) {
 
         if (array_key_exists($element['object']->id, $this->modx)) { // don't include something made only for a different group
             return;
@@ -134,10 +135,10 @@ class grade_tree_local extends grade_tree {
         }
         $prev = 0;
         foreach ($element['children'] as $sortorder=>$child) {
-            grade_tree_local::fill_levels($this->levelitems, $element['children'][$sortorder], $depth);
+            grade_tree_local::fill_levels_local($this->levelitems, $element['children'][$sortorder], $depth);
         }
     }
-*/
+
      /**
      * Returns name of element optionally with icon and link
      * USED BY LAEGRADER IN ORDER TO WRAP GRADE TITLES IN THE HEADER
@@ -225,8 +226,8 @@ class grade_tree_local extends grade_tree {
         // If module has grade.php, link to that, otherwise view.php
         if ($hasgradephp[$itemmodule]) {
             $args = array('id' => $cm->id, 'itemnumber' => $itemnumber);
-            if (isset($element['userid'])) {
-                $args['userid'] = $element['userid'];
+            if (isset($element['object']->userid)) {
+                $args['userid'] = $element['object']->userid;
             }
             return new moodle_url('/mod/' . $itemmodule . '/grade.php', $args);
         } else {
@@ -405,10 +406,10 @@ class grade_tree_local extends grade_tree {
                 default:
                     $childid = substr($child['eid'],1,8);
             }
-            if (!isset($this->parents[$childid]) && isset($element['type']) && $element['type'] <> 'courseitem') {
+            if (!isset($this->parents[$childid]) && isset($element->itemtype) && $element->itemtype <> 'courseitem') {
                 $this->parents[$childid] = new stdClass();
             	$this->parents[$childid]->id = $idnumber;
-                $this->parents[$childid]->agg = $element['object']->aggregation;
+                $this->parents[$childid]->agg = $element->aggregation;
             }
             if (! empty($child['children'])) {
                 $this->fill_parents($child, $childid, $showtotalsifcontainhidden);

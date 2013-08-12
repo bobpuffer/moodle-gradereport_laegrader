@@ -1269,7 +1269,7 @@ class grade_report_laegrader extends grade_report_grader {
 
             foreach ($this->gtree->items as $itemid=>$unused) {
                 // get the eid so we can use the standard method for gtree->locate_element
-                $eid = $unused->itemtype == 'category' || $unused->itemtype == 'course' ? 'i' . $itemid : 'c' . $unused->iteminstance;
+                $eid = $unused->itemtype == 'category' || $unused->itemtype == 'course' ? 'c' . $unused->iteminstance : 'i' . $unused->id;
 
                 // emulate grade element
                 $element = $this->gtree->locate_element($eid);
@@ -1527,7 +1527,7 @@ class grade_report_laegrader extends grade_report_grader {
         // Init all icons
         $editicon = '';
 
-        if ($element['type'] != 'categoryitem' && $element['type'] != 'courseitem') {
+        if ($element['type'] != 'category' && $element['type'] != 'course') {
             $editicon = $this->gtree->get_edit_icon($element, $this->gpr);
         }
 
@@ -1568,42 +1568,6 @@ class grade_report_laegrader extends grade_report_grader {
 
         return $OUTPUT->container($editicon.$zerofillicon.$clearoverridesicon.$editcalculationicon.$showhideicon.$lockunlockicon.$gradeanalysisicon, 'grade_icons');
     }
-
-    /**
-     * Given a category element returns collapsing +/- icon if available
-     * @param object $object
-     * @return string HTML
-     */
-    protected function get_collapsing_icon($element) {
-        global $OUTPUT;
-
-        $icon = '';
-        // If object is a category, display expand/contract icon
-        if ($element['type'] == 'category') {
-            // Load language strings
-            $strswitchminus = $this->get_lang_string('aggregatesonly', 'grades');
-            $strswitchplus  = $this->get_lang_string('gradesonly', 'grades');
-            $strswitchwhole = $this->get_lang_string('fullmode', 'grades');
-
-            $url = new moodle_url($this->gpr->get_return_url(null, array('target'=>$element['eid'], 'sesskey'=>sesskey())));
-
-            if (in_array($element['object']->id, $this->collapsed['aggregatesonly'])) {
-                $url->param('action', 'switch_plus');
-                $icon = $OUTPUT->action_icon($url, new pix_icon('t/switch_plus', $strswitchplus));
-
-            } else if (in_array($element['object']->id, $this->collapsed['gradesonly'])) {
-                $url->param('action', 'switch_whole');
-                $icon = $OUTPUT->action_icon($url, new pix_icon('t/switch_whole', $strswitchwhole));
-
-            } else {
-                $url->param('action', 'switch_minus');
-                $icon = $OUTPUT->action_icon($url, new pix_icon('t/switch_minus', $strswitchminus));
-            }
-        }
-        return $icon;
-    }
-
-
 
     /**
      * Given the name of a user preference (without grade_report_ prefix), locally saves then returns
