@@ -406,10 +406,10 @@ class grade_tree_local extends grade_tree {
                 default:
                     $childid = substr($child['eid'],1,8);
             }
-            if (!isset($this->parents[$childid]) && isset($element->itemtype) && $element->itemtype <> 'courseitem') {
+            if (!isset($this->parents[$childid]) && isset($element['type']) && $element['type'] !== 'course') {
                 $this->parents[$childid] = new stdClass();
-            	$this->parents[$childid]->id = $idnumber;
-                $this->parents[$childid]->agg = $element->aggregation;
+            	$this->parents[$childid]->parent_id = $idnumber;
+                $this->parents[$childid]->parent_agg = $element['object']->aggregation;
             }
             if (! empty($child['children'])) {
                 $this->fill_parents($child, $childid, $showtotalsifcontainhidden);
@@ -418,9 +418,9 @@ class grade_tree_local extends grade_tree {
     //        if ($accuratetotals && $alltotals) {
             // this line needs to determine whether to include hidden items
            	if ((!$child['object']->is_hidden() || $showtotalsifcontainhidden == GRADE_REPORT_SHOW_REAL_TOTAL_IF_CONTAINS_HIDDEN) // either its not hidden or the hiding setting allows it to be calculated into the total
-           	        && isset($this->parents[$childid]->id) // the parent of this item needs to be set
+           	        && isset($this->parents[$childid]->parent_id) // the parent of this item needs to be set
                     && ((isset($this->items[$childid]->aggregationcoef) && $this->items[$childid]->aggregationcoef !== 1) // isn't an extra credit item -- has a weight and the weight isn't 1
-                    || (isset($this->parents[$childid]->agg) && $this->parents[$childid]->agg == GRADE_AGGREGATE_WEIGHTED_MEAN))) { // or has a weight but in a category using WM
+                    || (isset($this->parents[$childid]->parent_agg) && $this->parents[$childid]->parent_agg == GRADE_AGGREGATE_WEIGHTED_MEAN))) { // or has a weight but in a category using WM
                 $this->items[$idnumber]->max_earnable += (isset($this->items[$childid]->max_earnable)) ? $this->items[$childid]->max_earnable : $this->items[$childid]->grademax;
             }
         }

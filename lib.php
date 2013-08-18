@@ -868,6 +868,10 @@ class grade_report_laegrader extends grade_report_grader {
                 // Get the decimal points preference for this item
                 $decimalpoints = $item->get_decimals();
 
+                // substituting shorthand for long object variables
+                $items = $this->gtree->items;
+				$parents = $this->gtree->parents;
+
                 if (in_array($itemid, $unknown)) {
                     $gradeval = null;
                 } else if (array_key_exists($itemid, $altered)) {
@@ -1006,19 +1010,18 @@ class grade_report_laegrader extends grade_report_grader {
                         // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no earned_total value
 	                    $tempmax = $item->grademax;
                         if ($gradedisplaytype == GRADE_DISPLAY_TYPE_REAL && isset($grade->cat_item)) {
-                        	$items = $this->gtree->items;
 		               		$grade_values = $grade->cat_item;
 		               		$grade_maxes = $grade->cat_max;
-		               		$this_cat = $this->gtree->items[$grade->itemid]->get_item_category();
+		               		$this_cat = $items[$grade->itemid]->get_item_category();
 		               		$this->gtree->limit_item($this_cat,$items,$grade_values,$grade_maxes);
 			       			$gradeval = array_sum($grade_values);
 			       			$item->grademax = array_sum($grade_maxes);
                         }
                       	$value = grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype, null);
 						$item->grademax = $tempmax;
-                      	if (! $grade->is_hidden() && $gradeval <> null && $this->accuratetotals && isset($this->gtree->parents[$grade->itemid]->id)) {
-                			$this->grades[$userid][$this->gtree->parents[$grade->itemid]->id]->cat_item[$grade->itemid] = $gradeval;
-							$this->grades[$userid][$this->gtree->parents[$grade->itemid]->id]->cat_max[$grade->itemid] = $grade->rawgrademax;
+                      	if (! $grade->is_hidden() && $gradeval <> null && $this->accuratetotals && isset($parents[$grade->itemid]->parent_id)) {
+                			$this->grades[$userid][$parents[$grade->itemid]->parent_id]->cat_item[$grade->itemid] = $gradeval;
+							$this->grades[$userid][$parents[$grade->itemid]->parent_id]->cat_max[$grade->itemid] = $grade->rawgrademax;
 				   		}
                     	if ($this->get_pref('quickgrading') and $grade->is_editable()) {
                             if (! $this->accuratetotals || (! $item->is_course_item() and ! $item->is_category_item())) {
@@ -1067,19 +1070,18 @@ class grade_report_laegrader extends grade_report_grader {
 	                    $tempmax = $item->grademax;
 	                    // TODO: check to see if cat_item is getting set whether accurate points is set or not
                         if ($gradedisplaytype == GRADE_DISPLAY_TYPE_REAL && isset($grade->cat_item)) {
-                        	$items = $this->gtree->items;
 		               		$grade_values = $grade->cat_item;
 		               		$grade_maxes = $grade->cat_max;
-		               		$this_cat = $this->gtree->items[$grade->itemid]->get_item_category();
+		               		$this_cat = $items[$grade->itemid]->get_item_category();
 		               		$this->gtree->limit_item($this_cat,$items,$grade_values,$grade_maxes);
 			       			$gradeval = array_sum($grade_values);
 			       			$item->grademax = array_sum($grade_maxes);
                         }
 //                      	$value = grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype, null);
 						$item->grademax = $tempmax;
-                      	if (! $grade->is_hidden() && $gradeval <> null && $this->accuratetotals && isset($this->gtree->parents[$grade->itemid]->id)) {
-                			$this->grades[$userid][$this->gtree->parents[$grade->itemid]->id]->cat_item[$grade->itemid] = $gradeval;
-							$this->grades[$userid][$this->gtree->parents[$grade->itemid]->id]->cat_max[$grade->itemid] = $grade->rawgrademax;
+                      	if (! $grade->is_hidden() && $gradeval <> null && $this->accuratetotals && isset($parents[$grade->itemid]->parent_id)) {
+                			$this->grades[$userid][$parents[$grade->itemid]->parent_id]->cat_item[$grade->itemid] = $gradeval;
+							$this->grades[$userid][$parents[$grade->itemid]->parent_id]->cat_max[$grade->itemid] = $grade->rawgrademax;
 				   		}
                     	$itemcell->text .= html_writer::tag('span', grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype, null), array('class'=>"gradevalue$hidden$gradepass"));
                         if ($this->get_pref('showanalysisicon')) {
@@ -1312,8 +1314,8 @@ class grade_report_laegrader extends grade_report_grader {
                 	$grade_maxes = $this->gtree->items[$itemid]->cat_max;
                 	$item->grademax = array_sum($grade_maxes);
                 }
-               	if ((!$unused->is_hidden() || $showtotalsifcontainhidden == GRADE_REPORT_SHOW_REAL_TOTAL_IF_CONTAINS_HIDDEN) && $this->accuratetotals && isset($this->gtree->parents[$itemid]->id)) {
-                	$this->gtree->items[$this->gtree->parents[$itemid]->id]->cat_max[$itemid] = $item->grademax;
+               	if ((!$unused->is_hidden() || $showtotalsifcontainhidden == GRADE_REPORT_SHOW_REAL_TOTAL_IF_CONTAINS_HIDDEN) && $this->accuratetotals && isset($parents[$itemid]->parent_id)) {
+                	$this->gtree->items[$parents[$itemid]->parent_id]->cat_max[$itemid] = $item->grademax;
                 }
 
                 $hidden = '';
@@ -1787,7 +1789,7 @@ class grade_report_laegrader extends grade_report_grader {
 		$colcounter = 1;
         foreach ($items as $grade_item) {
         	$colcounter++;
-        	if (isset($parents[$grade_item->id]->id) && $parents[$grade_item->id]->agg == GRADE_AGGREGATE_WEIGHTED_MEAN) {
+        	if (isset($parents[$grade_item->id]->parent_id) && $parents[$grade_item->id]->parent_agg == GRADE_AGGREGATE_WEIGHTED_MEAN) {
 				$col[] = $grade_item->aggregationcoef . '%';
             } else {
                 $col[] = '';
@@ -1813,19 +1815,19 @@ class grade_report_laegrader extends grade_report_grader {
             		$items[$itemid]->grademax = array_sum($grade->cat_max);
             		$gradestr = grade_format_gradevalue_real(array_sum($grade->cat_item), $items[$itemid], 2);
             		$items[$itemid]->grademax = $tempmax;
-                   	if (! $grade->is_hidden() && $grade->finalgrade !== null && $accuratetotals && isset($parents[$grade->itemid]->id)) {
-               			$userdata->grades[$parents[$itemid]->id]->cat_item[$itemid] = array_sum($grade->cat_item); // accumulate earned points
+                   	if (! $grade->is_hidden() && $grade->finalgrade !== null && $accuratetotals && isset($parents[$grade->itemid]->parent_id)) {
+               			$userdata->grades[$parents[$itemid]->parent_id]->cat_item[$itemid] = array_sum($grade->cat_item); // accumulate earned points
                			// can't use rawgrademax from grade_grades because it never gets updated
-						$userdata->grades[$parents[$itemid]->id]->cat_max[$itemid] = array_sum($grade->cat_max); // accumulate earnable points
+						$userdata->grades[$parents[$itemid]->parent_id]->cat_max[$itemid] = array_sum($grade->cat_max); // accumulate earnable points
 			   		}
     	        	$col[] = $gradestr;
 			   		$col[] = '';
             	} else {
 	                $gradestr = grade_format_gradevalue_real($grade->finalgrade, $items[$itemid], 2);
-                   	if (! $grade->is_hidden() && $grade->finalgrade !== null && $accuratetotals && isset($parents[$grade->itemid]->id)) {
-               			$userdata->grades[$parents[$itemid]->id]->cat_item[$itemid] = $grade->finalgrade;
+                   	if (! $grade->is_hidden() && $grade->finalgrade !== null && $accuratetotals && isset($parents[$grade->itemid]->parent_id)) {
+               			$userdata->grades[$parents[$itemid]->parent_id]->cat_item[$itemid] = $grade->finalgrade;
                			// can't use rawgrademax from grade_grades because it never gets updated
-						$userdata->grades[$parents[$itemid]->id]->cat_max[$itemid] = $items[$itemid]->grademax;
+						$userdata->grades[$parents[$itemid]->parent_id]->cat_max[$itemid] = $items[$itemid]->grademax;
 			   		}
     	        	$col[] = $gradestr;
             	}
