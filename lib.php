@@ -1824,8 +1824,8 @@ class grade_report_laegrader extends grade_report_grader {
 
         return $arrows;
     }
-}
-    function quick_dump($items, $parents, $accuratetotals, $course) {
+
+    function quick_dump() {
         global $CFG;
         $strgrades = get_string('grades');
 
@@ -1833,6 +1833,13 @@ class grade_report_laegrader extends grade_report_grader {
 		$rows = array();
         $col = array();
         $col[] = '';
+        $col[] = '';
+        $colcounter = 0;
+        // assign objects to variable names used previously when this was outside the class structure
+        $items = $this->gtree->items;
+        $parents = $this->gtree->parents;
+        $course = $this->course;
+        $accuratetotals = $this->accuratetotals;
         foreach ($items as $grade_item) {
         	$colcounter++;
         	if (is_null($grade_item->itemmodule)) {
@@ -1846,7 +1853,8 @@ class grade_report_laegrader extends grade_report_grader {
 
 		/// Print names of all the fields
 		unset($col);
-        $col[] = get_string("firstname") . ' ' . get_string("lastname") . chr(10) . get_string("email");
+		$col[] = get_string('email');
+        $col[] = get_string("firstname") . ' ' . get_string("lastname");
         foreach ($items as $grade_item) {
         	$col[] = $grade_item->itemname;
         	if (is_null($grade_item->itemmodule)) {
@@ -1857,14 +1865,15 @@ class grade_report_laegrader extends grade_report_grader {
 
         // write out range row
         unset($col);
+        $col[] = '';
         $col[] = 'Maximum points->';
-        foreach ($items as $grade_item) { // TODO: fix for cat andcourse maxpoints, also no decimals
+        foreach ($items as $itemid => $grade_item) { // TODO: fix for cat andcourse maxpoints, also no decimals
             if (isset($grade_item->max_earnable)) {
-               	$gradestr = grade_format_gradevalue_real($grade_item->max_earnable, $items[$itemid], 2);
+               	$gradestr = grade_format_gradevalue_real($grade_item->max_earnable, $items[$itemid], 2, true);
     	    	$col[] = $gradestr;
             	$col[] = '';
             } else {
-	        	$gradestr = grade_format_gradevalue_real($grade_item->grademax, $items[$itemid], 2);
+	        	$gradestr = grade_format_gradevalue_real($grade_item->grademax, $items[$itemid], 2, true);
     	    	$col[] = $gradestr;
             }
         }
@@ -1872,6 +1881,7 @@ class grade_report_laegrader extends grade_report_grader {
 
         // write out weights row
         unset($col);
+        $col[] = '';
         $col[] = 'Weight->';
 		$colcounter = 1;
         foreach ($items as $grade_item) {
@@ -1888,43 +1898,55 @@ class grade_report_laegrader extends grade_report_grader {
         $rows[] = $col;
 
     	/// Print all the lines of data.
-        $gui = new graded_users_iterator($course, $items);
-        $gui->init();
-        while ($userdata = $gui->next_user()) {
-        	unset($col);
-        	$user = $userdata->user;
+//        $gui = new graded_users_iterator($course, $items);
+//        $gui->init();
 
-        	// name and points line
+        // again, creating variable to match what was here before
+        $userdata = new stdClass();
+        $userdata->grades = $this->grades;
+        foreach ($this->users as $userid => $user) {
+//        while ($userdata = $gui->next_user()) {
+        	unset($col);
+//        	$user = $userdata->user;
+
+			// email
+			$col[] = $user->email;
+
+			// name and points line
             $col[] = $user->firstname . ' ' . $user->lastname;
-            foreach ($userdata->grades as $itemid => $grade) {
+            foreach ($items as $itemid => $item) {
+                $grade = $this->grades[$userid][$itemid];
             	if (in_array($items[$itemid]->itemtype, array('course','category'))) {// categories and course items get their actual points from the accumulation in cat_item
-            		$tempmax = $items[$itemid]->grademax;
+                    // set the parent_id differently for the course item
+            	    $parent_id = $items[$itemid]->itemtype == 'category' ? $this->grades[$userid][$parents[$itemid]->parent_id] : $itemid;
+            	    $tempmax = $items[$itemid]->grademax;
             		$items[$itemid]->grademax = array_sum($grade->cat_max);
-            		$gradestr = grade_format_gradevalue_real(array_sum($grade->cat_item), $items[$itemid], 2);
+            		$gradestr = grade_format_gradevalue_real(array_sum($grade->cat_item), $items[$itemid], 2, true);
             		$items[$itemid]->grademax = $tempmax;
-                   	if (! $grade->is_hidden() && $grade->finalgrade !== null && $accuratetotals && isset($parent_id)) {
-               			$userdata->grades[$parents[$itemid]->parent_id]->cat_item[$itemid] = array_sum($grade->cat_item); // accumulate earned points
+                   	if (! $grade->is_hidden() && $grade->finalgrade !== null && $accuratetotals && isset($parent_id) && $items[$itemid]->itemtype !== 'course') {
+               			$this->grades[$userid][$parents[$itemid]->parent_id]->cat_item[$itemid] = $grade->finalgrade;
                			// can't use rawgrademax from grade_grades because it never gets updated
-						$userdata->grades[$parents[$itemid]->parent_id]->cat_max[$itemid] = array_sum($grade->cat_max); // accumulate earnable points
+						$this->grades[$userid][$parents[$itemid]->parent_id]->cat_max[$itemid] = $items[$itemid]->grademax;
 			   		}
     	        	$col[] = $gradestr;
 			   		$col[] = '';
             	} else {
-	                $gradestr = grade_format_gradevalue_real($grade->finalgrade, $items[$itemid], 2);
+            	    $parent_id = $this->grades[$userid][$parents[$itemid]->parent_id];
+            	    $gradestr = grade_format_gradevalue_real($grade->finalgrade, $items[$itemid], 2, true);
                    	if (! $grade->is_hidden() && $grade->finalgrade !== null && $accuratetotals && isset($parent_id)) {
-               			$userdata->grades[$parents[$itemid]->parent_id]->cat_item[$itemid] = $grade->finalgrade;
+               			$this->grades[$userid][$parents[$itemid]->parent_id]->cat_item[$itemid] = $grade->finalgrade;
                			// can't use rawgrademax from grade_grades because it never gets updated
-						$userdata->grades[$parents[$itemid]->parent_id]->cat_max[$itemid] = $items[$itemid]->grademax;
+						$this->grades[$userid][$parents[$itemid]->parent_id]->cat_max[$itemid] = $items[$itemid]->grademax;
 			   		}
     	        	$col[] = $gradestr;
             	}
             }
-			$rows[] = $col;
-			unset($col);
+//			$rows[] = $col;
+//			unset($col);
 
-			// email and percentage line
-            $col[] = $user->email;
-            foreach ($userdata->grades as $itemid => $grade) {
+			// percentage line
+/*
+            foreach ($userdata->grades[$userid] as $itemid => $grade) {
             	if (in_array($items[$itemid]->itemtype, array('course','category'))) {// categories and course items get their actual points from the accumulation in cat_item
             		$gradestr = array_sum($grade->cat_max);
 	                $col[] = $gradestr;
@@ -1933,34 +1955,29 @@ class grade_report_laegrader extends grade_report_grader {
                 	$col[] = '';
             	}
             }
+*/
 			$rows[] = $col;
         }
 
-        $gui->close();
+//        $gui->close();
 	    // Calculate file name
         $shortname = $course->shortname;
-        $filename = clean_filename("$shortname . $strgrades.csv");
-/*        $getfile = $CFG->dataroot.'/courseevals/' . $filename;
-        $target = fopen($getfile,'w');
-        foreach ($rows as $row ) {
-        	fputcsv($target,$row);
-        }
-        fclose($target);
-*/
-        	// tell the browser it's going to be a csv file
-        	header('Content-Type: text/csv; charset=utf-8');
-        	// tell the browser we want to save it instead of displaying it
-        	header("Content-Disposition: attachment; filename=\"" . $filename . "\"");
+        $filename = clean_filename("$shortname-$strgrades.csv");
+    	// tell the browser it's going to be a csv file
+    	header('Content-Type: text/csv; charset=utf-8');
+    	// tell the browser we want to save it instead of displaying it
+    	header("Content-Disposition: attachment; filename=\"" . $filename . "\"");
 
-        	// open raw memory as file so no temp files needed, you might run out of memory though
-        	$output = fopen('php://output', 'w');
-        	// loop over the input array
-            foreach ($rows as $row ) {
-	        	fputcsv($output,$row);
-        	}
-        	fclose($output);
-			exit;
+    	// open raw memory as file so no temp files needed, you might run out of memory though
+    	$output = fopen('php://output', 'w');
+    	// loop over the input array
+        foreach ($rows as $row ) {
+        	fputcsv($output,$row);
+    	}
+    	fclose($output);
+		exit;
     }
+}
 
 function grade_report_laegrader_settings_definition(&$mform) {
 	global $CFG;

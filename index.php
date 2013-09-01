@@ -57,25 +57,6 @@ require_capability('moodle/grade:viewall', $context);
 /// return tracking object
 $gpr = new grade_plugin_return(array('type'=>'report', 'plugin'=>'laegrader', 'courseid'=>$courseid, 'page'=>$page));
 
-if ($action === 'quick-dump') {
-
-	require_capability('moodle/grade:export', $context);
-	require_capability('gradeexport/xls:view', $context);
-
-	if (groups_get_course_groupmode($COURSE) == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
-		if (!groups_is_member($groupid, $USER->id)) {
-			print_error('cannotaccessgroup', 'grades');
-		}
-	}
-
-	$report = new grade_report_laegrader($courseid, $gpr, $context, $page, $sortitemid); // END OF HACK
-
-	// print all the exported data here
-	quick_dump($report->gtree->items, $report->gtree->parents, $report->accuratetotals, $report->course);
-	//	$report->quick_dump();
-	redirect($PAGE->url_get_path(), null, 0);
-}
-
 // clear all overrides in a column when the clearoverrides icon is clicked
 if ($action == 'clearoverrides' && $itemid !== 0) {
 	$records = $DB->get_records('grade_grades', array('itemid'=>$itemid));
@@ -149,7 +130,9 @@ grade_regrade_final_grades($courseid);
 $reportname = get_string('pluginname', 'gradereport_laegrader');
 
 /// Print header
-print_grade_page_head($COURSE->id, 'report', 'laegrader', $reportname, false, $buttons);
+if ($action !== 'quick-dump') {
+    print_grade_page_head($COURSE->id, 'report', 'laegrader', $reportname, false, $buttons);
+}
 
 // Initialise the grader report object
 $report = new grade_report_laegrader($courseid, $gpr, $context, $page, $sortitemid); // END OF HACK
@@ -172,6 +155,26 @@ if ($data = data_submitted() and confirm_sesskey() and has_capability('moodle/gr
 $report->load_users();
 $numusers = $report->get_numusers();
 $report->load_final_grades();
+
+if ($action === 'quick-dump') {
+
+    require_capability('moodle/grade:export', $context);
+    require_capability('gradeexport/xls:view', $context);
+
+    if (groups_get_course_groupmode($COURSE) == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $context)) {
+        if (!groups_is_member($groupid, $USER->id)) {
+            print_error('cannotaccessgroup', 'grades');
+        }
+    }
+
+//    $report = new grade_report_laegrader($courseid, $gpr, $context, $page, $sortitemid); // END OF HACK
+
+    // print all the exported data here
+    $report->quick_dump();
+    //	$report->quick_dump();
+//    redirect($PAGE->url_get_path(), null, 0);
+}
+
 // AT THIS POINT WE HAVE ACCURATE GRADES FOR DISPLAY
 // no other grader actions are relevant as they expand or compress the column headers
 echo $report->group_selector;
