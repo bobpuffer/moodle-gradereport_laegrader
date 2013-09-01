@@ -1134,8 +1134,7 @@ class grade_report_laegrader extends grade_report_grader {
 
                 } else { // Not editing
                 	// can only use the first display type as different gradevals would need to be sent for real and letter/precentage
-                    $gradedisplaytype = (integer) substr( (string) $item->get_displaytype(),0,1);
-//                  $gradedisplaytype = $item->get_displaytype();
+                    $gradedisplaytype = $item->get_displaytype();
 
                     if ($item->scaleid && !empty($scalesarray[$item->scaleid])) {
                         $itemcell->attributes['class'] .= ' grade_type_scale';
@@ -1151,7 +1150,9 @@ class grade_report_laegrader extends grade_report_grader {
                     // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no cat_item value
                     $tempmax = $item->grademax;
                     if (isset($grade->cat_item)) { // if cat_item is set THIS IS A CATEGORY
-		       			switch ($gradedisplaytype) {
+                        $gradedisplaytype1 = (integer) substr( (string) $gradedisplaytype,0,1);
+                        $gradedisplaytype2 = $gradedisplaytype > 10 ? (integer) substr( (string) $gradedisplaytype,1,1) : null;
+                        switch ($gradedisplaytype1) {
 		       			    case GRADE_DISPLAY_TYPE_REAL:
 		       			        $grade_values = $grade->cat_item;
 		       			        $grade_maxes = $grade->cat_max;
@@ -1166,10 +1167,33 @@ class grade_report_laegrader extends grade_report_grader {
 		       			    case GRADE_DISPLAY_TYPE_LETTER:
 		       			        break;
 		       			}
-
+                        $formattedgradeval = grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype1, null); // category and course formatted grade
+                    } else {
+                        $formattedgradeval = grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype, null); // item can use standard method of double formatting if present
                     }
 
-                	$itemcell->text .= html_writer::tag('span', grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype, null), array('class'=>"gradevalue$hidden$gradepass"));
+                    // second round for the second display type if present for a category, items are taken care of the regular way
+                    if (isset($gradedisplaytype2)) {
+                        if (isset($grade->cat_item)) { // if cat_item is set THIS IS A CATEGORY
+                            switch ($gradedisplaytype1) {
+                                case GRADE_DISPLAY_TYPE_REAL:
+                                    $grade_values = $grade->cat_item;
+                                    $grade_maxes = $grade->cat_max;
+                                    $this_cat = $items[$grade->itemid]->get_item_category();
+                                    $this->gtree->limit_item($this_cat,$items,$grade_values,$grade_maxes);
+                                    $gradeval = array_sum($grade_values);
+                                    $item->grademax = array_sum($grade_maxes);
+                                    break;
+                                case GRADE_DISPLAY_TYPE_PERCENTAGE:
+                                    $gradeval = $type == 'category' ? $this->grades[$userid][$parent_id]->pctg[$grade->itemid] : $this->grades[$userid][$grade->itemid]->coursepctg;
+                                    $item->grademax = 1;
+                                case GRADE_DISPLAY_TYPE_LETTER:
+                                    break;
+                            }
+                            $formattedgradeval .= ' (' . grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype2, null) . ')';
+                        }
+                    }
+                    $itemcell->text .= html_writer::tag('span', $formattedgradeval, array('class'=>"gradevalue$hidden$gradepass"));
 					$item->grademax = $tempmax;
                 	if ($this->get_pref('showanalysisicon')) {
                         $itemcell->text .= $this->gtree->get_grade_analysis_icon($grade);
@@ -1616,7 +1640,7 @@ class grade_report_laegrader extends grade_report_grader {
         // Init all icons
         $editicon = '';
 
-        if ($element['type'] != 'category' && $element['type'] != 'course') {
+        if ($element['type'] != 'category' && $element['type'] != 'course' && !$this->accuratetotals) {
             $editicon = $this->gtree->get_edit_icon($element, $this->gpr);
         }
 
