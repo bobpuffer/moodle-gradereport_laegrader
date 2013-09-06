@@ -1175,7 +1175,7 @@ class grade_report_laegrader extends grade_report_grader {
                     // second round for the second display type if present for a category, items are taken care of the regular way
                     if (isset($gradedisplaytype2)) {
                         if (isset($grade->cat_item)) { // if cat_item is set THIS IS A CATEGORY
-                            switch ($gradedisplaytype1) {
+                            switch ($gradedisplaytype2) {
                                 case GRADE_DISPLAY_TYPE_REAL:
                                     $grade_values = $grade->cat_item;
                                     $grade_maxes = $grade->cat_max;
