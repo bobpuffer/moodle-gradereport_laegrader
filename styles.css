@@ -216,6 +216,12 @@ table#lae-user-grades input[type="text"] {
     text-align: center;
 }
 
+.laegradestable .userpicture {
+    border: 1px solid #AAAAAA;
+    border-radius: 20px 20px 20px 20px;
+    margin: 3px 10px 3px 3px;
+}
+
 /***
 *** added the following for the alignment issues
 ***/
