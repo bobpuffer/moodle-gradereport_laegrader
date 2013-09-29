@@ -163,7 +163,7 @@ class grade_tree_local extends grade_tree {
  		       	$header .= $catname;
 		}
 		if ($element['object']->aggregationcoef > 1) {
-		    $header .= 'W=' . format_float($element['object']->aggregationcoef,1, true, true) . '%<br />';
+		    $header .= ' W=' . format_float($element['object']->aggregationcoef,1, true, true) . '%<br />';
 		}
 		if ($titlelength) {
 	        $header = wordwrap($header, $titlelength, '<br />');
