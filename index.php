@@ -194,7 +194,7 @@ if (!empty($studentsperpage)) {
 }
 
 $reporthtml = $report->get_grade_table();
-$reporthtml .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$CFG->wwwroot/grade/report/laegrader/styles.css\" />";
+//$reporthtml .= "<link rel=\"stylesheet\" type=\"text/css\" href=\"$CFG->wwwroot/grade/report/laegrader/styles.css\" />";
 $reporthtml .= '<script src="jquery-1.7.2.min.js" type="text/javascript"></script>';
 		/*
        	 * code going into the html entity to enable scrolling columns and rows
