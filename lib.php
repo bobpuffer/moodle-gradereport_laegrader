@@ -1665,7 +1665,7 @@ class grade_report_laegrader extends grade_report_grader {
         // Init all icons
         $editicon = '';
 
-        if ($element['type'] != 'category' && $element['type'] != 'course' && !$this->accuratetotals) {
+        if (($element['type'] != 'category' && $element['type'] != 'course') || !$this->accuratetotals) {
             $editicon = $this->gtree->get_edit_icon($element, $this->gpr);
         }
 
