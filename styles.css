@@ -515,3 +515,13 @@ vertical-align:top;
 border-style:solid;
 border-width:1px 1px 0;
 }
+
+/* RTL support (Basic)
+   TODO: Switch activities header and grades to RTL too
+*/
+
+.dir-rtl .laegradestable .cell {height: 10px;}
+.dir-rtl .laegradestable .userpicture {margin: 0; border-radius:10px;}
+.dir-rtl#page-grade-report-laegrader-index .gradeparent {direction: ltr;}
+.laegradestable th.user {text-align: right;direction: rtl;}
+.dir-rtl [id="lae-user-grades:scroller:fxcol"] {float:right !important;}
