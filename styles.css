@@ -172,3 +172,13 @@ table#lae-user-grades input[type="text"] {
 .path-grade-report-laegrader div.submit {
 	text-align:center;
 }
+
+/* RTL support (Basic)
+   TODO: Switch activities header and grades to RTL too
+*/
+
+.dir-rtl .laegradestable .cell {height: 10px;}
+.dir-rtl .laegradestable .userpicture {margin: 0; border-radius:10px;}
+.dir-rtl#page-grade-report-laegrader-index .gradeparent {direction: ltr;}
+.laegradestable th.user {text-align: right;direction: rtl;}
+.dir-rtl [id="lae-user-grades:scroller:fxcol"] {float:right !important;}
