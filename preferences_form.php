@@ -103,6 +103,7 @@ class laegrader_report_preferences_form extends moodleform {
             $preferences['prefgeneral']['showquickfeedback'] = $checkbox_default;
 //            $preferences['prefgeneral']['gradeeditalways'] = $checkbox_default; // later for Luther only
             $preferences['prefgeneral']['laegraderreportheight'] = array(300,340,380,420,460,500,540,580,620,660,700,740,780,820,860,900);
+            $preferences['prefgeneral']['extrafields'] = $checkbox_default;;
         }
 
         // View capability is the lowest permission. Users with grade:manage or grade:edit must also have grader:view
@@ -178,14 +179,17 @@ class laegrader_report_preferences_form extends moodleform {
                     $options[GRADE_REPORT_PREFERENCE_DEFAULT] = get_string('reportdefault', 'grades', $default);
                 }
 
-                if ($lang_string == 'showclearoverrides' || $lang_string == 'laegraderreportheight' || $lang_string == 'showzerofill') {
+                if ($lang_string == 'showclearoverrides' || $lang_string == 'laegraderreportheight' || $lang_string == 'showzerofill' || $lang_string == 'extrafields') {
                 	$label = get_string($lang_string, 'gradereport_laegrader') ;
                 } else {
                 	$label = get_string($lang_string, 'grades') . $number;
                 }
 
                 $mform->addElement($type, $full_pref, $label, $options);
-                if ($lang_string != 'showuserimage' && $lang_string != 'showclearoverrides' && $lang_string != 'laegraderreportheight' && $lang_string != 'showzerofill') {
+                if ($lang_string == 'extrafields') {
+                    $mform->addHelpButton($full_pref, $lang_string, 'gradereport_laegrader');
+                }
+                elseif ($lang_string != 'showuserimage' && $lang_string != 'showclearoverrides' && $lang_string != 'laegraderreportheight' && $lang_string != 'showzerofill') {
                     $mform->addHelpButton($full_pref, $lang_string, 'grades');
                 }
                 $mform->setDefault($full_pref, $pref_value);
