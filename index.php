@@ -208,7 +208,7 @@ $reporthtml .= '<script src="jquery-1.7.2.min.js" type="text/javascript"></scrip
 		$headerrows = ($USER->gradeediting[$courseid]) ? 2 : 1;
 		$headerrows += ($report->get_pref('showaverages')) ? 1 : 0;
 		$headerrows += ($report->get_pref('showranges')) ? 1 : 0;
-		$extrafields = get_extra_user_fields($context);
+		$extrafields = $report->extrafields;
 		$headercols = 1 + count($extrafields);
 //		$headercols = ($report->get_pref('showuseridnumber')) ? 3 : 2;
 		$headercols += has_capability('gradereport/'.$CFG->grade_profilereport.':view', $context) ? 1 : 0;
