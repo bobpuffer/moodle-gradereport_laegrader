@@ -111,5 +111,5 @@ if ($ADMIN->fulltree) {
                                                      '5' => '5')));
 	$settings->add(new admin_setting_configcheckbox('grade_report_laegrader_accuratetotals', get_string('accuratetotals', 'gradereport_laegrader'), get_string('configaccuratetotals', 'gradereport_laegrader'), 2, PARAM_INT));
                                               
-    $settings->add(new admin_setting_configcheckbox('grade_report_laegrader_extracols', get_string('extracols', 'gradereport_laegrader'), get_string('extracols_help', 'gradereport_laegrader'), 0));
+    $settings->add(new admin_setting_configcheckbox('grade_report_laegrader_extrafields', get_string('extrafields', 'gradereport_laegrader'), get_string('extrafields_help', 'gradereport_laegrader'), 0));
 }
