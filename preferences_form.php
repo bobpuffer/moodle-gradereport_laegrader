@@ -103,7 +103,8 @@ class laegrader_report_preferences_form extends moodleform {
             $preferences['prefgeneral']['showquickfeedback'] = $checkbox_default;
 //            $preferences['prefgeneral']['gradeeditalways'] = $checkbox_default; // later for Luther only
             $preferences['prefgeneral']['laegraderreportheight'] = array(300,340,380,420,460,500,540,580,620,660,700,740,780,820,860,900);
-            $preferences['prefgeneral']['extrafields'] = $checkbox_default;;
+            $ef_default = $CFG->grade_report_laegrader_extrafields == 1 ? get_string('yes') : get_string('no') ;
+            $preferences['prefgeneral']['extrafields'] = array(GRADE_REPORT_PREFERENCE_DEFAULT => get_string('reportdefault', 'grades', $ef_default), 0 => get_string('no'), 1 => get_string('yes'));
         }
 
         // View capability is the lowest permission. Users with grade:manage or grade:edit must also have grader:view
