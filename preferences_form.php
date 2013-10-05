@@ -164,6 +164,7 @@ class laegrader_report_preferences_form extends moodleform {
                         } else {
                             $default = $options[$CFG->grade_aggregationposition];
                         }
+                    } else if ($full_pref == 'grade_report_laegraderreportheight') {
                     } elseif (isset($options[$CFG->{$full_pref}])) {
                         $default = $options[$CFG->{$full_pref}];
                     } else {
