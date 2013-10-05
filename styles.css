@@ -150,7 +150,9 @@ border-top:1px solid #cecece;
 
 .laegradestable th.item ,
 .laegradestable th.categoryitem,
-.laegradestable th.courseitem {
+.laegradestable th.courseitem,
+.laegradestable th.useremail,
+.laegradestable th.useridnumber {
 vertical-align:bottom;
 border-style:solid;
 border-width:1px;
