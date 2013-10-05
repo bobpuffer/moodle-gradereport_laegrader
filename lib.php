@@ -89,6 +89,8 @@ class grade_report_laegrader extends grade_report_grader {
      * */
     public $canviewhidden;
 
+    public $extrafields;
+
     var $preferences_page=false;
 
     /**
@@ -606,7 +608,17 @@ class grade_report_laegrader extends grade_report_grader {
         $strfeedback  = $this->get_lang_string("feedback");
         $strgrade     = $this->get_lang_string('grade');
 
-        $extrafields = get_extra_user_fields($this->context);
+        $adminextrafields = $CFG->grade_report_laegrader_extrafields == 1 ? 1 : 0 ;
+        $userextrafields = get_user_preferences( 'grade_report_extrafields' );
+        if ( !(isset($userextrafields)) ) { $userextrafields = $adminextrafields; }
+        if ( $userextrafields == 1 ) {
+            $this->extrafields = get_extra_user_fields($this->context);
+        }
+        else {
+            $this->extrafields = array();
+        }
+
+        $extrafields = $this->extrafields;
 
         $arrows = $this->get_sort_arrows($extrafields);
 
