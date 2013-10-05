@@ -633,7 +633,6 @@ class grade_report_laegrader extends grade_report_grader {
                 . '&action=quick-dump" class="inlinebutton"><img src="' . $CFG->wwwroot . '/grade/report/laegrader/images/copytoexcel.png" /></a></div>';
 
         $studentheader->text = $output . $arrows['studentname'];
- //       $studentheader->text = $arrows['studentname'];
 
         $headerrow->cells[] = $studentheader;
 
@@ -669,7 +668,8 @@ class grade_report_laegrader extends grade_report_grader {
             $userrow = new html_table_row();
             $userrow->id = 'fixed_user_'.$userid;
             $userrow->attributes['class'] = 'r'.$this->rowcount++.' '.$rowclasses[$this->rowcount % 2];
-
+            $itemrow->attributes['class'] = $rowclasses[$this->rowcount % 2];
+            
             $usercell = new html_table_cell();
             $usercell->attributes['class'] = 'user';
 
@@ -874,6 +874,11 @@ class grade_report_laegrader extends grade_report_grader {
                 $type = $item->itemtype;
                 $grade = $this->grades[$userid][$item->id];
 
+                $hidden = '';
+                if ($grade->is_hidden()) {
+//                    $hidden = ' hidden ';
+                    $hidden = ' gray ';
+                }
                 $itemcell = new html_table_cell();
 
                 $itemcell->id = 'u'.$userid.'i'.$itemid;
@@ -941,18 +946,6 @@ class grade_report_laegrader extends grade_report_grader {
                 if ($grade->is_excluded()) {
                     $itemcell->text .= html_writer::tag('span', get_string('excluded', 'grades'), array('class'=>'excludedfloater'));
                 }
-
-                // Do not show any icons if no grade (no record in DB to match)
-                if (!$item->needsupdate and $USER->gradeediting[$this->courseid]) {
-                    $itemcell->text .= $this->get_icons($element);
-                }
-
-                $hidden = '';
-                if ($grade->is_hidden()) {
-//                    $hidden = ' hidden ';
-                    $hidden = ' gray ';
-                }
-                $itemcell->attributes['class'] .= $hidden;
 
                 $gradepass = ' gradefail ';
                 if ($grade->is_passed($item)) {
@@ -1228,7 +1221,14 @@ class grade_report_laegrader extends grade_report_grader {
                 if (!empty($this->gradeserror[$item->id][$userid])) {
                     $itemcell->text .= $this->gradeserror[$item->id][$userid];
                 }
+                
+                // Do not show any icons if no grade (no record in DB to match)
+                if (!$item->needsupdate and $USER->gradeediting[$this->courseid]) {
+                    $itemcell->text .= $this->get_icons($element);
+                }
 
+                $itemcell->attributes['class'] .= $hidden;
+                
                 $itemrow->cells[] = $itemcell;
             }
             $rows[] = $itemrow;
