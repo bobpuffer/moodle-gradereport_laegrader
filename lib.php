@@ -609,7 +609,7 @@ class grade_report_laegrader extends grade_report_grader {
         $strgrade     = $this->get_lang_string('grade');
 
         $adminextrafields = $CFG->grade_report_laegrader_extrafields == 1 ? 1 : 0 ;
-        $userextrafields = get_user_preferences( 'grade_report_extrafields' );
+        $userextrafields = get_user_preferences( 'grade_report_laegrader_extrafields' );
         if ( !(isset($userextrafields)) ) { $userextrafields = $adminextrafields; }
         if ( $userextrafields == 1 ) {
             $this->extrafields = get_extra_user_fields($this->context);

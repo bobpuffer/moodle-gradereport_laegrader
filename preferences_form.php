@@ -104,7 +104,7 @@ class laegrader_report_preferences_form extends moodleform {
 //            $preferences['prefgeneral']['gradeeditalways'] = $checkbox_default; // later for Luther only
             $preferences['prefgeneral']['laegraderreportheight'] = array(300,340,380,420,460,500,540,580,620,660,700,740,780,820,860,900);
             $ef_default = $CFG->grade_report_laegrader_extrafields == 1 ? get_string('yes') : get_string('no') ;
-            $preferences['prefgeneral']['extrafields'] = array(GRADE_REPORT_PREFERENCE_DEFAULT => get_string('reportdefault', 'grades', $ef_default), 0 => get_string('no'), 1 => get_string('yes'));
+            $preferences['prefgeneral']['laegrader_extrafields'] = array(GRADE_REPORT_PREFERENCE_DEFAULT => get_string('reportdefault', 'grades', $ef_default), 0 => get_string('no'), 1 => get_string('yes'));
         }
 
         // View capability is the lowest permission. Users with grade:manage or grade:edit must also have grader:view
@@ -181,14 +181,14 @@ class laegrader_report_preferences_form extends moodleform {
                     $options[GRADE_REPORT_PREFERENCE_DEFAULT] = get_string('reportdefault', 'grades', $default);
                 }
 
-                if ($lang_string == 'showclearoverrides' || $lang_string == 'laegraderreportheight' || $lang_string == 'showzerofill' || $lang_string == 'extrafields') {
+                if ($lang_string == 'showclearoverrides' || $lang_string == 'laegraderreportheight' || $lang_string == 'showzerofill' || $lang_string == 'laegrader_extrafields') {
                 	$label = get_string($lang_string, 'gradereport_laegrader') ;
                 } else {
                 	$label = get_string($lang_string, 'grades') . $number;
                 }
 
                 $mform->addElement($type, $full_pref, $label, $options);
-                if ($lang_string == 'extrafields') {
+                if ($lang_string == 'laegrader_extrafields') {
                     $mform->addHelpButton($full_pref, $lang_string, 'gradereport_laegrader');
                 }
                 elseif ($lang_string != 'showuserimage' && $lang_string != 'showclearoverrides' && $lang_string != 'laegraderreportheight' && $lang_string != 'showzerofill') {
