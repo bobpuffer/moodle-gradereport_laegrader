@@ -61,8 +61,8 @@ class grade_tree_local extends grade_tree {
 
         $this->courseid   = $courseid;
         $this->levels     = array();
-        $this->context    = get_context_instance(CONTEXT_COURSE, $courseid);
-
+        $this->context    = context_course::instance($courseid);
+        
         if (!empty($COURSE->id) && $COURSE->id == $this->courseid) {
             $course = $COURSE;
         } else {
