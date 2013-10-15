@@ -85,6 +85,7 @@ class grade_tree_local extends grade_tree {
 
         // provide for crossindexing of modinfo and grades in the case of display by group so items not assigned to a group can be omitted
         // first determine if enablegroupmembersonly is on, then determine if groupmode is set (separate or visible)
+/*
         $this->modx = array();
         if ($CFG->enablegroupmembersonly && $CFG->currentgroup > 0 ) {
             $groupingsforthisgroup = $DB->get_fieldset_select('groupings_groups', 'groupingid', " groupid = $CFG->currentgroup ");
@@ -100,7 +101,7 @@ class grade_tree_local extends grade_tree {
                     AND cm.groupingid NOT IN($groupingsforthisgroup)";
             $this->modx = $DB->get_records_sql($sql);
         }
-
+*/
         // key to LAE grader, no levels
         grade_tree_local::fill_levels($this->levels, $this->top_element, 0);
         grade_tree_local::fill_levels_local($this->levelitems, $this->top_element, 0);
@@ -116,9 +117,10 @@ class grade_tree_local extends grade_tree {
 
     public function fill_levels_local(&$levelitems, &$element, $depth) {
 
-        if (array_key_exists($element['object']->id, $this->modx)) { // don't include something made only for a different group
+/*        if (array_key_exists($element['object']->id, $this->modx)) { // don't include something made only for a different group
             return;
-        } elseif ($element['type'] == 'category') { // prepare unique identifier
+        } else */
+    	if ($element['type'] == 'category') { // prepare unique identifier
             $element['eid'] = 'c'.$element['object']->id;
             $this->catitems[$element['object']->id] = $element['object']->fullname;
         } else if (in_array($element['type'], array('item', 'courseitem', 'categoryitem'))) {
@@ -396,9 +398,10 @@ class grade_tree_local extends grade_tree {
     function fill_parents($element, $idnumber, $showtotalsifcontainhidden = 0) {
         foreach($element['children'] as $sortorder=>$child) {
             // skip items that are only for another group than the one being considered
-            if (array_key_exists($child['object']->id, $this->modx)) {
+/*            if (array_key_exists($child['object']->id, $this->modx)) {
                 continue;
             }
+*/
             switch ($child['type']) {
                 case 'courseitem':
                 case 'categoryitem':
