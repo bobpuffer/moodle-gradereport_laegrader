@@ -172,7 +172,7 @@ class grade_tree_local extends grade_tree {
         }
 
         if ($icon) {
-            $header = $this->get_element_icon($element, $spacerifnone) . '<br />' . $header;
+            $header = $this->get_element_icon($element, $spacerifnone) . $header;
         }
 
         if ($withlink) {
@@ -274,6 +274,113 @@ class grade_tree_local extends grade_tree {
         return null;
     }
 */
+    
+	function accuratepointsprelimcalculation ($itemid, $type, $grade) {
+	    $gradeval = $grade->finalgrade;
+		if ($type !== 'course' && $type !== 'courseitem') {
+		    $parent_id = $this->parents[$itemid]->parent_id; // the parent record contains an id field pointing to its parent, the key on the parent record is the item itself to allow lookup
+	    }
+	    if ($type == 'categoryitem' || $type == 'courseitem' || $type == 'category' || $type == 'course') { // categoryitems or courseitems
+			if (isset($this->parents[$itemid]->cat_item)) { // if category or course has marked grades in it
+		        // set up variables that are used in this inserted limit_rules scrap
+		        $current_cat = $this->items[$itemid]->get_item_category(); // need category settings like drop-low or keep-high
+		
+		        // NEED TO RUN THROUGH THIS SEQUENCE THREE TIMES TO LIMIT ALL OF THE EXTRA ITEMS ADDED TO THE PARENTS ARRAY
+		        // copy cat_max to a variable we can send along with this bogus limit_item call to limit pctg
+		        $grade_maxes = $this->parents[$itemid]->cat_max; // range of earnable points for marked items
+		        $this->limit_item($current_cat,$this->items,$this->parents[$itemid]->pctg,$grade_maxes); // TODO: test this with some drop-low conditions to see if we can still ascertain the weighted grade
+		        // copy cat_max to a variable we can send along with this bogus limit_item call to limit cat_item
+		        $grade_maxes = $this->parents[$itemid]->cat_max; // range of earnable points for marked items
+		        $this->limit_item($current_cat,$this->items,$this->parents[$itemid]->cat_item,$grade_maxes); // TODO: test this with some drop-low conditions to see if we can still ascertain the weighted grade
+		        // assign after we've limited the source array
+		        $grade_maxes = $this->parents[$itemid]->cat_max; // range of earnable points for marked items
+		        $grade_values = $this->parents[$itemid]->cat_item; // earned points
+		    }
+	    } else { // items
+	        if ($grade->grade_item->aggregationcoef > 0 && $this->parents[$itemid]->parent_agg != GRADE_AGGREGATE_WEIGHTED_MEAN) {
+	            $this->parents[$parent_id]->excredit += $gradeval;
+	        } else {
+	            $this->parents[$parent_id]->cat_item[$itemid] = $gradeval;
+	            $this->parents[$parent_id]->cat_max[$itemid] = $grade->grade_item->grademax;
+	            if ($this->parents[$itemid]->parent_agg == GRADE_AGGREGATE_WEIGHTED_MEAN) {
+	                $this->parents[$parent_id]->agg_coef[$itemid] = $grade->grade_item->aggregationcoef;
+	            }
+	            $this->parents[$parent_id]->pctg[$itemid] = $gradeval / $grade->grade_item->grademax;
+	        }
+	    }
+	    if (!isset($grade_values)) {
+	        // do nothing
+	    } else if ($type == 'category' || $type == 'categoryitem') {
+	        // if we have a point value or if viewing an empty report
+	        // if (isset($gradeval) || $this->user->id == $USER->id) {
+	                            
+	        // preparing to deal with extra credit which would have an agg_coef of 1 if not WM
+	        if ($grade->grade_item->aggregationcoef > 0 && $this->parents[$itemid]->parent_agg != GRADE_AGGREGATE_WEIGHTED_MEAN) {
+	            $this->parents[$parent_id]->excredit += array_sum($grade_values);
+	        } else {
+	            // continue adding to the array under the parent object
+	            $this->parents[$parent_id]->cat_item[$itemid] = array_sum($grade_values) + $this->parents[$itemid]->excredit; // earned points
+	            $this->parents[$parent_id]->cat_max[$itemid] = array_sum($grade_maxes); // range of earnable points
+	            if ($this->parents[$itemid]->parent_agg == GRADE_AGGREGATE_WEIGHTED_MEAN) {
+	                $this->parents[$parent_id]->agg_coef[$itemid] = $grade->grade_item->aggregationcoef; // store this regardless of parent aggtype
+	            }
+	            if ($current_cat->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN) {
+	                // determine the weighted grade culminating in a percentage value
+	   	            $weight_normalizer = 1 / max(1,array_sum($this->parents[$itemid]->cat_max)); // adjust all weights in a container so their sum equals 100
+	                $weighted_percentage = 0;
+	                foreach ($this->parents[$itemid]->pctg as $key=>$pctg) {
+		    			// the previously calculated percentage (which might already be weighted) times the normalizer * the weight
+		    			$weighted_percentage += $pctg*$weight_normalizer*$this->parents[$itemid]->agg_coef[$key];
+	                }
+	                $this->parents[$parent_id]->pctg[$itemid]= $weighted_percentage;
+	            } else {
+	                $this->parents[$parent_id]->pctg[$itemid] = (array_sum($grade_values) + $this->parents[$itemid]->excredit) / array_sum($grade_maxes);
+	            }
+	        }
+//	    } else if (!isset($this->parents[$itemid]->agg_coef)) { // TODO: when does this happen?
+//	        $this->parents[$itemid]->coursepctg = 1;
+	    } else { // calculate up the weighted percentage for the course item
+//		    $current_cat = $this->items[$itemid]->get_item_category(); // need category settings like drop-low or keep-high
+	        if ($current_cat->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN) {
+//		    if ($this->parents[$itemid]->parent_agg == GRADE_AGGREGATE_WEIGHTED_MEAN) {
+	             $weight_normalizer = 0;
+	             $weighted_percentage = 0;
+	             foreach ($this->parents[$itemid]->agg_coef as $key=>$value) {
+	//	               	        foreach ($this->parents[$itemid]->pctg as $key=>$pctg) {
+	                 // the previously calculated percentage (which might already be weighted) times the normalizer * the weight
+	                 $weight_normalizer += $value;
+	                 if (isset($this->parents[$itemid]->pctg[$key])) {
+	                      $weighted_percentage += $this->parents[$itemid]->pctg[$key]*$value;
+	                 }
+	             }
+	             $weight_normalizer = 1 / $weight_normalizer;
+	             $weighted_percentage *= $weight_normalizer;
+	             $this->parents[$itemid]->coursepctg = $weighted_percentage;
+	         } else {
+	             $this->parents[$itemid]->coursepctg = (array_sum($grade_values) + $this->parents[$itemid]->excredit) / array_sum($grade_maxes);
+	         } 
+	    }
+	}
+    
+	public function accuratepointsfinalvalues($itemid, $item, $type, $parent_id, $gradeval, $gradedisplaytype = GRADE_DISPLAY_TYPE_REAL) {
+		$current_cat = $this->items[$itemid]->get_item_category(); // need category settings like drop-low or keep-high
+        switch ($gradedisplaytype) {
+       	    case GRADE_DISPLAY_TYPE_REAL:
+       	        $grade_values = $this->parents[$itemid]->cat_item;
+       	        $grade_maxes = $this->parents[$itemid]->cat_max;
+       	        $this->limit_item($current_cat,$this->items,$grade_values,$grade_maxes);
+                $gradeval = array_sum($grade_values) + $this->parents[$itemid]->excredit;
+           		$item->grademax = array_sum($grade_maxes);
+                break;
+       	    case GRADE_DISPLAY_TYPE_PERCENTAGE:
+       	        $gradeval = $type == 'category' ? $this->parents[$parent_id]->pctg[$itemid] : $this->parents[$itemid]->coursepctg;
+       	        $item->grademax = 1;
+       	    case GRADE_DISPLAY_TYPE_LETTER:
+       	        break;
+       	}
+       	return $gradeval;
+	}    
+	
     /**
      * Return hiding icon for give element
      *
@@ -412,9 +519,13 @@ class grade_tree_local extends grade_tree {
                 default:
                     $childid = substr($child['eid'],1,8);
             }
-            if (!isset($this->parents[$childid]) && isset($element['type']) && $element['type'] !== 'course') {
+            if (!isset($this->parents[$childid])) {
                 $this->parents[$childid] = new stdClass();
-            	$this->parents[$childid]->parent_id = $idnumber;
+                $this->parents[$childid]->cat_item = array();
+                $this->parents[$childid]->cat_max = array();
+                $this->parents[$childid]->pctg = array();
+                $this->parents[$childid]->agg_coef = array();
+                $this->parents[$childid]->parent_id = $idnumber;
                 $this->parents[$childid]->parent_agg = $element['object']->aggregation;
             }
             if (! empty($child['children'])) {
@@ -425,7 +536,7 @@ class grade_tree_local extends grade_tree {
             // this line needs to determine whether to include hidden items
            	if ((!$child['object']->is_hidden() || $showtotalsifcontainhidden == GRADE_REPORT_SHOW_REAL_TOTAL_IF_CONTAINS_HIDDEN) // either its not hidden or the hiding setting allows it to be calculated into the total
            	        && isset($this->parents[$childid]->parent_id) // the parent of this item needs to be set
-                    && ((isset($this->items[$childid]->aggregationcoef) && $this->items[$childid]->aggregationcoef !== 1) // isn't an extra credit item -- has a weight and the weight isn't 1
+                    && ((isset($this->items[$childid]->aggregationcoef) && $this->items[$childid]->aggregationcoef != 1) // isn't an extra credit item -- has a weight and the weight isn't 1
                     || (isset($this->parents[$childid]->parent_agg) && $this->parents[$childid]->parent_agg == GRADE_AGGREGATE_WEIGHTED_MEAN))) { // or has a weight but in a category using WM
                 $this->items[$idnumber]->max_earnable += (isset($this->items[$childid]->max_earnable)) ? $this->items[$childid]->max_earnable : $this->items[$childid]->grademax;
             }
