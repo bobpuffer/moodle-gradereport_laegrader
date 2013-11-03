@@ -101,22 +101,14 @@ if (has_capability('moodle/grade:edit', $context)) {
     $options = $gpr->get_options();
     $options['sesskey'] = sesskey();
 
-    // allow for always editing config
-/*
-    if (get_user_preferences('grade_report_gradeeditalways')) {
-        $USER->gradeediting[$course->id] = 1;
+    if ($USER->gradeediting[$course->id]) {
+        $options['edit'] = 0;
+        $string = get_string('turneditingoff');
     } else {
-*/
-        if ($USER->gradeediting[$course->id]) {
-            $options['edit'] = 0;
-            $string = get_string('turneditingoff');
-        } else {
-            $options['edit'] = 1;
-            $string = get_string('turneditingon');
-        }
-	    $buttons = new single_button(new moodle_url('index.php', $options), $string, 'get');
-//    }
-
+        $options['edit'] = 1;
+        $string = get_string('turneditingon');
+    }
+    $buttons = new single_button(new moodle_url('index.php', $options), $string, 'get');
 } else {
     $USER->gradeediting[$course->id] = 0;
     $buttons = '';
@@ -146,7 +138,7 @@ if ($report->currentgroup == -2) {
 
 /// processing posted grades & feedback here
 if ($data = data_submitted() and confirm_sesskey() and has_capability('moodle/grade:edit', $context)) {
-    $warnings = $report->process_data($data);
+    $warnings = $report->pre_process_grade($data);
 } else {
     $warnings = array();
 }
@@ -167,12 +159,8 @@ if ($action === 'quick-dump') {
         }
     }
 
-//    $report = new grade_report_laegrader($courseid, $gpr, $context, $page, $sortitemid); // END OF HACK
-
     // print all the exported data here
     $report->quick_dump();
-    //	$report->quick_dump();
-//    redirect($PAGE->url_get_path(), null, 0);
 }
 
 // AT THIS POINT WE HAVE ACCURATE GRADES FOR DISPLAY
@@ -199,7 +187,7 @@ $reporthtml .= '<script src="jquery-1.7.2.min.js" type="text/javascript"></scrip
        	 * code going into the html entity to enable scrolling columns and rows
        	 */
         // get how tall the scrolling window is by user configuration
-		$scrolling = get_user_preferences('grade_report_laegraderreportheight');
+		$scrolling = get_user_preferences('grade_report_laegrader_reportheight');
 		$scrolling = $scrolling == null ? 380 : 300 + ($scrolling * 40);
 
 		// initialize the javascript that will be used to enable scrolling
@@ -209,7 +197,6 @@ $reporthtml .= '<script src="jquery-1.7.2.min.js" type="text/javascript"></scrip
 		$headerrows += ($report->get_pref('showranges')) ? 1 : 0;
 		$extrafields = $report->extrafields;
 		$headercols = 1 + count($extrafields);
-//		$headercols = ($report->get_pref('showuseridnumber')) ? 3 : 2;
 		$headercols += has_capability('gradereport/'.$CFG->grade_profilereport.':view', $context) ? 1 : 0;
         $headerinit = "fxheaderInit('lae-user-grades', $scrolling," . $headerrows . ',' . $headercols . ');';
 		$reporthtml .=
