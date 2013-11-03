@@ -59,6 +59,10 @@ clear:both;
 	max-width: 20px;
 }
 
+.laegradestable td.userreport {
+	text-align: center;
+}
+
 .laegradestable th.user {
 	width: 154px;
 	min-width: 154px;
@@ -69,8 +73,9 @@ clear:both;
 
 .laegradestable th.user a {
 	font-size: 1em;
-	line-height: 1.2em;
-	margin-top: 5px;
+	line-height: 3em;
+    vertical-align:bottom;
+    margin-right: 5px;
 }
 
 .laegradestable th.userfield {
@@ -94,7 +99,6 @@ border:3px double #cecece;
 vertical-align:top;
 width:2.7em;
 height:2.7em;
-margin-right:10px;
 }
 
 .laegradestable th.user img {
@@ -269,9 +273,8 @@ color:#00008B;
 
 /* GRADE CELLS */
 span.gradevalue {
-	float: left;
-	padding-left: 10px;
-	width: 3.5em;
+	min-width: 16em;
+	max-width: 16em;
 	text-align: center;
 }
 
@@ -337,6 +340,15 @@ background-color:#E5AFFF;
 color:red;
 }
 
+.laegradestable tr.controls td.gray,
+.laegradestable tr.heading th.gray,
+.laegradestable tr.range td.gray,
+.laegradestable tr.avg td.gray,
+.laegradestable tr.even td.gray,
+.laegradestable tr.odd td.gray {
+background-color:#dddddd;
+}
+
 .laegradestable .excludedfloater {
 font-weight:700;
 color:red;
@@ -350,12 +362,17 @@ border-style:solid;
 border-width:0 1px 1px 0;
 }
 
+.laegradestable td.grade {
+	text-align: center;
+}
+
 .laegradestable td.average,
 .laegradestable td.controls,
 .laegradestable td.range,
 .laegradestable td.grade {
 	min-width: 16em;
 	max-width: 16em;
+/*	text-align: center;*/
 }
 
 /**** SUBMIT *****/
