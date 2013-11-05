@@ -285,16 +285,10 @@ class grade_tree_local extends grade_tree {
 		        // set up variables that are used in this inserted limit_rules scrap
 		        $current_cat = $this->items[$itemid]->get_item_category(); // need category settings like drop-low or keep-high
 		
-		        // NEED TO RUN THROUGH THIS SEQUENCE THREE TIMES TO LIMIT ALL OF THE EXTRA ITEMS ADDED TO THE PARENTS ARRAY
-		        // copy cat_max to a variable we can send along with this bogus limit_item call to limit pctg
-		        $grade_maxes = $this->parents[$itemid]->cat_max; // range of earnable points for marked items
-		        $this->limit_item($current_cat,$this->items,$this->parents[$itemid]->pctg,$grade_maxes); // TODO: test this with some drop-low conditions to see if we can still ascertain the weighted grade
-		        // copy cat_max to a variable we can send along with this bogus limit_item call to limit cat_item
-		        $grade_maxes = $this->parents[$itemid]->cat_max; // range of earnable points for marked items
-		        $this->limit_item($current_cat,$this->items,$this->parents[$itemid]->cat_item,$grade_maxes); // TODO: test this with some drop-low conditions to see if we can still ascertain the weighted grade
-		        // assign after we've limited the source array
+		        // copy cat_max to a variable we can send along with this limit_item
 		        $grade_maxes = $this->parents[$itemid]->cat_max; // range of earnable points for marked items
 		        $grade_values = $this->parents[$itemid]->cat_item; // earned points
+		        $this->limit_item($current_cat,$this->items,$this->parents[$itemid]->pctg,$this->parents[$itemid]->cat_max, $this->parents[$itemid]->cat_item); // TODO: test this with some drop-low conditions to see if we can still ascertain the weighted grade
 		    }
 	    } else { // items
 	        if ($grade->grade_item->aggregationcoef > 0 && $this->parents[$itemid]->parent_agg != GRADE_AGGREGATE_WEIGHTED_MEAN) {
@@ -326,7 +320,7 @@ class grade_tree_local extends grade_tree {
 	            }
 	            if ($current_cat->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN) {
 	                // determine the weighted grade culminating in a percentage value
-	   	            $weight_normalizer = 1 / max(1,array_sum($this->parents[$itemid]->cat_max)); // adjust all weights in a container so their sum equals 100
+	   	            $weight_normalizer = 1 / max(1,array_sum($this->parents[$itemid]->agg_coef)); // adjust all weights in a container so their sum equals 100
 	                $weighted_percentage = 0;
 	                foreach ($this->parents[$itemid]->pctg as $key=>$pctg) {
 		    			// the previously calculated percentage (which might already be weighted) times the normalizer * the weight
@@ -362,14 +356,15 @@ class grade_tree_local extends grade_tree {
 	    }
 	}
     
-	public function accuratepointsfinalvalues($itemid, $item, $type, $parent_id, $gradeval, $gradedisplaytype = GRADE_DISPLAY_TYPE_REAL) {
+	public function accuratepointsfinalvalues($itemid, &$item, $type, $parent_id, $gradeval, $gradedisplaytype = GRADE_DISPLAY_TYPE_REAL) {
 		$current_cat = $this->items[$itemid]->get_item_category(); // need category settings like drop-low or keep-high
         switch ($gradedisplaytype) {
        	    case GRADE_DISPLAY_TYPE_REAL:
+//       	        $this->limit_item($current_cat,$this->items,$this->parents[$itemid]->pctg,$this->parents[$itemid]->cat_max,$this->parents[$itemid]->cat_item);
        	        $grade_values = $this->parents[$itemid]->cat_item;
        	        $grade_maxes = $this->parents[$itemid]->cat_max;
-       	        $this->limit_item($current_cat,$this->items,$grade_values,$grade_maxes);
-                $gradeval = array_sum($grade_values) + $this->parents[$itemid]->excredit;
+       	        $grade_pctg = $this->parents[$itemid]->pctg;
+       	        $gradeval = array_sum($grade_values) + $this->parents[$itemid]->excredit;
            		$item->grademax = array_sum($grade_maxes);
                 break;
        	    case GRADE_DISPLAY_TYPE_PERCENTAGE:
@@ -456,16 +451,17 @@ class grade_tree_local extends grade_tree {
         return $changedisplay;
     }
 
-    function limit_item($this_cat,$items,&$grade_values,&$grade_maxes) {
+    function limit_item($this_cat,$items,&$grade_pctg,&$grade_maxes,&$grade_values) {
     	$extraused = $this_cat->is_extracredit_used();
     	if (!empty($this_cat->droplow)) {
-    		asort($grade_values, SORT_NUMERIC);
+    		asort($grade_pctg, SORT_NUMERIC);
     		$dropped = 0;
-    		foreach ($grade_values as $itemid=>$value) {
+    		foreach ($grade_pctg as $itemid=>$pctg) {
     			if ($dropped < $this_cat->droplow) {
     				if ($extraused and $items[$itemid]->aggregationcoef > 0) {
     					// no drop low for extra credits
     				} else {
+    					unset($grade_pctg[$itemid]);
     					unset($grade_values[$itemid]);
     					unset($grade_maxes[$itemid]);
     					$dropped++;
@@ -476,14 +472,15 @@ class grade_tree_local extends grade_tree {
     			}
     		}
     	} else if (!empty($this_cat->keephigh)) {
-    		arsort($grade_values, SORT_NUMERIC);
+    		arsort($grade_pctg, SORT_NUMERIC);
     		$kept = 0;
-    		foreach ($grade_values as $itemid=>$value) {
-    			if ($extraused and $items[$itemid]->aggregationcoef > 0) {
+    		foreach ($grade_pctg as $itemid=>$pctg) {
+      			if ($extraused and $items[$itemid]->aggregationcoef > 0) {
     				// we keep all extra credits
     			} else if ($kept < $this_cat->keephigh) {
     				$kept++;
     			} else {
+    				unset($grade_pctg[$itemid]);
     				unset($grade_values[$itemid]);
     				unset($grade_maxes[$itemid]);
     			}
