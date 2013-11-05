@@ -1829,7 +1829,7 @@ function grade_report_laegrader_settings_definition(&$mform) {
 //	} else {
 //		$options[-1] = get_string('defaultprev', 'grades', $options[1]);
 	}
-	$mform->addElement('select', 'report_laegrader_reportheight', get_string('laegraderreportheight', 'gradereport_laegrader'), $options);
+	$mform->addElement('select', 'report_laegrader_reportheight', get_string('laegrader_reportheight', 'gradereport_laegrader'), $options);
 	$options = array(-1 => get_string('default', 'grades'),
 			0 => '25',
 			1 => '30',
@@ -1850,5 +1850,5 @@ function grade_report_laegrader_settings_definition(&$mform) {
 //	} else {
 //		$options[-1] = get_string('defaultprev', 'grades', $options[1]);
 	}
-	$mform->addElement('select', 'report_laegrader_columnwidth', get_string('laegradercolumnwidth', 'gradereport_laegrader'), $options);
+	$mform->addElement('select', 'report_laegrader_columnwidth', get_string('laegrader_columnwidth', 'gradereport_laegrader'), $options);
 }
