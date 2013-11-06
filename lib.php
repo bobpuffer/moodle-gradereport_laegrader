@@ -146,12 +146,17 @@ class grade_report_laegrader extends grade_report_grader {
         $this->sortitemid = $sortitemid;
 
         // base url for sorting by first/last name
-        $studentsperpage = 300; //forced for laegrader report
-        $perpage = '';
-        $curpage = '';
+//        $studentsperpage = 300; //forced for laegrader report
+//        $perpage = '';
+//        $curpage = '';
 
         $this->baseurl = new moodle_url('index.php', array('id' => $this->courseid));
 
+        $studentsperpage = $this->get_students_per_page();
+        if (!empty($this->page) && !empty($studentsperpage)) {
+            $this->baseurl->params(array('perpage' => $studentsperpage, 'page' => $this->page));
+        }
+        
         $this->pbarurl = new moodle_url('/grade/report/laegrader/index.php', array('id' => $this->courseid, 'perpage' => $studentsperpage));
 
         $this->setup_groups();
@@ -203,7 +208,7 @@ class grade_report_laegrader extends grade_report_grader {
         }
    		return $this->process_data($data);	
    	}
-    
+
     /**
      * Setting the sort order, this depends on last state
      * all this should be in the new table class that we might need to use
@@ -259,224 +264,6 @@ class grade_report_laegrader extends grade_report_grader {
                 $this->sortorder = 'ASC';
             }
         }
-    }
-
-    /**
-     * pulls out the userids of the users to be display, and sorts them
-     * DONE
-     */
-    public function load_users() {
-        global $CFG, $DB;
-
-        //limit to users with a gradeable role
-        list($gradebookrolessql, $gradebookrolesparams) = $DB->get_in_or_equal(explode(',', $this->gradebookroles), SQL_PARAMS_NAMED, 'grbr0');
-
-        //limit to users with an active enrollment
-        list($enrolledsql, $enrolledparams) = get_enrolled_sql($this->context);
-
-        //fields we need from the user table
-        $userfields = user_picture::fields('u');
-        $userfields .= get_extra_user_fields_sql($this->context);
-
-        $sortjoin = $sort = $params = null;
-
-        //if the user has clicked one of the sort asc/desc arrows
-        if (is_numeric($this->sortitemid)) {
-            $params = array_merge(array('gitemid'=>$this->sortitemid), $gradebookrolesparams, $this->groupwheresql_params, $enrolledparams);
-
-            $sortjoin = "LEFT JOIN {grade_grades} g ON g.userid = u.id AND g.itemid = $this->sortitemid";
-            $sort = "g.finalgrade $this->sortorder";
-
-        } else {
-            $sortjoin = '';
-            switch($this->sortitemid) {
-                case 'lastname':
-                    $sort = "u.lastname $this->sortorder, u.firstname $this->sortorder";
-                    break;
-                case 'firstname':
-                    $sort = "u.firstname $this->sortorder, u.lastname $this->sortorder";
-                    break;
-                case 'idnumber':
-                default:
-                    $sort = "u.idnumber $this->sortorder";
-                    break;
-            }
-
-            $params = array_merge($gradebookrolesparams, $this->groupwheresql_params, $enrolledparams);
-        }
-
-        $sql = "SELECT $userfields
-                  FROM {user} u
-                  JOIN ($enrolledsql) je ON je.id = u.id
-                       $this->groupsql
-                       $sortjoin
-                  JOIN (
-                           SELECT DISTINCT ra.userid
-                             FROM {role_assignments} ra
-                            WHERE ra.roleid IN ($this->gradebookroles)
-                              AND ra.contextid " . get_related_contexts_string($this->context) . "
-                       ) rainner ON rainner.userid = u.id
-                   AND u.deleted = 0
-                   $this->groupwheresql
-              ORDER BY $sort";
-
-        $this->users = $DB->get_records_sql($sql, $params, $this->get_pref('studentsperpage') * $this->page, $this->get_pref('studentsperpage'));
-
-        if (empty($this->users)) {
-            $this->userselect = '';
-            $this->users = array();
-            $this->userselect_params = array();
-        } else {
-            list($usql, $uparams) = $DB->get_in_or_equal(array_keys($this->users), SQL_PARAMS_NAMED, 'usid0');
-            $this->userselect = "AND g.userid $usql";
-            $this->userselect_params = $uparams;
-
-            //add a flag to each user indicating whether their enrolment is active
-            $sql = "SELECT ue.userid
-                      FROM {user_enrolments} ue
-                      JOIN {enrol} e ON e.id = ue.enrolid
-                     WHERE ue.userid $usql
-                           AND ue.status = :uestatus
-                           AND e.status = :estatus
-                           AND e.courseid = :courseid
-                  GROUP BY ue.userid";
-            $coursecontext = get_course_context($this->context);
-            $params = array_merge($uparams, array('estatus'=>ENROL_INSTANCE_ENABLED, 'uestatus'=>ENROL_USER_ACTIVE, 'courseid'=>$coursecontext->instanceid));
-            $useractiveenrolments = $DB->get_records_sql($sql, $params);
-
-            foreach ($this->users as $user) {
-                $this->users[$user->id]->suspendedenrolment = !array_key_exists($user->id, $useractiveenrolments);
-            }
-        }
-
-        return $this->users;
-    }
-
-    /**
-     * we supply the userids in this query, and get all the grades
-     * pulls out all the grades, this does not need to worry about paging
-     */
-    public function load_final_grades() {
-        global $CFG, $DB;
-
-        // please note that we must fetch all grade_grades fields if we want to construct grade_grade object from it!
-        $params = array_merge(array('courseid'=>$this->courseid), $this->userselect_params);
-        $sql = "SELECT g.*
-                  FROM {grade_items} gi,
-                       {grade_grades} g
-                 WHERE g.itemid = gi.id AND gi.courseid = :courseid {$this->userselect}";
-
-        $userids = array_keys($this->users);
-
-
-        if ($grades = $DB->get_records_sql($sql, $params)) {
-            foreach ($grades as $graderec) {
-                if (in_array($graderec->userid, $userids) and array_key_exists($graderec->itemid, $this->gtree->get_items())) { // some items may not be present!!
-                    $this->grades[$graderec->userid][$graderec->itemid] = new grade_grade($graderec, false);
-                    $this->grades[$graderec->userid][$graderec->itemid]->grade_item = $this->gtree->get_item($graderec->itemid); // db caching
-                }
-            }
-        }
-
-        // prefil grades that do not exist yet
-        foreach ($userids as $userid) {
-            foreach ($this->gtree->get_items() as $itemid=>$unused) {
-                if (!isset($this->grades[$userid][$itemid])) {
-                    $this->grades[$userid][$itemid] = new grade_grade();
-                    $this->grades[$userid][$itemid]->itemid = $itemid;
-                    $this->grades[$userid][$itemid]->userid = $userid;
-                    $this->grades[$userid][$itemid]->grade_item = $this->gtree->get_item($itemid); // db caching
-                }
-            }
-        }
-    }
-
-    /**
-     * Builds and returns a div with on/off toggles.
-     * @return string HTML code
-     */
-    public function get_toggles_html() {
-        global $CFG, $USER, $COURSE, $OUTPUT;
-
-        $html = '';
-        if ($USER->gradeediting[$this->courseid]) {
-            if (has_capability('moodle/grade:manage', $this->context) or has_capability('moodle/grade:hide', $this->context)) {
-                $html .= $this->print_toggle('eyecons');
-            }
-            if (has_capability('moodle/grade:manage', $this->context)
-             or has_capability('moodle/grade:lock', $this->context)
-             or has_capability('moodle/grade:unlock', $this->context)) {
-                $html .= $this->print_toggle('locks');
-            }
-            if (has_capability('moodle/grade:manage', $this->context)) {
-                $html .= $this->print_toggle('quickfeedback');
-            }
-
-            if (has_capability('moodle/grade:manage', $this->context)) {
-                $html .= $this->print_toggle('calculations');
-            }
-        }
-
-        if ($this->canviewhidden) {
-            $html .= $this->print_toggle('averages');
-        }
-
-        $html .= $this->print_toggle('ranges');
-        if (!empty($CFG->enableoutcomes)) {
-            $html .= $this->print_toggle('nooutcomes');
-        }
-
-        return $OUTPUT->container($html, 'grade-report-toggles');
-    }
-
-    /**
-    * Shortcut function for printing the grader report toggles.
-    * @param string $type The type of toggle
-    * @param bool $return Whether to return the HTML string rather than printing it
-    * @return void
-    */
-    public function print_toggle($type) {
-        global $CFG, $OUTPUT;
-
-        $icons = array('eyecons' => 't/hide',
-                       'calculations' => 't/calc',
-                       'locks' => 't/lock',
-                       'averages' => 't/mean',
-                       'quickfeedback' => 't/feedback',
-                       'nooutcomes' => 't/outcomes');
-
-        $prefname = 'grade_report_show' . $type;
-
-        if (array_key_exists($prefname, $CFG)) {
-            $showpref = get_user_preferences($prefname, $CFG->$prefname);
-        } else {
-            $showpref = get_user_preferences($prefname);
-        }
-
-        $strshow = $this->get_lang_string('show' . $type, 'grades');
-        $strhide = $this->get_lang_string('hide' . $type, 'grades');
-
-        $showhide = 'show';
-        $toggleaction = 1;
-
-        if ($showpref) {
-            $showhide = 'hide';
-            $toggleaction = 0;
-        }
-
-        if (array_key_exists($type, $icons)) {
-            $imagename = $icons[$type];
-        } else {
-            $imagename = "t/$type";
-        }
-
-        $string = ${'str' . $showhide};
-
-        $url = new moodle_url($this->baseurl, array('toggle' => $toggleaction, 'toggle_type' => $type));
-
-        $retval = $OUTPUT->container($OUTPUT->action_icon($url, new pix_icon($imagename, $string))); // TODO: this container looks wrong here
-
-        return $retval;
     }
 
     /**

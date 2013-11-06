@@ -213,7 +213,8 @@ if ($USER->gradeediting[$course->id] && ($report->get_pref('showquickfeedback') 
     echo '<div>';
     echo '<input type="hidden" value="'.s($courseid).'" name="id" />';
     echo '<input type="hidden" value="'.sesskey().'" name="sesskey" />';
-    echo '<input type="hidden" value="grader" name="report"/>';
+    echo '<input type="hidden" value="laegrader" name="report"/>';
+    echo '<input type="hidden" value="'.$page.'" name="page"/>';
     echo $reporthtml;
     echo '<div class="submit"><input type="submit" value="'.s(get_string('update')).'" /></div>';
     echo '</div></form>';
