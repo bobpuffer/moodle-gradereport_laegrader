@@ -1225,7 +1225,7 @@ class grade_report_laegrader extends grade_report_grader {
                     $hidden = ' gray ';
                 }
                 $itemcell->attributes['class'] .= ' range'. $hidden;
-                if ($item->itemtype !== 'course' && $accuratetotals) {
+                if ($item->itemtype !== 'course' && $this->accuratetotals) {
 	                $parentid = $this->gtree->parents[$itemid]->parent_id; // shorthand
                 }
                 // if we have an accumulated total points that's not accurately reflected in the db, then we want to display the ACCURATE number
