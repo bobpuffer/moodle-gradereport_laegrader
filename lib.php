@@ -1470,8 +1470,14 @@ class grade_report_laegrader extends grade_report_grader {
         		$col[] = $grade_item->itemtype;
         	}
         }
-		$rows[] = $col;
 
+        /// feedback columns
+		foreach ($items as $grade_item) {
+        	$colcounter++;
+       		$col[] = 'Feedback';
+        }
+		$rows[] = $col;
+		
 		/// Print names of all the fields
 		unset($col);
 		$col[] = get_string('email');
@@ -1481,6 +1487,11 @@ class grade_report_laegrader extends grade_report_grader {
         	if ($grade_item->itemtype == 'category' || $grade_item->itemtype == 'course') {
 	        	$col[] = '';
         	}
+        }
+
+		/// Print names of all the fields for feedback columns
+        foreach ($items as $grade_item) {
+        	$col[] = $grade_item->itemname;
         }
         $rows[] = $col;
 
@@ -1554,34 +1565,24 @@ class grade_report_laegrader extends grade_report_grader {
             	    $parent_id = $items[$itemid]->itemtype == 'category' ? $this->gtree->parents[$itemid]->parent_id : $itemid;
             		if (isset($this->gtree->parents[$itemid]->cat_max)) { // if cat_max is set THIS IS A CATEGORY OR COURSE and we are using accurate totals
 						$gradeval = $this->gtree->accuratepointsfinalvalues($itemid, $item, $type, $parent_id, 0, GRADE_DISPLAY_TYPE_REAL);
-//            			$tempmax = $items[$itemid]->grademax;
-//            			$items[$itemid]->grademax = array_sum($this->grades[$userid][$itemid]->cat_max);
             			$gradestr = grade_format_gradevalue_real($gradeval, $items[$itemid], 2, true);
-//            			$items[$itemid]->grademax = $tempmax;
-/*
-            			if (!$grade->is_hidden() && $grade->finalgrade !== null && $accuratetotals && isset($parent_id) && $items[$itemid]->itemtype !== 'course') {
-	               			$this->grades[$userid][$this->gtree->parents[$itemid]->parent_id]->cat_item[$itemid] = $grade->finalgrade;
-	               			// can't use rawgrademax from grade_grades because it never gets updated
-							$this->grades[$userid][$this->gtree->parents[$itemid]->parent_id]->cat_max[$itemid] = $items[$itemid]->grademax;
-				   		}
-*/				   		
             		}
 			   		$col[] = $gradestr;
 			   		$col[] = '';
             	} else {
             	    $parent_id = $this->gtree->parents[$itemid]->parent_id;
             	    $gradestr = grade_format_gradevalue_real($grade->finalgrade, $items[$itemid], 2, true);
-/*
-            	    if (! $grade->is_hidden() && $grade->finalgrade !== null && $accuratetotals && isset($parent_id)) {
-               			$this->grades[$userid][$this->gtree->parents[$itemid]->parent_id]->cat_item[$itemid] = $grade->finalgrade;
-               			// can't use rawgrademax from grade_grades because it never gets updated
-						$this->grades[$userid][$this->gtree->parents[$itemid]->parent_id]->cat_max[$itemid] = $items[$itemid]->grademax;
-			   		}
-*/			   		
     	        	$col[] = $gradestr;
             	}
             }
-			$rows[] = $col;
+            // feedback columns
+            foreach ($items as $itemid => $item) {
+                $grade = $this->grades[$userid][$itemid];
+                $type = $item->itemtype;
+       			$gradestr = $grade->feedback;
+		   		$col[] = $gradestr;
+            }
+            $rows[] = $col;
         }
 
 	    // Calculate file name
