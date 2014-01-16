@@ -167,8 +167,13 @@ class grade_report_laegrader extends grade_report_grader {
    	public function pre_process_grade(&$data) {
    		$context = context_course::instance($this->courseid);
    		foreach ($data as $varname => $students) {
-            if (strpos($varname, 'grade') === false) {
-            	continue;
+            // skip, not a grade nor feedback
+            if (strpos($varname, 'grade') === 0) {
+                $datatype = 'grade';
+            } else if (strpos($varname, 'feedback') === 0) {
+                $datatype = 'feedback';
+            } else {
+                continue;
             }
    			foreach ($students as $userid => $items) {
                 $userid = clean_param($userid, PARAM_INT);
@@ -679,9 +684,9 @@ class grade_report_laegrader extends grade_report_grader {
                             } else {
                                 $nogradestr = $this->get_lang_string('nooutcome', 'grades');
                             }
-                            $itemcell->text .= '<input type="hidden" id="oldgrade_'.$userid.'_'.$item->id.'" name="oldgrade_'.$userid.'_'.$item->id.'" value="'.$oldval.'"/>';
                             $attributes = array('tabindex' => $tabindices[$item->id]['grade'], 'id'=>'grade_'.$userid.'_'.$item->id);
-                            $itemcell->text .= html_writer::select($scaleopt, 'grade_'.$userid.'_'.$item->id, $gradeval, array(-1=>$nogradestr), $attributes);;
+                            $itemcell->text .= html_writer::label(get_string('typescale', 'grades'), $attributes['id'], false, array('class' => 'accesshide'));
+                            $itemcell->text .= html_writer::select($scaleopt, 'grade['.$userid.']['.$item->id.']', $gradeval, array(-1=>$nogradestr), $attributes);
                         } elseif(!empty($scale)) {
                             $scales = explode(",", $scale->scale);
 
