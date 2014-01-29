@@ -21,7 +21,7 @@ require_once $CFG->libdir.'/gradelib.php';
 require_once $CFG->dirroot.'/grade/lib.php';
 require_once $CFG->dirroot.'/grade/report/laegrader/lib.php';
 require_once $CFG->dirroot.'/grade/report/laegrader/locallib.php'; // END OF HACK
-require_once $CFG->dirroot.'/grade/report/laegrader/lae_grade_export_xls.php';
+//require_once $CFG->dirroot.'/grade/report/laegrader/lae_grade_export_xls.php';
 
 //require_js(array('yui_yahoo', 'yui_dom', 'yui_event', 'yui_container', 'yui_connection', 'yui_dragdrop', 'yui_element'));
 

@@ -452,6 +452,7 @@ class grade_report_laegrader extends grade_report_grader {
         $catcolors = array(' catblue ', ' catorange ');
         $catcolorindex = 0;
 		$catcolor = 0;
+		$currentcatcolor = '';
         foreach ($this->gtree->levelitems as $key=>$element) {
         	$coursecat = substr($this->gtree->top_element['eid'],1,9);
 			if ($element['object']->categoryid === $coursecat || $element['type'] == 'courseitem') {
