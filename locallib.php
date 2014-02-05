@@ -275,11 +275,15 @@ class grade_tree_local extends grade_tree {
     }
 */
     
-	function accuratepointsprelimcalculation ($itemid, $type, $grade) {
-	    $gradeval = $grade->finalgrade;
+	function accuratepointsprelimcalculation ($itemid, $type, $grade, $usetargets = false) {
+	    // plugin target grade for final
+	    
+	    // get the id of this grade's parent
 		if ($type !== 'course' && $type !== 'courseitem') {
 		    $parent_id = $this->parents[$itemid]->parent_id; // the parent record contains an id field pointing to its parent, the key on the parent record is the item itself to allow lookup
 	    }
+	    
+	    // assign array values to grade_values and grade_maxes for later use
 	    if ($type == 'categoryitem' || $type == 'courseitem' || $type == 'category' || $type == 'course') { // categoryitems or courseitems
 			if (isset($this->parents[$itemid]->cat_item)) { // if category or course has marked grades in it
 		        // set up variables that are used in this inserted limit_rules scrap
@@ -291,10 +295,16 @@ class grade_tree_local extends grade_tree {
 		        $grade_values = $this->parents[$itemid]->cat_item; // earned points
 			}
 	    } else { // items
-	        if ($grade->grade_item->aggregationcoef > 0 && $this->parents[$itemid]->parent_agg != GRADE_AGGREGATE_WEIGHTED_MEAN) {
+			if ($usetargets && is_null($grade->finalgrade)) {
+		    	$gradeval = $this->items[$itemid]->target;
+		    } else {
+				$gradeval = $grade->finalgrade;
+		    }
+	    	if ($grade->grade_item->aggregationcoef > 0 && $this->parents[$itemid]->parent_agg != GRADE_AGGREGATE_WEIGHTED_MEAN) {
 	            $this->parents[$parent_id]->excredit += $gradeval;
 	        } else {
-	            $this->parents[$parent_id]->cat_item[$itemid] = $gradeval;
+	            // fill parent's array with information from this grade
+	        	$this->parents[$parent_id]->cat_item[$itemid] = $gradeval;
 	            $this->parents[$parent_id]->cat_max[$itemid] = $grade->grade_item->grademax;
 	            if ($this->parents[$itemid]->parent_agg == GRADE_AGGREGATE_WEIGHTED_MEAN) {
 	                $this->parents[$parent_id]->agg_coef[$itemid] = $grade->grade_item->aggregationcoef;
@@ -327,10 +337,15 @@ class grade_tree_local extends grade_tree {
 		    			$weighted_percentage += $pctg*$weight_normalizer*$this->parents[$itemid]->agg_coef[$key];
 	                }
 	                $this->parents[$parent_id]->pctg[$itemid]= $weighted_percentage;
+//	            } else if (sizeof($grade_maxes)) {
+//	            	// skip
+	            } else if ($type == 'course' || $type == 'courseitem') {
+	            	// skip
 	            } else {
 	                $this->parents[$parent_id]->pctg[$itemid] = (array_sum($grade_values) + $this->parents[$itemid]->excredit) / array_sum($grade_maxes);
 	            }
 	        }
+	        $grade->grade_item->grademax = array_sum($grade_maxes); 
 	    } else { // calculate up the weighted percentage for the course item
 	        if ($this->cat->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN) {
 	             $weight_normalizer = 0;
@@ -347,27 +362,32 @@ class grade_tree_local extends grade_tree {
 	         } else {
 	             $this->parents[$itemid]->coursepctg = (array_sum($grade_values) + $this->parents[$itemid]->excredit) / array_sum($grade_maxes);
 	         } 
+	        $grade->grade_item->grademax = array_sum($grade_maxes); 
 	    }
 	}
     
 	public function accuratepointsfinalvalues($itemid, &$item, $type, $parent_id, $gradeval, $gradedisplaytype = GRADE_DISPLAY_TYPE_REAL) {
 		$current_cat = $this->items[$itemid]->get_item_category(); // need category settings like drop-low or keep-high
-		switch ($gradedisplaytype) {
-       	    case GRADE_DISPLAY_TYPE_REAL:
-//        		$this->limit_item($current_cat,$this->items,$this->parents[$itemid]->pctg,$this->parents[$itemid]->cat_max,$this->parents[$itemid]->cat_item);
-       	    	$grade_values = $this->parents[$itemid]->cat_item;
-       	        $grade_maxes = $this->parents[$itemid]->cat_max;
-       	        $grade_pctg = $this->parents[$itemid]->pctg;
-       	        $gradeval = array_sum($grade_values) + $this->parents[$itemid]->excredit;
-           		$item->grademax = array_sum($grade_maxes);
-                break;
-       	    case GRADE_DISPLAY_TYPE_PERCENTAGE:
-       	        $gradeval = $type == 'category' ? $this->parents[$parent_id]->pctg[$itemid] : $this->parents[$itemid]->coursepctg;
-       	        $item->grademax = 1;
-       	    case GRADE_DISPLAY_TYPE_LETTER:
-       	        break;
-       	}
-       	return $gradeval;
+	    if (!isset($this->parents[$itemid]->cat_item)) {
+	        $gradeval = 0;
+	    } else {
+			switch ($gradedisplaytype) {
+	       	    case GRADE_DISPLAY_TYPE_REAL:
+	//        		$this->limit_item($current_cat,$this->items,$this->parents[$itemid]->pctg,$this->parents[$itemid]->cat_max,$this->parents[$itemid]->cat_item);
+	       	    	$grade_values = $this->parents[$itemid]->cat_item;
+	       	        $grade_maxes = $this->parents[$itemid]->cat_max;
+	       	        $grade_pctg = $this->parents[$itemid]->pctg;
+	       	        $gradeval = array_sum($grade_values) + $this->parents[$itemid]->excredit;
+	           		$item->grademax = array_sum($grade_maxes);
+	                break;
+	       	    case GRADE_DISPLAY_TYPE_PERCENTAGE:
+	       	        $gradeval = $type == 'category' ? $this->parents[$parent_id]->pctg[$itemid] : $this->parents[$itemid]->coursepctg;
+	       	        $item->grademax = 1;
+	       	    case GRADE_DISPLAY_TYPE_LETTER:
+	       	        break;
+	       	}
+	    }
+	    return $gradeval;
 	}    
 	
     /**
@@ -547,7 +567,136 @@ class grade_tree_local extends grade_tree {
             }
         }
     }
+
+    
+    /*
+	 * calculates up the real weight of items and categories adding a weight field
+	 */
+    
+    function calc_weights() {
+    	global $DB;
+/*    	
+		$sql = "SELECT id, weight, weightoverride 
+				FROM {grade_items}
+				WHERE courseid = $this->courseid";
+    	$checkitems = $DB->get_records_sql($sql);
+    	$normalizer = 100;
+    	// reduce max_earnable for containers by any items who've had their weights overridden
+    	foreach ($checkitems as $idnumber => $check) {
+    		if ($check->weightoverride != 0) {
+    			$normalizer -= $check->weight;
+		    	if (isset($this->items[$idnumber]->max_earnable)) { // category
+    				$this->items[$this->parents[$idnumber]->parent_id]->max_earnable -= $this->items[$idnumber]->max_earnable;
+		    	} else {
+    				$this->items[$this->parents[$idnumber]->parent_id]->max_earnable -= $this->items[$idnumber]->grademax;
+		    	}
+//    			$this->items[$this->parents[$idnumber]->parent_id]->max_earnable -= $check->weight * $this->items[$this->parents[$idnumber]->parent_id]->max_earnable * .01;
+    		}
+    	}
+*/    	
+    	$normalizer = 100;
+    	//***** temporary snippet used until we disaggregate *****//
+    	// reduce max_earnable for containers by any items who've had their weights overridden
+    	foreach ($this->items as $idnumber => $item) {
+       		if ($item->aggregationcoef != 0) {
+    			$normalizer -= $check->weight;
+		    	if (isset($this->items[$idnumber]->max_earnable)) { // category
+    				$this->items[$this->parents[$idnumber]->parent_id]->max_earnable -= $this->items[$idnumber]->max_earnable;
+		    	} else {
+    				$this->items[$this->parents[$idnumber]->parent_id]->max_earnable -= $this->items[$idnumber]->grademax;
+		    	}
+//    			$this->items[$this->parents[$idnumber]->parent_id]->max_earnable -= $check->weight * $this->items[$this->parents[$idnumber]->parent_id]->max_earnable * .01;
+    		}
+    	}
+    	foreach ($this->items as $idnumber => $item) {
+    		if ($item->itemtype === 'course') {
+				$this->parents[$idnumber]->weight = '';
+    		} else {
+				$parentid = $this->parents[$idnumber]->parent_id;
+		    	if ($item->hidden > 0) {
+					$this->parents[$idnumber]->weight = '';
+//		    	} else if ($checkitems[$idnumber]->weight > 0) {
+//					$this->parents[$idnumber]->weight = $checkitems[$idnumber]->weight;
+//		    	} else if ($checkitems[$parentid]->weight > 0) {
+//					$this->parents[$idnumber]->weight = $checkitems[$parentid]->weight * $item->grademax / $this->items[$parentid]->max_earnable;
+		    	} else if (isset($this->parents[$parentid]->parent_id)) { // if the parent has a parent
+					$this->parents[$idnumber]->weight = ($item->grademax * $normalizer / $this->items[$parentid]->max_earnable) * ($this->items[$parentid]->max_earnable / $this->items[$this->parents[$parentid]->parent_id]->max_earnable); // normalizes the maximum container points to 100
+		    	} else if (isset($item->max_earnable)) { // category
+					$this->parents[$idnumber]->weight = $item->max_earnable * ($normalizer / $this->items[$parentid]->max_earnable); // normalizes the maximum container points to 100
+		    	} else {	
+					$this->parents[$idnumber]->weight = $item->grademax * ($normalizer / $this->items[$parentid]->max_earnable); // normalizes the maximum container points to 100
+		    	}
+    		}
+    	}    		
+    }
+    /*
+     * TODO: take into account hidden grades and setting of show total excluding hidden items
+     */
+	function calc_weights_recursive(&$element) {
+	    /// Recursively iterate through all child elements
+		if (isset($element['object']->grade_item) && $element['object']->grade_item->itemtype == 'course') {
+			$container_weight = 100;
+			$this->items[$element['object']->grade_item->id]->weight = 100;
+		} else if ($element['type'] == 'grade_item' || $element['type'] === 'item' || $element['type'] === 'categoryitem' || $element['type'] === 'courseitem') {
+			$id = $element['object']->id;
+			$container_weight = $this->items[$id]->weight;
+		} else { 
+//			var_dump($element);
+			$id = $element['object']->grade_item->id;
+			$container_weight = $this->items[$id]->weight;
+		}
+		if (isset($element['children'])) {
+			if ($element['object']->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN) {
+				$combined_weight = 0;
+				foreach ($element['children'] as $key=>$child) {
+					if ($child['object'] instanceof grade_category) {
+						$child['object']->load_grade_item();
+						$id = $child['object']->grade_item->id;
+						$combined_weight += $this->items[$id]->aggregationcoef;
+					} else if ($child['type'] !== 'categoryitem' && $child['type'] !== 'courseitem') {
+						$combined_weight += $child['object']->aggregationcoef;
+					}    		
+				}
+				$normalizer = $container_weight / $combined_weight; 
+				foreach ($element['children'] as $key=>$child) {
+					if ($child['object'] instanceof grade_category) {
+						$id = $child['object']->grade_item->id;
+						$this->items[$id]->weight = $this->items[$id]->aggregationcoef * $normalizer;
+					} else if ($child['type'] !== 'categoryitem' && $child['type'] !== 'courseitem') {
+						$child['object']->weight = $child['object']->aggregationcoef * $normalizer;
+					}    		
+				}
+			} else if ($element['object']->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN2) {
+				$combined_weight = 0;
+				foreach ($element['children'] as $key=>$child) {
+					if ($child['object'] instanceof grade_category) {
+						$child['object']->load_grade_item();
+						$id = $child['object']->grade_item->id;
+						$combined_weight += $this->items[$id]->grademax; // TODO: fix this to use cat_max or something
+					} else if ($child['type'] !== 'categoryitem' && $child['type'] !== 'courseitem') {
+						$combined_weight += $child['object']->grademax;
+					}    		
+				}
+				$normalizer = $container_weight / $combined_weight; 
+				foreach ($element['children'] as $key=>$child) {
+					if ($child['object'] instanceof grade_category) {
+						$id = $child['object']->grade_item->id;
+						$this->items[$id]->weight = $this->items[$id]->grademax * $normalizer; // TODO: fix this to use cat_max or something
+					} else if ($child['type'] !== 'categoryitem' && $child['type'] !== 'courseitem') {
+						$child['object']->weight = $child['object']->grademax * $normalizer;
+					}
+				}
+			}
+			foreach ($element['children'] as $key=>$child) {
+				$this->calc_weights_recursive($child);
+			}
+		}
+	}
+    
 }
+
+    
+
 
 function is_percentage($gradestr = null) {
     return (substr(trim($gradestr),-1,1) == '%') ? true : false;
