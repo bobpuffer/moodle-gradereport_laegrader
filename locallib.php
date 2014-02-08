@@ -571,32 +571,14 @@ class grade_tree_local extends grade_tree {
     
     /*
 	 * calculates up the real weight of items and categories adding a weight field
+	 * this function is not currently called by anything but will be used in the disaggregation of the gradebook
 	 */
     
     function calc_weights() {
     	global $DB;
-/*    	
-		$sql = "SELECT id, weight, weightoverride 
-				FROM {grade_items}
-				WHERE courseid = $this->courseid";
-    	$checkitems = $DB->get_records_sql($sql);
-    	$normalizer = 100;
-    	// reduce max_earnable for containers by any items who've had their weights overridden
-    	foreach ($checkitems as $idnumber => $check) {
-    		if ($check->weightoverride != 0) {
-    			$normalizer -= $check->weight;
-		    	if (isset($this->items[$idnumber]->max_earnable)) { // category
-    				$this->items[$this->parents[$idnumber]->parent_id]->max_earnable -= $this->items[$idnumber]->max_earnable;
-		    	} else {
-    				$this->items[$this->parents[$idnumber]->parent_id]->max_earnable -= $this->items[$idnumber]->grademax;
-		    	}
-//    			$this->items[$this->parents[$idnumber]->parent_id]->max_earnable -= $check->weight * $this->items[$this->parents[$idnumber]->parent_id]->max_earnable * .01;
-    		}
-    	}
-*/    	
     	$normalizer = 100;
     	//***** temporary snippet used until we disaggregate *****//
-    	// reduce max_earnable for containers by any items who've had their weights overridden
+/*
     	foreach ($this->items as $idnumber => $item) {
        		if ($item->aggregationcoef != 0) {
     			$normalizer -= $check->weight;
@@ -605,9 +587,9 @@ class grade_tree_local extends grade_tree {
 		    	} else {
     				$this->items[$this->parents[$idnumber]->parent_id]->max_earnable -= $this->items[$idnumber]->grademax;
 		    	}
-//    			$this->items[$this->parents[$idnumber]->parent_id]->max_earnable -= $check->weight * $this->items[$this->parents[$idnumber]->parent_id]->max_earnable * .01;
     		}
     	}
+*/    	
     	foreach ($this->items as $idnumber => $item) {
     		if ($item->itemtype === 'course') {
 				$this->parents[$idnumber]->weight = '';

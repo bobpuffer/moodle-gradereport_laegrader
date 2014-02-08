@@ -146,10 +146,6 @@ class grade_report_laegrader extends grade_report_grader {
         $this->sortitemid = $sortitemid;
 
         // base url for sorting by first/last name
-//        $studentsperpage = 300; //forced for laegrader report
-//        $perpage = '';
-//        $curpage = '';
-
         $this->baseurl = new moodle_url('index.php', array('id' => $this->courseid));
 
         $studentsperpage = $this->get_students_per_page();
