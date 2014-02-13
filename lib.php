@@ -118,8 +118,8 @@ class grade_report_laegrader extends grade_report_grader {
         $this->showtotalsifcontainhidden = array($this->courseid => grade_get_setting($this->courseid, 'report_user_showtotalsifcontainhidden', $CFG->grade_report_user_showtotalsifcontainhidden));
         $showtotalsifcontainhidden = $this->showtotalsifcontainhidden[$this->courseid];
         $this->columnwidth = get_user_preferences('grade_report_laegrader_columnwidth'); 
-        $this->columnwidth = $this->columnwidth == null ? 25 : 25 + ($this->columnwidth * 5);
-        
+		$this->columnwidth = $this->columnwidth == null ? 25 + ($CFG->grade_report_laegrader_columnwidth * 5) : 25 + ($this->columnwidth * 5);
+		        
         // need this array, even tho its useless in the laegrader report or we'll generate warnings
         $this->collapsed = array('aggregatesonly' => array(), 'gradesonly' => array());
 
@@ -1108,7 +1108,7 @@ class grade_report_laegrader extends grade_report_grader {
                                SELECT DISTINCT ra.userid
                                  FROM {role_assignments} ra
                                 WHERE ra.roleid $gradebookrolessql
-                                  AND ra.contextid " . get_related_contexts_string($this->context) . "
+								AND ra.contextid IN (". implode(",", $this->context->get_parent_context_ids(true)) .")
                            ) rainner ON rainner.userid = u.id
                       $groupsql
                      WHERE gi.courseid = :courseid
@@ -1137,7 +1137,7 @@ class grade_report_laegrader extends grade_report_grader {
                       $groupsql
                      WHERE gi.courseid = :courseid
                            AND ra.roleid $gradebookrolessql
-                           AND ra.contextid ".get_related_contexts_string($this->context)."
+							AND ra.contextid IN (". implode(",", $this->context->get_parent_context_ids(true)) .")
                            AND u.deleted = 0
                            AND g.id IS NULL
                            $groupwheresql
