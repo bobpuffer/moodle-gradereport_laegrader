@@ -43,9 +43,8 @@ class laegrader_report_preferences_form extends moodleform {
         $mform    =& $this->_form;
         $course   = $this->_customdata['course'];
 
-        $context = get_context_instance(CONTEXT_COURSE, $course->id);
-        $systemcontext = get_context_instance(CONTEXT_SYSTEM);
-
+		$context = context_course::instance($course->id);
+		$systemcontext = context_system::instance();
         $canviewhidden = has_capability('moodle/grade:viewhidden', $context);
 
         $checkbox_default = 'checkbox';
