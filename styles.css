@@ -376,6 +376,12 @@ border-width:0 1px 1px 0;
 /*	text-align: center;*/
 }
 
+.laegradestable tr.even td.cell,
+.laegradestable tr.even th.cell {
+background-color:#fafafa;
+white-space:nowrap;
+}
+
 /**** SUBMIT *****/
 .laegradestable input.submit {
 margin: auto;
@@ -439,21 +445,6 @@ border:3px double #cecece;
 vertical-align:middle;
 padding:0;
 }
-
-
-/***** RTL *****/
-.dir-rtl .laegradestable td.userfield,
-.dir-rtl .laegradestable th,
-.laegradestable.dir-rtl  div.gradeparent,
-.laegradestable.dir-rtl  .ie6 form,
-.dir-rtl .laegradestable td.ajax {
-text-align:right;
-}
-
-.dir-rtl .laegradestable th img.sorticon { margin-left: 0; margin-right: .3em; }
-
-.dir-rtl .laegradestable .quickfeedback { margin-left: 0; margin-right: 10px;}
-
 
 /***** DON'T KNOW WHAT THESE DO *****/
 .laegradestable .gradeparent {
@@ -537,6 +528,19 @@ border-width:1px 1px 0;
 /* RTL support (Basic)
    TODO: Switch activities header and grades to RTL too
 */
+
+/***** RTL *****/
+.dir-rtl .laegradestable td.userfield,
+.dir-rtl .laegradestable th,
+.laegradestable.dir-rtl  div.gradeparent,
+.laegradestable.dir-rtl  .ie6 form,
+.dir-rtl .laegradestable td.ajax {
+text-align:right;
+}
+
+.dir-rtl .laegradestable th img.sorticon { margin-left: 0; margin-right: .3em; }
+
+.dir-rtl .laegradestable .quickfeedback { margin-left: 0; margin-right: 10px;}
 
 .dir-rtl .laegradestable .cell {height: 10px;}
 .dir-rtl .laegradestable .userpicture {margin: 0; border-radius:10px;}
