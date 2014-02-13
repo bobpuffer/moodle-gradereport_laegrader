@@ -459,7 +459,7 @@ class grade_tree_local extends grade_tree {
 
         $type = 'changedisplay';
         $tooltip = $strchangedisplay;
-        $actiontext = '<img alt="' . $type . ' title="' . $strchangedisplay . '" src="' . $CFG->wwwroot . '/grade/report/laegrader/images/changedisplay.png" />';
+		$actiontext = '<img alt="' . $type . '" title="' . $strchangedisplay . '" src="' . $CFG->wwwroot . '/grade/report/laegrader/images/changedisplay.png" />';
         $changedisplay = $OUTPUT->action_link($url, $actiontext, null, array('class' => 'action-icon'));
 
         return $changedisplay;
