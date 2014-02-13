@@ -189,8 +189,7 @@ $reporthtml .= '<script src="jquery-1.7.2.min.js" type="text/javascript"></scrip
        	 */
         // get how tall the scrolling window is by user configuration
 		$scrolling = get_user_preferences('grade_report_laegrader_reportheight');
-		$scrolling = $scrolling == null ? 380 : 300 + ($scrolling * 40);
-
+		$scrolling = $scrolling == null ? 300 + ($CFG->grade_report_laegrader_reportheight * 40) : 300 + ($scrolling * 40);
 		// initialize the javascript that will be used to enable scrolling
 		// special thanks to jaimon mathew for jscript
 		$headerrows = ($USER->gradeediting[$courseid]) ? 2 : 1;
