@@ -279,6 +279,11 @@ span.gradevalue {
 	text-align: center;
 }
 
+.laegradestable tr.even td.cell,
+.laegradestable tr.even th.cell {
+white-space:nowrap;
+}
+
 .laegradestable td input.text {
 	border:1px solid #666;
 	width: 3.5em;
@@ -376,11 +381,6 @@ border-width:0 1px 1px 0;
 /*	text-align: center;*/
 }
 
-.laegradestable tr.even td.cell,
-.laegradestable tr.even th.cell {
-background-color:#fafafa;
-white-space:nowrap;
-}
 
 /**** SUBMIT *****/
 .laegradestable input.submit {
