@@ -316,7 +316,7 @@ class grade_report_laegrader extends grade_report_grader {
         $studentheader->id = 'studentheader';
 
         // LAE here's where we insert the "Copy to Excel" button
-        $output = '<div class="inlinebutton" title="Download contents of gradebook to csv suitable for Excel or Google">';
+		$output = '<div class="inlinebutton" title="' . get_string('copytoexcel', 'gradereport_laegrader') . '">';
         $output .= '<a href="' . $CFG->wwwroot . '/grade/report/laegrader/index.php?id=' . $this->courseid
                 . '&action=quick-dump" class="inlinebutton"><img src="' . $CFG->wwwroot . '/grade/report/laegrader/images/copytoexcel.png" /></a></div>';
 

@@ -155,14 +155,14 @@ class grade_tree_local extends grade_tree {
     function get_element_header_local(&$element, $withlink=false, $icon=true, $spacerifnone=false, $titlelength = null, $catname) {
         $header = '';
 
-		switch ($element['type']) {
+	    switch ($element['type']) {
 			case 'courseitem':
-				$header .= 'COURSE TOTAL';
+				$header .= get_string('coursetotal', 'gradereport_laegrader');
 				break;
 			case 'categoryitem':
-				$header .= 'CATEGORY TOTAL<br />';
+				$header .= get_string('categorytotal', 'gradereport_laegrader');
 			default:
- 		       	$header .= $catname;
+		 		$header .= $catname;
 		}
 		if ($element['object']->aggregationcoef > 1) {
 		    $header .= ' W=' . format_float($element['object']->aggregationcoef,1, true, true) . '%<br />';
