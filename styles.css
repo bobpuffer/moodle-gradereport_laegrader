@@ -279,11 +279,6 @@ span.gradevalue {
 	text-align: center;
 }
 
-.laegradestable tr.even td.cell,
-.laegradestable tr.even th.cell {
-white-space:nowrap;
-}
-
 .laegradestable td input.text {
 	border:1px solid #666;
 	width: 3.5em;
@@ -328,7 +323,13 @@ font-size:100%;
 padding:0;
 }
 
-.laegradestable tr td.overridden {background-color:#F3E4C0;}
+.laegradestable tr.even td.cell,
+.laegradestable tr.even th.cell {
+	background-color:#fafafa;
+	white-space:nowrap;
+}
+
+.laegradestable tr.even td.overridden {background-color:#F3E4C0;}
 .laegradestable tr.odd td.overridden {background-color:#EFD9A4;}
 
 .laegradestable tr td.ajaxoverridden {background-color:#FFE3A0;}

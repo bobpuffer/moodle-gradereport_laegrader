@@ -47,8 +47,8 @@ class laegrader_report_preferences_form extends moodleform {
 		$systemcontext = context_system::instance();
         $canviewhidden = has_capability('moodle/grade:viewhidden', $context);
 
-        $checkbox_default = 'checkbox';
-//        $checkbox_default = array(GRADE_REPORT_PREFERENCE_DEFAULT => '*default*', 0 => get_string('no'), 1 => get_string('yes'));
+//        $checkbox_default = 'checkbox';
+        $checkbox_default = array(GRADE_REPORT_PREFERENCE_DEFAULT => '*default*', 0 => get_string('no'), 1 => get_string('yes'));
 
         $advanced = array();
 /// form definition with preferences defaults
