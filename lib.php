@@ -529,7 +529,12 @@ class grade_report_laegrader extends grade_report_grader {
         }
         $jsscales = $scalesarray;
         $rowclasses = array('even', 'odd');
-
+        if ($accuratetotals) {
+	        foreach ($this->users as $userid => $user) {
+            	$this->gtree->accuratepointsprelimcalculation($this->grades[$userid]);
+	        }
+        } 
+        
         foreach ($this->users as $userid => $user) {
 
             if ($this->canviewhidden) {
@@ -542,12 +547,14 @@ class grade_report_laegrader extends grade_report_grader {
                 unset($hidingaffected);
             }
 			// hack		
+/*
             foreach ($this->gtree->parents as $parent) {
 				unset($parent->pctg);
 				unset($parent->cat_max);
 				unset($parent->cat_item);
 				$parent->excredit = 0;
 			} // end hack
+*/
 
             $itemrow = new html_table_row();
             $itemrow->id = 'user_'.$userid;
@@ -639,6 +646,7 @@ class grade_report_laegrader extends grade_report_grader {
                 }
 
                 /**** ACCURATE TOTALS CALCULATIONS *****/
+/*
                 // determine if we should calculate up for accuratetotals
                 if ($grade->is_hidden() && $showtotalsifcontainhidden !== GRADE_REPORT_SHOW_REAL_TOTAL_IF_CONTAINS_HIDDEN) {
                     // do nothing
@@ -647,8 +655,9 @@ class grade_report_laegrader extends grade_report_grader {
                 } else if (!isset($parent_id)) {
                     // do nothing
                 } else if ($accuratetotals) {
-					$this->gtree->accuratepointsprelimcalculation($itemid, $type, $grade);
-                } 
+//					$this->gtree->accuratepointsprelimcalculation($itemid, $type, $grade);
+                }
+*/                
 				/***** ACCURATE TOTALS END *****/
 					
                 // if in editing mode, we need to print either a text box
@@ -702,12 +711,12 @@ class grade_report_laegrader extends grade_report_grader {
 						// hack
                         // We always want to display the correct (first) displaytype when editing
                     	$gradedisplaytype = (integer) substr( (string) $item->get_displaytype(),0,1);
-                    	$tempmax = $item->grademax;
+//                    	$tempmax = $item->grademax;
                     	
                     	// if we have an accumulated total points that's not accurately reflected in the db, then we want to display the ACCURATE number
                         // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no earned_total value
-                    	if (isset($this->gtree->parents[$itemid]->cat_item)) { // if cat_item is set THIS IS A CATEGORY OR COURSE and we are using accurate totals
-							$gradeval = $this->gtree->accuratepointsfinalvalues($itemid, $item, $type, $parent_id, $gradeval, $gradedisplaytype);
+                    	if (isset($grade->cat_item)) { // if cat_item is set THIS IS A CATEGORY OR COURSE and we are using accurate totals
+							$gradeval = $this->gtree->accuratepointsfinalvalues($this->grades, $itemid, $item, $type, $parent_id, $gradedisplaytype);
                     	}
                     	if ($this->get_pref('quickgrading') and $grade->is_editable()) {
                             // regular display if an item or accuratetotals is off
@@ -724,10 +733,9 @@ class grade_report_laegrader extends grade_report_grader {
 
                             }
                         }
-                    	$item->grademax = $tempmax;
+//                    	$item->grademax = $tempmax;
                     } 
                     // end hack
-
 
                     // If quickfeedback is on, print an input element
                     if ($this->get_pref('showquickfeedback') and $grade->is_editable()) {
@@ -758,15 +766,15 @@ class grade_report_laegrader extends grade_report_grader {
                     $tempmax = $item->grademax;
                     $gradedisplaytype1 = (integer) substr( (string) $gradedisplaytype,0,1);
                     $gradedisplaytype2 = $gradedisplaytype > 10 ? (integer) substr( (string) $gradedisplaytype,1,1) : null;
-                    if (isset($this->gtree->parents[$itemid]->cat_item)) { // if cat_item is set THIS IS A CATEGORY
-						$gradeval = $this->gtree->accuratepointsfinalvalues($itemid, $item, $type, $parent_id, $gradeval, $gradedisplaytype1);
+                    if (isset($grade->cat_item)) { // if cat_item is set THIS IS A CATEGORY
+						$gradeval = $this->gtree->accuratepointsfinalvalues($this->grades, $itemid, $item, $type, $parent_id, $gradedisplaytype1);
                     }
                     $formattedgradeval = grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype1, null); // item can use standard method of double formatting if present
                     
                     // second round for the second display type if present for a category, items are taken care of the regular way
                     if (isset($gradedisplaytype2)) {
-                        if (isset($this->gtree->parents[$itemid]->cat_item)) { // if cat_item is set THIS IS A CATEGORY
-							$gradeval = $this->gtree->accuratepointsfinalvalues($itemid, $item, $type, $parent_id, $gradeval, $gradedisplaytype2);
+                        if (isset($grade->cat_item)) { // if cat_item is set THIS IS A CATEGORY
+							$gradeval = $this->gtree->accuratepointsfinalvalues($this->grades, $itemid, $item, $type, $parent_id, $gradedisplaytype2);
                         }
                     	$formattedgradeval .= ' (' . grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype2, null) . ')';
                     }
@@ -1567,7 +1575,7 @@ class grade_report_laegrader extends grade_report_grader {
             	    $gradestr = '';
             	    
             	    $parent_id = $items[$itemid]->itemtype == 'category' ? $this->gtree->parents[$itemid]->parent_id : $itemid;
-            		if (isset($this->gtree->parents[$itemid]->cat_max)) { // if cat_max is set THIS IS A CATEGORY OR COURSE and we are using accurate totals
+            		if (isset($grade->cat_max)) { // if cat_max is set THIS IS A CATEGORY OR COURSE and we are using accurate totals
 						$gradeval = $this->gtree->accuratepointsfinalvalues($itemid, $item, $type, $parent_id, 0, GRADE_DISPLAY_TYPE_REAL);
             			$gradestr = grade_format_gradevalue_real($gradeval, $items[$itemid], 2, true);
             		}
