@@ -716,7 +716,7 @@ class grade_report_laegrader extends grade_report_grader {
                     	// if we have an accumulated total points that's not accurately reflected in the db, then we want to display the ACCURATE number
                         // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no earned_total value
                     	if (isset($grade->cat_item)) { // if cat_item is set THIS IS A CATEGORY OR COURSE and we are using accurate totals
-							$gradeval = $this->gtree->accuratepointsfinalvalues($this->grades, $itemid, $item, $type, $parent_id, $gradedisplaytype);
+							$gradeval = $this->gtree->accuratepointsfinalvalues($this->grades[$userid], $itemid, $item, $type, $parent_id, $gradedisplaytype);
                     	}
                     	if ($this->get_pref('quickgrading') and $grade->is_editable()) {
                             // regular display if an item or accuratetotals is off
@@ -767,14 +767,14 @@ class grade_report_laegrader extends grade_report_grader {
                     $gradedisplaytype1 = (integer) substr( (string) $gradedisplaytype,0,1);
                     $gradedisplaytype2 = $gradedisplaytype > 10 ? (integer) substr( (string) $gradedisplaytype,1,1) : null;
                     if (isset($grade->cat_item)) { // if cat_item is set THIS IS A CATEGORY
-						$gradeval = $this->gtree->accuratepointsfinalvalues($this->grades, $itemid, $item, $type, $parent_id, $gradedisplaytype1);
+						$gradeval = $this->gtree->accuratepointsfinalvalues($this->grades[$userid], $itemid, $item, $type, $parent_id, $gradedisplaytype1);
                     }
                     $formattedgradeval = grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype1, null); // item can use standard method of double formatting if present
                     
                     // second round for the second display type if present for a category, items are taken care of the regular way
                     if (isset($gradedisplaytype2)) {
                         if (isset($grade->cat_item)) { // if cat_item is set THIS IS A CATEGORY
-							$gradeval = $this->gtree->accuratepointsfinalvalues($this->grades, $itemid, $item, $type, $parent_id, $gradedisplaytype2);
+							$gradeval = $this->gtree->accuratepointsfinalvalues($this->grades[$userid], $itemid, $item, $type, $parent_id, $gradedisplaytype2);
                         }
                     	$formattedgradeval .= ' (' . grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype2, null) . ')';
                     }
