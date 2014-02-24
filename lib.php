@@ -129,11 +129,15 @@ class grade_report_laegrader extends grade_report_grader {
             $nooutcomes = get_user_preferences('grade_report_shownooutcomes');
         }
 
-        // force category_last to true for laegrader report
-        $switch = true;
-
+        // if user report preference set or site report setting set use it, otherwise use course or site setting
+        $switch = $this->get_pref('aggregationposition');
+        if ($switch == '') {
+            $switch = grade_get_setting($this->courseid, 'aggregationposition', $CFG->grade_aggregationposition);
+        }
+		$this->aggregationposition = $switch;
+        
         // Grab the grade_tree for this course
-        $this->gtree = grade_tree_local_helper($this->courseid, false, true, null, $nooutcomes, $this->currentgroup);
+        $this->gtree = grade_tree_local_helper($this->courseid, false, $switch, null, $nooutcomes, $this->currentgroup);
 
         // Fill items with parent information needed later for laegrader report
         $this->gtree->parents = array();
@@ -432,6 +436,14 @@ class grade_report_laegrader extends grade_report_grader {
         // substituting shorthand for long object variables
         $items = $this->gtree->items;
         
+        /**** ACCURATE TOTALS CALCULATIONS  must be done before ranges *****/
+        if ($accuratetotals) {
+        	foreach ($this->users as $userid => $user) {
+            	$this->gtree->accuratepointsprelimcalculation($this->grades[$userid]);
+	        }
+        } 
+		/***** ACCURATE TOTALS END *****/
+        
         $jsarguments = array(
             'id'        => '#fixed_column',
             'cfg'       => array('ajaxenabled'=>false),
@@ -498,7 +510,10 @@ class grade_report_laegrader extends grade_report_grader {
 
 			$headingrow->cells[] = $itemcell;
         }
-        $rows[] = $headingrow;
+        if (!$this->aggregationposition) {
+        	$headingrow->cells = array_reverse($headingrow->cells);
+        }
+        $rows[] = $headingrow; 
 
         $rows = $this->get_right_icons_row($rows);
         $rows = $this->get_right_range_row($rows);
@@ -529,12 +544,7 @@ class grade_report_laegrader extends grade_report_grader {
         }
         $jsscales = $scalesarray;
         $rowclasses = array('even', 'odd');
-        if ($accuratetotals) {
-	        foreach ($this->users as $userid => $user) {
-            	$this->gtree->accuratepointsprelimcalculation($this->grades[$userid]);
-	        }
-        } 
-        
+                
         foreach ($this->users as $userid => $user) {
 
             if ($this->canviewhidden) {
@@ -546,15 +556,6 @@ class grade_report_laegrader extends grade_report_grader {
                 $unknown = $hidingaffected['unknown'];
                 unset($hidingaffected);
             }
-			// hack		
-/*
-            foreach ($this->gtree->parents as $parent) {
-				unset($parent->pctg);
-				unset($parent->cat_max);
-				unset($parent->cat_item);
-				$parent->excredit = 0;
-			} // end hack
-*/
 
             $itemrow = new html_table_row();
             $itemrow->id = 'user_'.$userid;
@@ -566,10 +567,12 @@ class grade_report_laegrader extends grade_report_grader {
                 $item =& $items[$itemid];
                 $type = $item->itemtype;
                 $grade = $this->grades[$userid][$itemid];
-				// hack, shorthand for a long variable
-                if ($type !== 'course' && $accuratetotals) {
-    				$parent_id = $this->gtree->parents[$itemid]->parent_id; // the parent record contains an id field pointing to its parent, the key on the parent record is the item itself to allow lookup
-	            } // end hack
+				
+                // hack, shorthand for a long variable
+                if ($accuratetotals) {
+    				$parent_id = $type !== 'course' ? $this->gtree->parents[$itemid]->parent_id : $itemid; // the parent record contains an id field pointing to its parent, the key on the parent record is the item itself to allow lookup
+	            }
+	            // end hack
                 
                 $itemcell = new html_table_cell();
 
@@ -644,21 +647,6 @@ class grade_report_laegrader extends grade_report_grader {
                 } elseif (is_null($grade->is_passed($item))) {
                     $gradepass = '';
                 }
-
-                /**** ACCURATE TOTALS CALCULATIONS *****/
-/*
-                // determine if we should calculate up for accuratetotals
-                if ($grade->is_hidden() && $showtotalsifcontainhidden !== GRADE_REPORT_SHOW_REAL_TOTAL_IF_CONTAINS_HIDDEN) {
-                    // do nothing
-                } else if ($gradeval == null) {
-                    // do nothing
-                } else if (!isset($parent_id)) {
-                    // do nothing
-                } else if ($accuratetotals) {
-//					$this->gtree->accuratepointsprelimcalculation($itemid, $type, $grade);
-                }
-*/                
-				/***** ACCURATE TOTALS END *****/
 					
                 // if in editing mode, we need to print either a text box
                 // or a drop down (for scales)
@@ -708,10 +696,9 @@ class grade_report_laegrader extends grade_report_grader {
                         }
 
                     } else if ($item->gradetype != GRADE_TYPE_TEXT) { // Value type
-						// hack
-                        // We always want to display the correct (first) displaytype when editing
+
+                    	// We always want to display the correct (first) displaytype when editing
                     	$gradedisplaytype = (integer) substr( (string) $item->get_displaytype(),0,1);
-//                    	$tempmax = $item->grademax;
                     	
                     	// if we have an accumulated total points that's not accurately reflected in the db, then we want to display the ACCURATE number
                         // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no earned_total value
@@ -719,7 +706,7 @@ class grade_report_laegrader extends grade_report_grader {
 							$gradeval = $this->gtree->accuratepointsfinalvalues($this->grades[$userid], $itemid, $item, $type, $parent_id, $gradedisplaytype);
                     	}
                     	if ($this->get_pref('quickgrading') and $grade->is_editable()) {
-                            // regular display if an item or accuratetotals is off
+                            // regular display if an item or accuratetotals is off, categories aren't editable with accuratetotals
                     	    if (! $this->accuratetotals || (! $item->is_course_item() and ! $item->is_category_item())) {
                                 $value = format_float($gradeval, $decimalpoints);
 	                            $gradelabel = fullname($user) . ' ' . $item->itemname;
@@ -733,9 +720,7 @@ class grade_report_laegrader extends grade_report_grader {
 
                             }
                         }
-//                    	$item->grademax = $tempmax;
                     } 
-                    // end hack
 
                     // If quickfeedback is on, print an input element
                     if ($this->get_pref('showquickfeedback') and $grade->is_editable()) {
@@ -763,7 +748,6 @@ class grade_report_laegrader extends grade_report_grader {
                 	// hack
                     // if we have an accumulated total points that's not accurately reflected in the db, then we want to display the ACCURATE number
                     // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no cat_item value
-                    $tempmax = $item->grademax;
                     $gradedisplaytype1 = (integer) substr( (string) $gradedisplaytype,0,1);
                     $gradedisplaytype2 = $gradedisplaytype > 10 ? (integer) substr( (string) $gradedisplaytype,1,1) : null;
                     if (isset($grade->cat_item)) { // if cat_item is set THIS IS A CATEGORY
@@ -779,7 +763,6 @@ class grade_report_laegrader extends grade_report_grader {
                     	$formattedgradeval .= ' (' . grade_format_gradevalue($gradeval, $item, true, $gradedisplaytype2, null) . ')';
                     }
                     $itemcell->text .= html_writer::tag('span', $formattedgradeval, array('class'=>"gradevalue$hidden$gradepass"));
-					$item->grademax = $tempmax; 
 					// end of hack
                 	
 					if ($this->get_pref('showanalysisicon')) {
@@ -1028,7 +1011,7 @@ class grade_report_laegrader extends grade_report_grader {
                 // if we have an accumulated total points that's not accurately reflected in the db, then we want to display the ACCURATE number
                 // we only need to take the extra calculation into account if points display since percent and letter are accurate by their nature
                 // If the settings don't call for ACCURATE point totals ($this->accuratetotals) then there will be no earned_total value
-                $tempmax = $item->grademax;
+//                $tempmax = $item->grademax;
                 if (isset($items[$itemid]->cat_max)) {
                 	$grade_maxes = $items[$itemid]->cat_max;
                 	$item->grademax = array_sum($grade_maxes);
@@ -1037,13 +1020,13 @@ class grade_report_laegrader extends grade_report_grader {
                 		&& $this->accuratetotals 
                			&& isset($parentid)
                			&& ($item->aggregationcoef == 0 || $this->gtree->parents[$itemid]->parent_agg != GRADE_AGGREGATE_WEIGHTED_MEAN2)) { // if it has an agg_coef then its extra credit unless its parent is WM
-                	$items[$parentid]->cat_max[$itemid] = $item->grademax;
+//                	$items[$parentid]->cat_max[$itemid] = $item->grademax;
                	}
 
                 $formattedrange = $item->get_formatted_range(GRADE_DISPLAY_TYPE_REAL, $rangesdecimalpoints);
                 $itemcell->text = $OUTPUT->container($formattedrange, 'rangevalues'.$hidden);
                 $rangerow->cells[] = $itemcell;
-                $item->grademax = $tempmax;
+//                $item->grademax = $tempmax;
             }
             $rows[] = $rangerow;
         }

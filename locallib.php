@@ -105,6 +105,9 @@ class grade_tree_local extends grade_tree {
         // key to LAE grader, no levels
         grade_tree_local::fill_levels($this->levels, $this->top_element, 0);
         grade_tree_local::fill_levels_local($this->levelitems, $this->top_element, 0);
+        if (!$category_grade_last) {
+        	$this->levelitems = array_reverse($this->levelitems, true);
+        }
     }
     /**
      * Static recursive helper - fills the levels array, useful when accessing tree elements of one level
