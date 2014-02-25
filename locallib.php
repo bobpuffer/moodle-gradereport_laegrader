@@ -347,11 +347,11 @@ class grade_tree_local extends grade_tree {
 		            }
 		            if ($this->cat->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN) {
 		                // determine the weighted grade culminating in a percentage value
-		   	            $weight_normalizer = 1 / max(1,array_sum($grades[$itemid]->agg_coef)); // adjust all weights in a container so their sum equals 100
+		   	            $weight_normalizer = 1 / max(1,array_sum($this->parents[$itemid]->agg_coef)); // adjust all weights in a container so their sum equals 100
 		                $weighted_percentage = 0;
 		                foreach ($grades[$itemid]->pctg as $key=>$pctg) {
 			    			// the previously calculated percentage (which might already be weighted) times the normalizer * the weight
-			    			$weighted_percentage += $pctg*$weight_normalizer*$grades[$itemid]->agg_coef[$key];
+			    			$weighted_percentage += $pctg*$weight_normalizer*$this->parents[$itemid]->agg_coef[$key];
 		                }
 		                $grades[$parent_id]->pctg[$itemid]= $weighted_percentage;
 	//	            } else if (sizeof($grade_maxes)) {
@@ -665,6 +665,8 @@ class grade_tree_local extends grade_tree {
 					continue; // do nothing with these types of elements
 				} else if ($element['object']->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN) {
 					$combined_weight += $this->items[$id]->aggregationcoef;
+				} else if ($element['object']->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN2 && $this->items[$id]->aggregationcoef == 1) { // extra credit
+					continue;
 				} else if ($element['object']->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN2) {
 					$combined_weight += $this->items[$id]->grademax; // TODO: fix this to use cat_max or something
 				}    		
