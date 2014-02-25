@@ -81,6 +81,9 @@ class laegrader_report_preferences_form extends moodleform {
         // View capability is the lowest permission. Users with grade:manage or grade:edit must also have grader:view
         if (has_capability('gradereport/laegrader:view', $context)) {
             $preferences['prefshow']['studentsperpage'] = 'text'; //no students per page in LAE grader report
+            $preferences['prefshow']['aggregationposition'] = array(GRADE_REPORT_PREFERENCE_DEFAULT => '*default*',
+                                                                       GRADE_REPORT_AGGREGATION_POSITION_FIRST => get_string('positionfirst', 'grades'),
+                                                                       GRADE_REPORT_AGGREGATION_POSITION_LAST => get_string('positionlast', 'grades'));
             $preferences['prefshow']['showuserimage'] = $checkbox_default;
             $preferences['prefshow']['showactivityicons'] = $checkbox_default;
             $preferences['prefshow']['showranges'] = $checkbox_default;
