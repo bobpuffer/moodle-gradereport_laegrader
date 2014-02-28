@@ -164,9 +164,42 @@ class grade_report_laegrader extends grade_report_grader {
         $this->setup_sortitemid();
     }
 
-   	public function pre_process_grade(&$data) {
-   		$context = context_course::instance($this->courseid);
-   		foreach ($data as $varname => $students) {
+    /**
+     * Processes the data sent by the form (grades and feedbacks).
+     * Caller is responsible for all access control checks
+     * @param array $data form submission (with magic quotes)
+     * @return array empty array if success, array of warnings if something fails.
+     */
+    public function process_data($data) {
+        global $DB;
+        $warnings = array();
+
+        $separategroups = false;
+        $mygroups       = array();
+        if ($this->groupmode == SEPARATEGROUPS and !has_capability('moodle/site:accessallgroups', $this->context)) {
+            $separategroups = true;
+            $mygroups = groups_get_user_groups($this->course->id);
+            $mygroups = $mygroups[0]; // ignore groupings
+            // reorder the groups fro better perf below
+            $current = array_search($this->currentgroup, $mygroups);
+            if ($current !== false) {
+                unset($mygroups[$current]);
+                array_unshift($mygroups, $this->currentgroup);
+            }
+        }
+
+        // always initialize all arrays
+        $queue = array();
+        $this->load_users();
+        $this->load_final_grades();
+
+        // Were any changes made?
+        $changedgrades = false;
+
+        foreach ($data as $varname => $students) {
+
+            $needsupdate = false;
+
             // skip, not a grade nor feedback
             if (strpos($varname, 'grade') === 0) {
                 $datatype = 'grade';
@@ -175,43 +208,169 @@ class grade_report_laegrader extends grade_report_grader {
             } else {
                 continue;
             }
-   			foreach ($students as $userid => $items) {
+
+            foreach ($students as $userid => $items) {
                 $userid = clean_param($userid, PARAM_INT);
                 foreach ($items as $itemid => $postedvalue) {
-		   			// percentage input
-		            if (strpos($postedvalue, '%')) {
-		            	if (!$gradeitem = grade_item::fetch(array('id'=>$itemid, 'courseid'=>$this->courseid))) { // we must verify course id here!
-				            print_error('invalidgradeitmeid');
-				        }
-		            	$percent = trim(substr($postedvalue, 0, strpos($postedvalue, '%')));
-		                $postedvalue = $percent * .01 * $gradeitem->grademax;
-		                $data->grade[$userid][$itemid] = $postedvalue;
-		                // letter input?
-		            } else if (ctype_alpha(trim(substr($postedvalue,0,1)))) {
-		            	$letters = grade_get_letters($this->context);
-		            	if (!$gradeitem = grade_item::fetch(array('id'=>$itemid, 'courseid'=>$this->courseid))) { // we must verify course id here!
-				            print_error('invalidgradeitmeid');
-				        }
-		            	unset($lastitem);
-		                foreach ($letters as $used=>$letter) {
-		                    if (strtoupper($postedvalue) == strtoupper($letter)) {
-		                        if (isset($lastitem)) {
-		                            $postedvalue = $lastitem;
-		                        } else {
-		                            $postedvalue = $gradeitem->grademax;
-		                        }
-		                        break;
-		                    } else {
-		                        $lastitem = ($used - 1) * .01 * $gradeitem->grademax;
-		                    }
-//							$postedvalue = $lastitem;
-		                }
-		                $data->grade[$userid][$itemid] = $postedvalue;
-		            }
+                    $itemid = clean_param($itemid, PARAM_INT);
+
+                    // Was change requested?
+                    $oldvalue = $this->grades[$userid][$itemid];
+                    if ($datatype === 'grade') {
+                        // If there was no grade and there still isn't
+                        if (is_null($oldvalue->finalgrade) && $postedvalue == -1) {
+                            // -1 means no grade
+                            continue;
+                        }
+
+                        // If the grade item uses a custom scale
+                        if (!empty($oldvalue->grade_item->scaleid)) {
+
+                            if ((int)$oldvalue->finalgrade === (int)$postedvalue) {
+                                continue;
+                            }
+                        } else {
+                            // The grade item uses a numeric scale
+
+                            // Format the finalgrade from the DB so that it matches the grade from the client
+                            if ($postedvalue === format_float($oldvalue->finalgrade, $oldvalue->grade_item->get_decimals())) {
+                                continue;
+                            }
+                        }
+
+                        $changedgrades = true;
+
+                    } else if ($datatype === 'feedback') {
+                        // If quick grading is on, feedback needs to be compared without line breaks.
+                        if ($this->get_pref('quickgrading')) {
+                            $oldvalue->feedback = preg_replace("/\r\n|\r|\n/", "", $oldvalue->feedback);
+                        }
+                        if (($oldvalue->feedback === $postedvalue) or ($oldvalue->feedback === NULL and empty($postedvalue))) {
+                            continue;
+                        }
+                    }
+
+                    if (!$gradeitem = grade_item::fetch(array('id'=>$itemid, 'courseid'=>$this->courseid))) {
+                        print_error('invalidgradeitemid');
+                    }
+
+                    // Pre-process grade
+                    if ($datatype == 'grade') {
+                        $feedback = false;
+                        $feedbackformat = false;
+                        if ($gradeitem->gradetype == GRADE_TYPE_SCALE) {
+                            if ($postedvalue == -1) { // -1 means no grade
+                                $finalgrade = null;
+                            } else {
+                                $finalgrade = $postedvalue;
+                            }
+                        } else {
+                            $postedvalue = $this->pre_process_grade($postedvalue, $itemid);
+                        	$finalgrade = unformat_float($postedvalue);
+                        }
+
+                        $errorstr = '';
+                        // Warn if the grade is out of bounds.
+                        if (is_null($finalgrade)) {
+                            // ok
+                        } else {
+                            $bounded = $gradeitem->bounded_grade($finalgrade);
+                            if ($bounded > $finalgrade) {
+                                $errorstr = 'lessthanmin';
+                            } else if ($bounded < $finalgrade) {
+                                $errorstr = 'morethanmax';
+                            }
+                        }
+                        if ($errorstr) {
+                            $user = $DB->get_record('user', array('id' => $userid), 'id, firstname, lastname');
+                            $gradestr = new stdClass();
+                            $gradestr->username = fullname($user);
+                            $gradestr->itemname = $gradeitem->get_name();
+                            $warnings[] = get_string($errorstr, 'grades', $gradestr);
+                        }
+
+                    } else if ($datatype == 'feedback') {
+                        $finalgrade = false;
+                        $trimmed = trim($postedvalue);
+                        if (empty($trimmed)) {
+                             $feedback = NULL;
+                        } else {
+                             $feedback = $postedvalue;
+                        }
+                    }
+
+                    // group access control
+                    if ($separategroups) {
+                        // note: we can not use $this->currentgroup because it would fail badly
+                        //       when having two browser windows each with different group
+                        $sharinggroup = false;
+                        foreach($mygroups as $groupid) {
+                            if (groups_is_member($groupid, $userid)) {
+                                $sharinggroup = true;
+                                break;
+                            }
+                        }
+                        if (!$sharinggroup) {
+                            // either group membership changed or somebody is hacking grades of other group
+                            $warnings[] = get_string('errorsavegrade', 'grades');
+                            continue;
+                        }
+                    }
+
+                    $url = '/report/grader/index.php?id=' . $this->course->id;
+                    $fullname = fullname($this->users[$userid]);
+
+                    $info = "{$gradeitem->itemname}: $fullname";
+                    add_to_log($this->course->id, 'grade', 'update', $url, $info);
+
+                    $gradeitem->update_final_grade($userid, $finalgrade, 'gradebook', $feedback, FORMAT_MOODLE);
+
+                    // We can update feedback without reloading the grade item as it doesn't affect grade calculations
+                    if ($datatype === 'feedback') {
+                        $this->grades[$userid][$itemid]->feedback = $feedback;
+                    }
                 }
             }
         }
-   		return $this->process_data($data);
+
+        if ($changedgrades) {
+            // If a final grade was overriden reload grades so dependent grades like course total will be correct
+            $this->grades = null;
+        }
+
+        return $warnings;
+    }
+
+
+    public function pre_process_grade($value, $itemid) {
+		// percentage input
+		if (strpos($value, '%')) {
+			if (!$gradeitem = grade_item::fetch(array('id'=>$itemid, 'courseid'=>$this->courseid))) { // we must verify course id here!
+				print_error('invalidgradeitmeid');
+			}
+			$percent = trim(substr($value, 0, strpos($value, '%')));
+			$value = $percent * .01 * $gradeitem->grademax;
+			// letter input?
+		} else if (ctype_alpha(trim(substr($value,0,1)))) {
+			$context = context_course::instance($this->courseid);
+			$letters = grade_get_letters($this->context);
+			if (!$gradeitem = grade_item::fetch(array('id'=>$itemid, 'courseid'=>$this->courseid))) { // we must verify course id here!
+				print_error('invalidgradeitmeid');
+			}
+			foreach ($letters as $used=>$letter) {
+				if (strtoupper($value) == strtoupper($letter)) {
+					if (isset($lastitem)) {
+						$value = $lastitem;
+					} else {
+						$value = $gradeitem->grademax;
+					}
+					break;
+				} else {
+					$lastitem = ($used - 1) * .01 * $gradeitem->grademax;
+				}
+			}
+		}
+   		return ($value);
    	}
 
     /**

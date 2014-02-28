@@ -139,7 +139,7 @@ if ($report->currentgroup == -2) {
 
 /// processing posted grades & feedback here
 if ($data = data_submitted() and confirm_sesskey() and has_capability('moodle/grade:edit', $context)) {
-    $warnings = $report->pre_process_grade($data);
+    $warnings = $report->process_data($data);
 } else {
     $warnings = array();
 }
