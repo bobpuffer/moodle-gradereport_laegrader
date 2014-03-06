@@ -351,8 +351,8 @@ class grade_tree_local extends grade_tree {
 		                $weighted_percentage = 0;
 		                foreach ($grades[$itemid]->pctg as $key=>$pctg) {
 			    			// the previously calculated percentage (which might already be weighted) times the normalizer * the weight
-			    			if (isset($this->parents[$itemid]->agg_coef[$key]))  {
-    		                	$weighted_percentage += $pctg*$weight_normalizer*$this->parents[$itemid]->agg_coef[$key];
+			    			if (isset($grades[$itemid]->agg_coef[$key]))  {
+    		                	$weighted_percentage += $pctg*$weight_normalizer*$grades[$itemid]->agg_coef[$key];
 			    			}
 		                }
 		                $grades[$parent_id]->pctg[$itemid]= $weighted_percentage;
