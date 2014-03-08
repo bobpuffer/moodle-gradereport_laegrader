@@ -456,7 +456,12 @@ class grade_tree_local extends grade_tree {
         $strparams = $this->get_params_for_iconstr($element);
         $strclearoverrides = get_string('clearoverrides', 'gradereport_laegrader', $strparams);
 
-        $url = new moodle_url('/grade/report/laegrader/index.php', array('id' => $this->courseid, 'sesskey' => sesskey(), 'action' => 'clearoverrides', 'itemid'=>$element['object']->id));
+        if ($element['type'] == 'item') {
+            $url = new moodle_url('/grade/report/laegrader/index.php', array('id' => $this->courseid, 'sesskey' => sesskey(), 'action' => 'clearoverrides', 'itemid'=>$element['object']->id));
+        } else {
+            $element['object']->load_grade_item();
+        	$url = new moodle_url('/grade/report/laegrader/index.php', array('id' => $this->courseid, 'sesskey' => sesskey(), 'action' => 'clearoverrides', 'itemid'=>$element['object']->grade_item->id));
+        }
 
         $type = 'clearoverrides';
         $tooltip = $strclearoverrides;
