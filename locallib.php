@@ -343,11 +343,11 @@ class grade_tree_local extends grade_tree {
 		            $grades[$parent_id]->cat_item[$itemid] = array_sum($grade_values) + $grades[$itemid]->excredit; // earned points
 		            $grades[$parent_id]->cat_max[$itemid] = array_sum($grade_maxes); // range of earnable points
 		            if ($this->parents[$itemid]->parent_agg == GRADE_AGGREGATE_WEIGHTED_MEAN) {
-		                $this->parents[$parent_id]->agg_coef[$itemid] = $grade->grade_item->aggregationcoef; // store this regardless of parent aggtype
+		                $grades[$parent_id]->agg_coef[$itemid] = $grade->grade_item->aggregationcoef; // store this regardless of parent aggtype
 		            }
 		            if ($this->cat->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN) {
 		                // determine the weighted grade culminating in a percentage value
-		   	            $weight_normalizer = 1 / max(1,array_sum($this->parents[$itemid]->agg_coef)); // adjust all weights in a container so their sum equals 100
+		   	            $weight_normalizer = 1 / max(1,array_sum($grades[$itemid]->agg_coef)); // adjust all weights in a container so their sum equals 100
 		                $weighted_percentage = 0;
 		                foreach ($grades[$itemid]->pctg as $key=>$pctg) {
 			    			// the previously calculated percentage (which might already be weighted) times the normalizer * the weight
@@ -369,7 +369,7 @@ class grade_tree_local extends grade_tree {
 		        if ($this->cat->aggregation == GRADE_AGGREGATE_WEIGHTED_MEAN) {
 		             $weight_normalizer = 0;
 		             $weighted_percentage = 0;
-		             foreach ($this->parents[$itemid]->agg_coef as $key=>$value) {
+		             foreach ($grades[$itemid]->agg_coef as $key=>$value) {
 		                 if (isset($grades[$itemid]->pctg[$key]) && $grades[$itemid]->pctg[$key] > 0) {
 		                 	$weight_normalizer += $value;
 		                 	$weighted_percentage += $grades [$itemid]->pctg[$key]*$value;
