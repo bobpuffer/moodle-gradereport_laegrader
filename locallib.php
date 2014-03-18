@@ -370,9 +370,9 @@ class grade_tree_local extends grade_tree {
 		             $weight_normalizer = 0;
 		             $weighted_percentage = 0;
 		             foreach ($grades[$itemid]->agg_coef as $key=>$value) {
-		                 if (isset($grades[$itemid]->pctg[$key]) && $grades[$itemid]->pctg[$key] > 0) {
+		                 if (isset($grades[$itemid]->pctg[$key])) {
 		                 	$weight_normalizer += $value;
-		                 	$weighted_percentage += $grades [$itemid]->pctg[$key]*$value;
+		                 	$weighted_percentage += $grades[$itemid]->pctg[$key]*$value;
 		                 }
 		             }
 		             if ($weight_normalizer != 0) {
